@@ -6,3 +6,4 @@
 *.pages
 *.py
 main
+.DS_Store
