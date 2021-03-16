@@ -1,0 +1,8 @@
+*.dat
+*.plt
+*.pdf
+*.png
+*#
+*.pages
+*.py
+main
