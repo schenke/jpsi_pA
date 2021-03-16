@@ -2,7 +2,7 @@
 
 namespace Hard{
   
-  //all momenta passed are transverse momenta. + and - components are computed from them and the rapidities, and m
+  // All momenta passed are transverse momenta. + and - components are computed from them and the rapidities, and m
   // I chose to pass all parameters to all functions, even if redundant, to avoid mistakes later.
   double qqqq(const double p, const double phip, const double q, const double phiq, 
               const double k1, const double phik1, const double k2, const double phik2, 
@@ -71,7 +71,7 @@ namespace Hard{
     double Cp = 0.5*(Cplus*pminus + Cminus*pplus) - k2*p*cos(phik2-phip) + k1*p*cos(phik1-phip);
     double Cq = 0.5*(Cplus*qminus + Cminus*qplus) - k2*q*cos(phik2-phiq) + k1*q*cos(phik1-phiq);
     double pq = 0.5*(pplus*qminus + pminus*qplus) - p*q*cos(phip-phiq);
-    double C2 = k2*k2+k1*k1-2.*cos(phik2-phik1);
+    double C2 = Cplus*Cminus - ( k2*k2+k1*k1-2.*cos(phik2-phik1) );
     
     return (2.*Cp*Cq - (m*m+pq)*C2)/pow((m*m+pq),2.);
     
