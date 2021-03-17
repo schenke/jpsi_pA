@@ -17,11 +17,11 @@ set(CMAKE_INSTALL_RPATH ${CMAKE_HOME_DIRECTORY})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Find GSL and FFTW for this project:
-find_package(FFTW REQUIRED)
-if (FFTW_FOUND)
-    message("Found FFTW library ${FFTW_INCLUDE_DIRS}")
-    include_directories(${FFTW_INCLUDE_DIRS})
-endif()
+#find_package(FFTW REQUIRED)
+#if (FFTW_FOUND)
+#    message("Found FFTW library ${FFTW_INCLUDE_DIRS}")
+#    include_directories(${FFTW_INCLUDE_DIRS})
+#endif()
 
 # Find Cuba for this project:
 find_package(CUBA REQUIRED)
