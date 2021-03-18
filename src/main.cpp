@@ -179,7 +179,9 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
   double qtilde = qqqtilde*qtildescale;
   double PT = qqPT*pscale; 
   double phiPT = qqphiPT*2.*M_PI;
-    
+  double R = qqR*Rscale;
+  double b = qqb*Rscale;
+
   kinPair in;
   in.M = M;
   in.PT  = PT;
@@ -188,14 +190,14 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
   in.Y = Y;
   in.m = m;
 
-  kinqq var = convert(in);
+  kinqq out = convert(in);
   
-  double p = var.p;
-  double phip = var.phip;
-  double q = var.q;
-  double phiq = var.phiq;
-  double yp = var.yp;
-  double yq = var.yq;
+  double p = out.p;
+  double phip = out.phip;
+  double q = out.q;
+  double phiq = out.phiq;
+  double yp = out.yp;
+  double yq = out.yq;
   
   // get sums of vectors
   double px = p*cos(phip); 
@@ -209,7 +211,7 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
   double pplusq = sqrt(pplusqx*pplusqx+pplusqy*pplusqy);
   double phi_pplusq = atan2(pplusqy,pplusqx);
   
-  //since these 3 parts only appear in a sum, we should combine them to do only one
+  // since these 3 parts only appear in a sum, we should combine them to do only one
   // function call
   double H = Hard::qqqq(p, phip, q, phiq, pplusq, phi_pplusq, 0, 0, 0, 0, yp, yq, m)
     +Hard::qqg(p, phip, q, phiq, pplusq, phi_pplusq, 0, 0, 0, 0, yp, yq, m)
@@ -222,11 +224,11 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,8.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(pplusq, qqR*Rscale, Qs)/(pplusq*pplusq)*H*J
-    *qqR*Rscale*Rscale*2.*M_PI
-    *qqb*Rscale*Rscale*2.*M_PI
+    *Phip(pplusq, R, Qs)/(pplusq*pplusq)*H*J
+    *R*Rscale*2.*M_PI
+    *b*Rscale*2.*M_PI
     *PT*pscale*2.*M_PI
-    *2.*constants::mD
+    *(2.*constants::mD-constants::mJPsi)
     *qtildescale
     *2.*M_PI;
   // scaled momenta above (in PT)
