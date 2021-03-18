@@ -31,6 +31,9 @@ namespace constants {
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3;
   const double Bp = 0.4;
+  const double mD = 1.864;
+  const double mc = 1.275; //vary?
+  const double mJPsi =3.096916;
 }
 
 // Parameters that need to be passed to the integrand
@@ -147,7 +150,6 @@ double StF(double k, double R, double Qs){
   return 2.*exp(-(k*k/(Qs*Qs*TA(R))))/(Qs*Qs*TA(R));
 } 
 
-
 // Integrand for the first qqbar integral
 static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
@@ -169,13 +171,20 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
   // Qs will be made rapidity dependent
   double Qs = static_cast<params*>(userdata)->Qs;
   double Y = static_cast<params*>(userdata)->Y;
-  double m = static_cast<params*>(userdata)->m;
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
 
+  // scale the integration variables 
+  double M = constants::mJPsi + qqM*(2.*constants::mD-constants::mJPsi); 
+  double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
+  double qtilde = qqqtilde*qtildescale;
+  double PT = qqPT*pscale; 
+  double phiPT = qqphiPT*2.*M_PI;
+    
   kinPair in;
-  in.M = qqM;
-  in.PT  = qqPT;
-  in.phi = qqphiPT;
-  in.qtilde = qqqtilde;
+  in.M = M;
+  in.PT  = PT;
+  in.phi = qqphi*2.*M_PI; // not the PT phi
+  in.qtilde = qtilde;
   in.Y = Y;
   in.m = m;
 
@@ -199,7 +208,6 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
   
   double pplusq = sqrt(pplusqx*pplusqx+pplusqy*pplusqy);
   double phi_pplusq = atan2(pplusqy,pplusqx);
-
   
   //since these 3 parts only appear in a sum, we should combine them to do only one
   // function call
@@ -207,10 +215,31 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
     +Hard::qqg(p, phip, q, phiq, pplusq, phi_pplusq, 0, 0, 0, 0, yp, yq, m)
     +Hard::gg(p, phip, q, phiq, pplusq, phi_pplusq, 0, 0, 0, 0, yp, yq, m);
   
+  // get Jacobian
+  double betax = PT/sqrt(M*M+PT*PT);
+  double gammax = 1./sqrt(1.-betax*betax);
+  double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
+
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,8.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(pplusq, qqR, Qs)/(pplusq*pplusq)*H;
-  
+    *Phip(pplusq, qqR*Rscale, Qs)/(pplusq*pplusq)*H*J
+    *qqR*Rscale*Rscale*2.*M_PI
+    *qqb*Rscale*Rscale*2.*M_PI
+    *PT*pscale*2.*M_PI
+    *2.*constants::mD
+    *qtildescale
+    *2.*M_PI;
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // d2R
+  // d2b
+  // d2PT
+  // dM
+  // dqtilde
+  // dphi
+
+  //remember factor 2 for p and q direction (not included yet)
+
   return 0;
 }  
   
@@ -323,7 +352,6 @@ int main(int argc, char *argv[]) {
 
   data.Qs = 1.; // Saturation scale in GeV
   data.lambda = 0.1; // Infrared cutoff on p integral in GeV
-
   userdata = &data; // Set the parameters to be passed to the integrand
 
   // Run 8D Vegas integration
