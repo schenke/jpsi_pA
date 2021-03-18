@@ -136,8 +136,8 @@ double TA(double R){
 // Unintegrated gluon distribution for the proton
 double Phip(double k, double R, double Qs){
   return k*k*constants::CF/(pow(2.*M_PI,3))/constants::alphas
-    *2.*constants::CF*exp(R*R/(2*constants::Bp))*exp(-constants::CF
-                                                     *exp(R*R/(2*constants::Bp))*k*k/(constants::CA*Qs*Qs))/(constants::CA*Qs*Qs);
+    *2.*constants::CF*exp(R*R/(2.*constants::Bp))*exp(-constants::CF
+                                                     *exp(R*R/(2.*constants::Bp))*k*k/(constants::CA*Qs*Qs))/(constants::CA*Qs*Qs);
 }
 
 // Unintegrated gluon distribution for lead
@@ -150,8 +150,8 @@ double StF(double k, double R, double Qs){
   return 2.*exp(-(k*k/(Qs*Qs*TA(R))))/(Qs*Qs*TA(R));
 } 
 
-// Integrand for the first qqbar integral
-static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
+// Integrand for the first J/Psi integral
+static int JPsiIntegrand1(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define qqR xx[0]
@@ -165,9 +165,9 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
 #define qqphiPT xx[8]
 #define f ff[0]
 
-  double kscale = 100.;
-  double pscale = 10.;
-  double Rscale = 12./constants::hbarc;
+  double pscale = 100.;
+  double Rscale = 3./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 10./constants::hbarc; // bscale needs to be the same in all terms
   // Qs will be made rapidity dependent
   double Qs = static_cast<params*>(userdata)->Qs;
   double Y = static_cast<params*>(userdata)->Y;
@@ -181,7 +181,9 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
   double phiPT = qqphiPT*2.*M_PI;
   double R = qqR*Rscale;
   double b = qqb*Rscale;
-
+  double phiR = qqphiR*2*M_PI;
+  double phib = qqphib*2*M_PI;
+  
   kinPair in;
   in.M = M;
   in.PT  = PT;
@@ -213,9 +215,9 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
   
   // since these 3 parts only appear in a sum, we should combine them to do only one
   // function call
-  double H = Hard::qqqq(p, phip, q, phiq, pplusq, phi_pplusq, 0, 0, 0, 0, yp, yq, m)
-    +Hard::qqg(p, phip, q, phiq, pplusq, phi_pplusq, 0, 0, 0, 0, yp, yq, m)
-    +Hard::gg(p, phip, q, phiq, pplusq, phi_pplusq, 0, 0, 0, 0, yp, yq, m);
+  double H = Hard::qqqq(p, phip, q, phiq, pplusq, phi_pplusq, 0., 0., 0., 0., yp, yq, m)
+    +Hard::qqg(p, phip, q, phiq, pplusq, phi_pplusq, 0., 0., 0., 0., yp, yq, m)
+    +Hard::gg(p, phip, q, phiq, pplusq, phi_pplusq, 0., 0., 0., 0., yp, yq, m);
   
   // get Jacobian
   double betax = PT/sqrt(M*M+PT*PT);
@@ -224,9 +226,9 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,8.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(pplusq, R, Qs)/(pplusq*pplusq)*H*J
+    *Phip(pplusq, R, Qs)/(pplusq*pplusq)*H*J*(M/constants::mJPsi)*(M/constants::mJPsi)
     *R*Rscale*2.*M_PI
-    *b*Rscale*2.*M_PI
+    *b*bscale*2.*M_PI
     *PT*pscale*2.*M_PI
     *(2.*constants::mD-constants::mJPsi)
     *qtildescale
@@ -240,11 +242,121 @@ static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
   // dqtilde
   // dphi
 
+  // if (f < 0.)
+  //   {
+  //     cout << H << endl;
+  //   }
+
+  //remember factor 2 for p and q direction (not included yet)
+
+  return 0;
+}  
+ 
+// Integrand for the second J/Psi integral
+static int JPsiIntegrand2(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+  // others defined in Integrand1
+#define qqk1 xx[9]
+#define qqphik1 xx[10]
+
+  double kscale = 100.;
+  double pscale = 10.;
+  double Rscale = 12./constants::hbarc;
+  // Qs will be made rapidity dependent
+  double Qs = static_cast<params*>(userdata)->Qs;
+  double Y = static_cast<params*>(userdata)->Y;
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables 
+  double M = constants::mJPsi + qqM*(2.*constants::mD-constants::mJPsi); 
+  double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
+  double qtilde = qqqtilde*qtildescale;
+  double PT = qqPT*pscale; 
+  double phiPT = qqphiPT*2.*M_PI;
+  double R = qqR*Rscale;
+  double b = qqb*Rscale;
+  double k1 = qqk1*kscale;
+  double phik1 = qqphik1*2.*M_PI;
+  double phiR = qqphiR*2*M_PI;
+  double phib = qqphib*2*M_PI;
+
+  kinPair in;
+  in.M = M;
+  in.PT  = PT;
+  in.phi = qqphi*2.*M_PI; // not the PT phi
+  in.qtilde = qtilde;
+  in.Y = Y;
+  in.m = m;
+
+  kinqq out = convert(in);
+  
+  double p = out.p;
+  double phip = out.phip;
+  double q = out.q;
+  double phiq = out.phiq;
+  double yp = out.yp;
+  double yq = out.yq;
+  
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double qx = q*cos(phiq); 
+  double qy = q*sin(phiq);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double pplusqminusk1x = px+qx-k1x;
+  double pplusqminusk1y = py+qy-k1y;
+  double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
+  double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
+  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
+ 
+  // double Rx = R*cos(phiR);
+  // double Ry = R*sin(phiR);
+  // double bx = b*cos(phib);
+  // double by = b*sin(phib);
+  // double Rminusbx = Rx-bx;
+  // double Rminusby = Ry-by;
+  // double Rminusb = sqrt(Rminusbx*Rminusbx+Rminusby*Rminusby);
+  // double phi_Rminusb = atan2(Rminusby,Rminusbx);
+  
+  // since these 3 parts only appear in a sum, we should combine them to do only one
+  // function call
+  double H = Hard::qqqq(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, 0, 0, yp, yq, m)
+    +Hard::qqg(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, 0, 0, yp, yq, m)
+    +Hard::gg(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, 0, 0, yp, yq, m);
+  
+  // get Jacobian
+  double betax = PT/sqrt(M*M+PT*PT);
+  double gammax = 1./sqrt(1.-betax*betax);
+  double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
+
+  f = -constants::alphas*double(constants::Nc)*double(constants::Nc)
+    /(2.*pow(2.*M_PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, R, Qs)/(k1*k1)*H*J*StF(pplusqminusk1,Rminusb,Qs)
+    *R*Rscale*2.*M_PI
+    *b*Rscale*2.*M_PI
+    *PT*pscale*2.*M_PI
+    *(2.*constants::mD-constants::mJPsi)
+    *qtildescale
+    *2.*M_PI
+    *k1*kscale*2.*M_PI;
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // d2R
+  // d2b
+  // d2PT
+  // dM
+  // dqtilde
+  // dphi
+  // d2k1
   //remember factor 2 for p and q direction (not included yet)
 
   return 0;
 }  
   
+
+
 
 
 // Integrand for integral over everything but |p|
@@ -309,17 +421,17 @@ int main(int argc, char *argv[]) {
   //printf("%.17f \n", TA(0.));
 
   // Cuba's parameters for integration
-  int NDIM = 8;
+  int NDIM = 9;
   int NCOMP = 1;
   int NVEC = 1;
   //  double EPSREL = 5e-4;
-  double EPSREL = 5e-2;
+  double EPSREL = 5e-3;
   double EPSABS = 1e-12;
   int VERBOSE = 0;
   int LAST = 4;
   int MINEVAL = 0;
   //int MAXEVAL = 100000000;
-  int MAXEVAL = 10000000;
+  int MAXEVAL = 100000000;
   int KEY = 0;
   
   //vegas
@@ -354,7 +466,39 @@ int main(int argc, char *argv[]) {
 
   data.Qs = 1.; // Saturation scale in GeV
   data.lambda = 0.1; // Infrared cutoff on p integral in GeV
+  data.Y = 0.;
   userdata = &data; // Set the parameters to be passed to the integrand
+
+  // // Run 9D Vegas integration
+  // Vegas(NDIM, NCOMP, JPsiIntegrand1, userdata, NVEC,
+  //       EPSREL, EPSABS, VERBOSE, SEED,
+  //       MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+  //       GRIDNO, NULL, NULL,
+  //       &neval, &fail, integral, error, prob);
+  
+  // // Print the result
+  // double JPsi1result = (double)integral[0];
+  // double JPsi1error = (double)error[0];
+  // printf("%.8f +- %.8f\t\n", JPsi1result, JPsi1error);
+
+  NDIM = 10;
+
+  // Run 10D Vegas integration
+  Vegas(NDIM, NCOMP, JPsiIntegrand2, userdata, NVEC,
+        EPSREL, EPSABS, VERBOSE, SEED,
+        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+        GRIDNO, NULL, NULL,
+        &neval, &fail, integral, error, prob);
+  
+  // Print the result
+  double JPsi2result = (double)integral[0];
+  double JPsi2error = (double)error[0];
+  printf("%.8f +- %.8f\t\n", JPsi2result, JPsi2error);
+
+
+
+
+  NDIM = 8;
 
   // Run 8D Vegas integration
   Vegas(NDIM, NCOMP, FullIntegrand, userdata, NVEC,
