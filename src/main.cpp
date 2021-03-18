@@ -39,6 +39,8 @@ struct params {
   double k;
   double Qs;
   double lambda;
+  double Y;
+  double m;
 };
 
 struct kinqq {
@@ -101,7 +103,6 @@ kinqq convert(kinPair input) {
 }
   
 
-
 // Nuclear density for lead
 double rhoA(double z, void * params) {
   // do everything in GeV^some power
@@ -130,14 +131,14 @@ double TA(double R){
 }
 
 // Unintegrated gluon distribution for the proton
-double phip(double k, double R, double Qs){
+double Phip(double k, double R, double Qs){
   return k*k*constants::CF/(pow(2.*M_PI,3))/constants::alphas
     *2.*constants::CF*exp(R*R/(2*constants::Bp))*exp(-constants::CF
                                                      *exp(R*R/(2*constants::Bp))*k*k/(constants::CA*Qs*Qs))/(constants::CA*Qs*Qs);
 }
 
 // Unintegrated gluon distribution for lead
-double phit(double k, double R, double Qs){
+double Phit(double k, double R, double Qs){
   return k*k*constants::CF/(pow(2.*M_PI,3))/constants::alphas*2.*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA(R)))/(constants::CA*Qs*Qs*TA(R));
 }
 
@@ -145,6 +146,74 @@ double phit(double k, double R, double Qs){
 double StF(double k, double R, double Qs){
   return 2.*exp(-(k*k/(Qs*Qs*TA(R))))/(Qs*Qs*TA(R));
 } 
+
+
+// Integrand for the first qqbar integral
+static int qqbarIntegrand1(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define qqR xx[0]
+#define qqphiR xx[1]
+#define qqb xx[2]
+#define qqphib xx[3]
+#define qqqtilde xx[4]
+#define qqphi xx[5]
+#define qqM xx[6]
+#define qqPT xx[7]
+#define qqphiPT xx[8]
+#define f ff[0]
+
+  double kscale = 100.;
+  double pscale = 10.;
+  double Rscale = 12./constants::hbarc;
+  // Qs will be made rapidity dependent
+  double Qs = static_cast<params*>(userdata)->Qs;
+  double Y = static_cast<params*>(userdata)->Y;
+  double m = static_cast<params*>(userdata)->m;
+
+  kinPair in;
+  in.M = qqM;
+  in.PT  = qqPT;
+  in.phi = qqphiPT;
+  in.qtilde = qqqtilde;
+  in.Y = Y;
+  in.m = m;
+
+  kinqq var = convert(in);
+  
+  double p = var.p;
+  double phip = var.phip;
+  double q = var.q;
+  double phiq = var.phiq;
+  double yp = var.yp;
+  double yq = var.yq;
+  
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double qx = q*cos(phiq); 
+  double qy = q*sin(phiq);
+  
+  double pplusqx = px+qx;
+  double pplusqy = py+qy;
+  
+  double pplusq = sqrt(pplusqx*pplusqx+pplusqy*pplusqy);
+  double phi_pplusq = atan2(pplusqy,pplusqx);
+
+  
+  //since these 3 parts only appear in a sum, we should combine them to do only one
+  // function call
+  double H = Hard::qqqq(p, phip, q, phiq, pplusq, phi_pplusq, 0, 0, 0, 0, yp, yq, m)
+    +Hard::qqg(p, phip, q, phiq, pplusq, phi_pplusq, 0, 0, 0, 0, yp, yq, m)
+    +Hard::gg(p, phip, q, phiq, pplusq, phi_pplusq, 0, 0, 0, 0, yp, yq, m);
+  
+  f = constants::alphas*double(constants::Nc)*double(constants::Nc)
+    /(2.*pow(2.*M_PI,8.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(pplusq, qqR, Qs)/(pplusq*pplusq)*H;
+  
+  return 0;
+}  
+  
 
 
 // Integrand for integral over everything but |p|
@@ -158,14 +227,13 @@ static int Integrand(const int *ndim, const cubareal xx[],
 #define b xx[4]
 #define phib xx[5]
 #define phi xx[6]
-#define f ff[0]
 
   double kscale = 100.;
   double Rscale = 12./constants::hbarc;
   double p = static_cast<params*>(userdata)->pe;
   double Qs = static_cast<params*>(userdata)->Qs;
 
-  f = 2*M_PI*k*kscale*R*Rscale*b*Rscale*phip(k*kscale, R*Rscale, Qs)*phit(sqrt(p*p + k*k*kscale*kscale - 2.*p*k*kscale*cos((phi - phik)*2.*M_PI)), sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)), Qs)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI; // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube)
+  f = 2*M_PI*k*kscale*R*Rscale*b*Rscale*Phip(k*kscale, R*Rscale, Qs)*Phit(sqrt(p*p + k*k*kscale*kscale - 2.*p*k*kscale*cos((phi - phik)*2.*M_PI)), sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)), Qs)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI; // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube)
   return 0;
 }
 
@@ -181,7 +249,7 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   double Qs = static_cast<params*>(userdata)->Qs;
   double lambda = static_cast<params*>(userdata)->lambda;
 
-  f = 2.*constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)*2.*M_PI*k*kscale*R*Rscale*b*Rscale*phip(k*kscale, R*Rscale, Qs)*phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)), Qs)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI*pscale*(p*pscale+lambda); // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+  f = 2.*constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)*2.*M_PI*k*kscale*R*Rscale*b*Rscale*Phip(k*kscale, R*Rscale, Qs)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)), Qs)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI*pscale*(p*pscale+lambda); // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   return 0;
 }
 
