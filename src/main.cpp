@@ -34,13 +34,73 @@ namespace constants {
 }
 
 // Parameters that need to be passed to the integrand
-struct params 
-{
+struct params {
   double pe;
   double k;
   double Qs;
   double lambda;
 };
+
+struct kinqq {
+  double p;
+  double phip;
+  double q;
+  double phiq;
+  double yp;
+  double yq;
+};
+
+struct kinPair {
+  double M;
+  double PT;
+  double Y;
+  double qtilde;
+  double phi;
+  double m;
+};
+
+// Conversion of kinematic variables
+kinqq convert(kinPair input) {
+
+  kinqq output;
+
+  double M = input.M;
+  double PT = input.PT;
+  double Y = input.Y;
+  double qtilde = input.qtilde;
+  double phi = input.phi;
+  double m = input.m;
+  
+  double betax = PT/sqrt(M*M+PT*PT);
+  double gammax = 1./sqrt(1.-betax*betax);
+  double betaz = tanh(Y);
+  double gammaz = 1./sqrt(1.-betaz*betaz);
+
+  double pE = gammaz*(gammax*(M/2.-betax*qtilde*cos(phi))
+                      -betaz*sqrt(M*M/4.-m*m-qtilde*qtilde));
+  double px = gammax*(betax*M/2.-qtilde*cos(phi));
+  double py = -qtilde*sin(phi);
+  double pz = gammaz*(betaz*gammax*(M/2.-betax*qtilde*cos(phi))
+                      -sqrt(M*M/4.-m*m-qtilde*qtilde));
+  
+  double qE = gammaz*(gammax*(M/2.+betax*qtilde*cos(phi))
+                      +betaz*sqrt(M*M/4.-m*m-qtilde*qtilde));
+  double qx = gammax*(betax*M/2.+qtilde*cos(phi));
+  double qy = qtilde*sin(phi);
+  double qz = gammaz*(betaz*gammax*(M/2.+betax*qtilde*cos(phi))
+                      +sqrt(M*M/4.-m*m-qtilde*qtilde));
+
+  output.p = sqrt(px*px+py*py);
+  output.phip = atan2(py,px);
+  output.q = sqrt(qx*qx+qy*qy);
+  output.phiq = atan2(qy,qx);
+  output.yp = 0.5*log((pE+pz)/(pE-pz));
+  output.yq = 0.5*log((qE+qz)/(qE-qz));
+
+  return output;
+}
+  
+
 
 // Nuclear density for lead
 double rhoA(double z, void * params) {
@@ -66,7 +126,7 @@ double TA(double R){
 
   gsl_integration_workspace_free (w);
   
-  return result/67.09678472225216694;// normalization for above parameters RA=6.6fm and d=0.546fm - adjust if parameters change;
+  return result/67.09678472225216694;// normalization for above parameters RA=6.62fm and d=0.546fm - adjust if parameters change;
 }
 
 // Unintegrated gluon distribution for the proton
@@ -80,6 +140,12 @@ double phip(double k, double R, double Qs){
 double phit(double k, double R, double Qs){
   return k*k*constants::CF/(pow(2.*M_PI,3))/constants::alphas*2.*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA(R)))/(constants::CA*Qs*Qs*TA(R));
 }
+
+// FT of fundamental S of the target
+double StF(double k, double R, double Qs){
+  return 2.*exp(-(k*k/(Qs*Qs*TA(R))))/(Qs*Qs*TA(R));
+} 
+
 
 // Integrand for integral over everything but |p|
 static int Integrand(const int *ndim, const cubareal xx[],
@@ -147,13 +213,14 @@ int main(int argc, char *argv[]) {
   int NDIM = 8;
   int NCOMP = 1;
   int NVEC = 1;
-  double EPSREL = 5e-4;
+  //  double EPSREL = 5e-4;
+  double EPSREL = 5e-2;
   double EPSABS = 1e-12;
   int VERBOSE = 0;
   int LAST = 4;
   int MINEVAL = 0;
-  int MAXEVAL = 100000000;
-  //int MAXEVAL = 1000000;
+  //int MAXEVAL = 100000000;
+  int MAXEVAL = 10000000;
   int KEY = 0;
   
   //vegas
@@ -203,50 +270,52 @@ int main(int argc, char *argv[]) {
   double gerror = (double)error[0];
   printf("%.8f +- %.8f\t\n", gresult, gerror);
   
-  // Integrate 7D to get |p|-spectrum
-  int ppoints = 20; // Points in |p| to compute
-  double pstep = 0.1; // Step width in |p|
+
+  // // Integrate 7D to get |p|-spectrum
+  // int ppoints = 20; // Points in |p| to compute
+  // double pstep = 0.1; // Step width in |p|
   
-  NDIM = 7;
-  int runs = 1;
-  for (int r=0; r<runs; r++){
-    for (int i=1; i<=ppoints; i++){
-      data.pe = i*pstep;
-      userdata = &data;
-      SEED = time(NULL)+r*10000;
+  // NDIM = 7;
+  // int runs = 1;
+  // for (int r=0; r<runs; r++){
+  //   for (int i=1; i<=ppoints; i++){
+  //     data.pe = i*pstep;
+  //     userdata = &data;
+  //     SEED = time(NULL)+r*10000;
 
-      // Suave(NDIM, NCOMP, Integrand, userdata, NVEC,
-      //       EPSREL, EPSABS, VERBOSE | LAST, SEED,
-      //       MINEVAL, MAXEVAL, NNEW, NMIN, FLATNESS,
-      //       NULL, NULL,
-      //       &nregions, &neval, &fail, integral, error, prob);
+  //     // Suave(NDIM, NCOMP, Integrand, userdata, NVEC,
+  //     //       EPSREL, EPSABS, VERBOSE | LAST, SEED,
+  //     //       MINEVAL, MAXEVAL, NNEW, NMIN, FLATNESS,
+  //     //       NULL, NULL,
+  //     //       &nregions, &neval, &fail, integral, error, prob);
       
-      // Divonne(NDIM, NCOMP, Integrand, userdata, NVEC,
-      //         EPSREL, EPSABS, VERBOSE, SEED,
-      //         MINEVAL, MAXEVAL, KEY1, KEY2, KEY3, MAXPASS,
-      //         BORDER, MAXCHISQ, MINDEVIATION,
-      //         NGIVEN, LDXGIVEN, NULL, NEXTRA, NULL,
-      //         NULL, NULL,
-      //         &nregions, &neval, &fail, integral, error, prob);
+  //     // Divonne(NDIM, NCOMP, Integrand, userdata, NVEC,
+  //     //         EPSREL, EPSABS, VERBOSE, SEED,
+  //     //         MINEVAL, MAXEVAL, KEY1, KEY2, KEY3, MAXPASS,
+  //     //         BORDER, MAXCHISQ, MINDEVIATION,
+  //     //         NGIVEN, LDXGIVEN, NULL, NEXTRA, NULL,
+  //     //         NULL, NULL,
+  //     //         &nregions, &neval, &fail, integral, error, prob);
 
-      Vegas(NDIM, NCOMP, Integrand, userdata, NVEC,
-            EPSREL, EPSABS, VERBOSE, SEED,
-            MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-            GRIDNO, NULL, NULL,
-            &neval, &fail, integral, error, prob);
+  //     Vegas(NDIM, NCOMP, Integrand, userdata, NVEC,
+  //           EPSREL, EPSABS, VERBOSE, SEED,
+  //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+  //           GRIDNO, NULL, NULL,
+  //           &neval, &fail, integral, error, prob);
       
-      // Cuhre(NDIM, NCOMP, Integrand, userdata, NVEC,
-      //       EPSREL, EPSABS, VERBOSE | LAST,
-      //       MINEVAL, MAXEVAL, KEY,
-      //       NULL, NULL,
-      //       &nregions, &neval, &fail, integral, error, prob);
+  //     // Cuhre(NDIM, NCOMP, Integrand, userdata, NVEC,
+  //     //       EPSREL, EPSABS, VERBOSE | LAST,
+  //     //       MINEVAL, MAXEVAL, KEY,
+  //     //       NULL, NULL,
+  //     //       &nregions, &neval, &fail, integral, error, prob);
       
-      gresult = 2.*constants::alphas/constants::CF/data.pe/data.pe*(double)integral[0];
-      gerror = 2.*constants::alphas/constants::CF/data.pe/data.pe*(double)error[0];
-      printf("%.3f \t \t%.8f \t%.8f\n", data.pe, gresult, gerror);
-    }
+  //     gresult = 2.*constants::alphas/constants::CF/data.pe/data.pe*(double)integral[0];
+  //     gerror = 2.*constants::alphas/constants::CF/data.pe/data.pe*(double)error[0];
+  //     printf("%.3f \t \t%.8f \t%.8f\n", data.pe, gresult, gerror);
+  //   }
+  // }
     
-  }
+
   MPI_Finalize();
 
   return 1;
