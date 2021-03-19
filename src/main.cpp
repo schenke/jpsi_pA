@@ -229,7 +229,7 @@ static int JPsiIntegrand1(const int *ndim, const cubareal xx[],
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *PT*pscale*2.*M_PI
-    *(2.*constants::mD-constants::mJPsi)
+    *(2.*constants::mD-constants::mJPsi)*2.*M
     *qtildescale
     *2.*M_PI;
   // scaled momenta above (in PT)
@@ -338,7 +338,7 @@ static int JPsiIntegrand2(const int *ndim, const cubareal xx[],
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *PT*pscale*2.*M_PI
-    *(2.*constants::mD-constants::mJPsi)
+    *(2.*constants::mD-constants::mJPsi)*2.*M
     *qtildescale
     *2.*M_PI
     *k1*kscale*2.*M_PI;
@@ -443,7 +443,7 @@ static int JPsiIntegrand3(const int *ndim, const cubareal xx[],
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *PT*pscale*2.*M_PI
-    *(2.*constants::mD-constants::mJPsi)
+    *(2.*constants::mD-constants::mJPsi)*2.*M
     *qtildescale
     *2.*M_PI
     *k*kscale*2.*M_PI;
@@ -532,8 +532,6 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
   double pplusqminusk1y = py+qy-k1y;
   double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
   double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
-
-
   double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
  
   // double Rx = R*cos(phiR);
@@ -562,7 +560,7 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *PT*pscale*2.*M_PI
-    *(2.*constants::mD-constants::mJPsi)
+    *(2.*constants::mD-constants::mJPsi)*2.*M
     *qtildescale
     *2.*M_PI
     *k*kscale*2.*M_PI
