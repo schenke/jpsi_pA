@@ -33,10 +33,10 @@ namespace Hard{
     double Cp = 0.5*(Cplus*pminus + Cminus*pplus) - k2*p*cos(phik2-phip) + k1*p*cos(phik1-phip);
     double Cq = 0.5*(Cplus*qminus + Cminus*qplus) - k2*q*cos(phik2-phiq) + k1*q*cos(phik1-phiq);
     double pq = 0.5*(pplus*qminus + pminus*qplus) - p*q*cos(phip-phiq);
-    double C2 = Cplus*Cminus - ( k2*k2+k1*k1-2.*cos(phik2-phik1) );
+    double C2 = Cplus*Cminus - ( k2*k2+k1*k1-2.*k1*k2*cos(phik2-phik1) );
     
     return 32.*pplus*qplus*(m*m+at2)*(m*m+bt2)/pow((2.*pplus*(m*m+at2)+2.*qplus*(m*m+bt2)),2.)+
-      8./((m*m+pq)*(2.*pplus*(m*m+at2)+2.*qplus*(m*m+bt2)))*
+      4./((m*m+pq)*(pplus*(m*m+at2)+qplus*(m*m+bt2)))*
       ((m*m+adotb)*(qplus*Cp+pplus*Cq-Cplus*(m*m+pq))+Cplus*((m*m+bdotq)*(m*m-adotp)-(m*m+adotq)*(m*m-bdotp))+pplus*(adotC*(m*m+bdotq)-bdotC*(m*m+adotq))+qplus*(adotC*(m*m-bdotp)-bdotC*(m*m-adotp)));
     +(2.*Cp*Cq - (m*m+pq)*C2)/pow((m*m+pq),2.);
   }
@@ -108,7 +108,7 @@ namespace Hard{
     double Cp = 0.5*(Cplus*pminus + Cminus*pplus) - k2*p*cos(phik2-phip) + k1*p*cos(phik1-phip);
     double Cq = 0.5*(Cplus*qminus + Cminus*qplus) - k2*q*cos(phik2-phiq) + k1*q*cos(phik1-phiq);
     double pq = 0.5*(pplus*qminus + pminus*qplus) - p*q*cos(phip-phiq);
-    double C2 = Cplus*Cminus - ( k2*k2+k1*k1-2.*cos(phik2-phik1) );
+    double C2 = Cplus*Cminus - ( k2*k2+k1*k1-2.*k1*k2*cos(phik2-phik1) );
     
     return (2.*Cp*Cq - (m*m+pq)*C2)/pow((m*m+pq),2.);
     

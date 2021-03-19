@@ -466,8 +466,8 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
 #define qq4k1 xx[10]
 #define qq4phik1 xx[11]
 
-  double kscale = 100.;
-  double pscale = 100.;
+  double kscale = 20.;
+  double pscale = 20.;
   double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 10./constants::hbarc; // bscale needs to be the same in all terms
   // Qs will be made rapidity dependent
