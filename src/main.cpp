@@ -214,9 +214,7 @@ static int JPsiIntegrand1(const int *ndim, const cubareal xx[],
   
   // since these 3 parts only appear in a sum, we should combine them to do only one
   // function call
-  double H = Hard::qqqq(p, phip, q, phiq, pplusq, phi_pplusq, 0., 0., 0., 0., yp, yq, m)
-    +Hard::qqg(p, phip, q, phiq, pplusq, phi_pplusq, 0., 0., 0., 0., yp, yq, m)
-    +Hard::gg(p, phip, q, phiq, pplusq, phi_pplusq, 0., 0., 0., 0., yp, yq, m);
+  double H = Hard::all(p, phip, q, phiq, pplusq, phi_pplusq, 0., 0., 0., 0., yp, yq, m);
   
   // get Jacobian
   double betax = PT/sqrt(M*M+PT*PT);
@@ -323,9 +321,7 @@ static int JPsiIntegrand2(const int *ndim, const cubareal xx[],
   
   // since these 3 parts only appear in a sum, we should combine them to do only one
   // function call
-  double H = Hard::qqqq(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, 0, 0, yp, yq, m)
-    +Hard::qqg(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, 0, 0, yp, yq, m)
-    +Hard::gg(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, 0, 0, yp, yq, m);
+  double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, 0, 0, yp, yq, m);
   
   // get Jacobian
   double betax = PT/sqrt(M*M+PT*PT);
@@ -428,9 +424,7 @@ static int JPsiIntegrand3(const int *ndim, const cubareal xx[],
   
   // since these 3 parts only appear in a sum, we should combine them to do only one
   // function call
-  double H = Hard::qqqq(p, phip, q, phiq, pplusqminusk, phi_pplusqminusk, k, phik, k, phik, yp, yq, m)
-    +Hard::qqg(p, phip, q, phiq, pplusqminusk, phi_pplusqminusk, k, phik, k, phik, yp, yq, m)
-    +Hard::gg(p, phip, q, phiq, pplusqminusk, phi_pplusqminusk, k, phik, k, phik, yp, yq, m);
+  double H = Hard::all(p, phip, q, phiq, pplusqminusk, phi_pplusqminusk, k, phik, k, phik, yp, yq, m);
   
   // get Jacobian
   double betax = PT/sqrt(M*M+PT*PT);
@@ -545,9 +539,7 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
   
   // since these 3 parts only appear in a sum, we should combine them to do only one
   // function call
-  double H = Hard::qqqq(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m)
-    +Hard::qqg(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m)
-    +Hard::gg(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
+  double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
   
   // get Jacobian
   double betax = PT/sqrt(M*M+PT*PT);

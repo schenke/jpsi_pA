@@ -11,6 +11,9 @@
 
 namespace Hard{
   
+  double all(const double p, const double phip, const double q, const double phiq, 
+              const double k1, const double phik1, const double k2, const double phik2, 
+              const double k, const double phik, const double yp, const double yq, const double m);
   double qqqq(const double p, const double phip, const double q, const double phiq, 
               const double k1, const double phik1, const double k2, const double phik2, 
               const double k, const double phik, const double yp, const double yq, const double m);
