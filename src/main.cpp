@@ -223,11 +223,11 @@ static int JPsiIntegrand1(const int *ndim, const cubareal xx[],
 
   f = 2.*M_PI*constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,8.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(pplusq, R, Qs)/(pplusq*pplusq)*H*J*(M/constants::mJPsi)*(M/constants::mJPsi)
+    *Phip(pplusq, R, Qs)/(pplusq*pplusq)*H*J
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *PT*pscale*2.*M_PI
-    *(2.*constants::mD-constants::mJPsi)*2.*M
+    *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
     *qtildescale
     *2.*M_PI;
   // scaled momenta above (in PT)
@@ -334,7 +334,7 @@ static int JPsiIntegrand2(const int *ndim, const cubareal xx[],
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *PT*pscale*2.*M_PI
-    *(2.*constants::mD-constants::mJPsi)*2.*M
+    *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
     *qtildescale
     *2.*M_PI
     *k1*kscale*2.*M_PI;
@@ -437,7 +437,7 @@ static int JPsiIntegrand3(const int *ndim, const cubareal xx[],
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *PT*pscale*2.*M_PI
-    *(2.*constants::mD-constants::mJPsi)*2.*M
+    *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
     *qtildescale
     *2.*M_PI
     *k*kscale*2.*M_PI;
@@ -466,10 +466,10 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
 #define qq4k1 xx[10]
 #define qq4phik1 xx[11]
 
-  double kscale = 20.;
-  double pscale = 20.;
-  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bscale = 10./constants::hbarc; // bscale needs to be the same in all terms
+  double kscale = 1.;
+  double pscale = 1.;
+  double Rscale = 0.1/constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 0.1/constants::hbarc; // bscale needs to be the same in all terms
   // Qs will be made rapidity dependent
   double Qs = static_cast<params*>(userdata)->Qs;
   double Y = static_cast<params*>(userdata)->Y;
@@ -540,7 +540,7 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
   // since these 3 parts only appear in a sum, we should combine them to do only one
   // function call
   double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
-  
+
   // get Jacobian
   double betax = PT/sqrt(M*M+PT*PT);
   double gammax = 1./sqrt(1.-betax*betax);
@@ -552,7 +552,7 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *PT*pscale*2.*M_PI
-    *(2.*constants::mD-constants::mJPsi)*2.*M
+    *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
     *qtildescale
     *2.*M_PI
     *k*kscale*2.*M_PI
@@ -571,6 +571,126 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
 
   return 0;
 }  
+
+
+// Integrand for the J/Psi integral no M no PT no b
+static int JPsiIntegrandTest(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+  // others defined in Integrand1
+  //#define tqqR xx[0]
+  //#define tqqphiR xx[1]
+  //#define tqqb xx[2]
+  //#define tqqphib xx[3]
+#define tqqqtilde xx[1]
+#define tqqphi xx[2]
+#define tqq4k xx[3]
+#define tqq4phik xx[4]
+#define tqq4k1 xx[5]
+#define tqq4phik1 xx[6]
+
+  double kscale = 20.;
+  double pscale = 20.;
+  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 10./constants::hbarc; // bscale needs to be the same in all terms
+  // Qs will be made rapidity dependent
+  double Qs = static_cast<params*>(userdata)->Qs;
+  double Y = static_cast<params*>(userdata)->Y;
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables 
+  double M = constants::mJPsi;
+  double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
+  double qtilde = tqqqtilde*qtildescale;
+  double PT = 1.; 
+  //double phiPT = qqphiPT*2.*M_PI;
+  double R = 0.1;//tqqR*Rscale;
+  double b = 0.;//tqqb*bscale;
+  double k = tqq4k*kscale;
+  double phik = tqq4phik*2.*M_PI;
+  double k1 = tqq4k1*kscale;
+  double phik1 = tqq4phik1*2.*M_PI;
+  double phiR = 0.;//tqqphiR*2*M_PI;
+  double phib = 0.;//tqqphib*2*M_PI;
+  double phi = tqqphi*2.*M_PI;
+
+  kinPair in;
+  in.M = M;
+  in.PT  = PT;
+  in.phi = phi; // not the PT phi
+  in.qtilde = qtilde;
+  in.Y = Y;
+  in.m = m;
+
+  kinqq out = convert(in);
+  
+  double p = out.p;
+  double phip = out.phip;
+  double q = out.q;
+  double phiq = out.phiq;
+  double yp = out.yp;
+  double yq = out.yq;
+  
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double qx = q*cos(phiq); 
+  double qy = q*sin(phiq);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double pplusqminusk1minuskx = px+qx-kx-k1x;
+  double pplusqminusk1minusky = py+qy-ky-k1x;
+  double pplusqminusk1minusk = sqrt(pplusqminusk1minuskx*pplusqminusk1minuskx
+                                    +pplusqminusk1minusky*pplusqminusk1minusky);
+  double phi_pplusqminusk1minusk = atan2(pplusqminusk1minusky,pplusqminusk1minuskx);
+
+  double pplusqminusk1x = px+qx-k1x;
+  double pplusqminusk1y = py+qy-k1y;
+  double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
+  double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
+  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
+ 
+  // double Rx = R*cos(phiR);
+  // double Ry = R*sin(phiR);
+  // double bx = b*cos(phib);
+  // double by = b*sin(phib);
+  // double Rminusbx = Rx-bx;
+  // double Rminusby = Ry-by;
+  // double Rminusb = sqrt(Rminusbx*Rminusbx+Rminusby*Rminusby);
+  // double phi_Rminusb = atan2(Rminusby,Rminusbx);
+  
+  // get hard factor
+  double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
+
+  // get Jacobian
+  double betax = PT/sqrt(M*M+PT*PT);
+  double gammax = 1./sqrt(1.-betax*betax);
+  double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
+
+  f = constants::alphas*double(constants::Nc)*double(constants::Nc)
+    /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, R, Qs)/(k1*k1)*H*J*StF(pplusqminusk1minusk,Rminusb,Qs)*StF(k,Rminusb,Qs)
+    *R*Rscale*2.*M_PI
+    //*b*bscale*2.*M_PI
+    *qtildescale
+    *2.*M_PI
+    *k*kscale*2.*M_PI
+    *k1*kscale*2.*M_PI;
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // d2R
+  // d2b
+  // dqtilde
+  // dphi
+  // d2k
+  // d2k1
+  //remember factor 2 for p and q direction (not included yet)
+
+  return 0;
+}  
+
 
 
 // Integrand for integral over everything but |p|
@@ -644,7 +764,6 @@ int main(int argc, char *argv[]) {
   int VERBOSE = 0;
   int LAST = 4;
   int MINEVAL = 0;
-  //int MAXEVAL = 100000000;
   int MAXEVAL = 100000000;
   int KEY = 0;
   
@@ -695,6 +814,20 @@ int main(int argc, char *argv[]) {
   // double JPsi1error = (double)error[0];
   // printf("%.8f +- %.8f\t\n", JPsi1result, JPsi1error);
 
+
+  NDIM = 6;
+  Vegas(NDIM, NCOMP, JPsiIntegrandTest, userdata, NVEC,
+        EPSREL, EPSABS, VERBOSE, SEED,
+        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+        GRIDNO, NULL, NULL,
+        &neval, &fail, integral, error, prob);
+  
+  // Print the result
+  double JPsi2result = (double)integral[0];
+  double JPsi2error = (double)error[0];
+  printf("%.12f +- %.12f\t\n", JPsi2result, JPsi2error);
+
+
   NDIM = 12;
 
   // Run 12D Vegas integration
@@ -705,11 +838,9 @@ int main(int argc, char *argv[]) {
         &neval, &fail, integral, error, prob);
   
   // Print the result
-  double JPsi2result = (double)integral[0];
-  double JPsi2error = (double)error[0];
+  JPsi2result = (double)integral[0];
+  JPsi2error = (double)error[0];
   printf("%.8f +- %.8f\t\n", JPsi2result, JPsi2error);
-
-
 
 
   NDIM = 8;
