@@ -473,8 +473,8 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
 #define qq4phik1 xx[11]
 
   double kscale = 100.;
-  double pscale = 10.;
-  double Rscale = 3./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double pscale = 100.;
+  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 10./constants::hbarc; // bscale needs to be the same in all terms
   // Qs will be made rapidity dependent
   double Qs = static_cast<params*>(userdata)->Qs;
@@ -557,7 +557,7 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
 
   f = 2.*M_PI*constants::alphas*double(constants::Nc)*double(constants::Nc)
-    /(2.*pow(2.*M_PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qs)/(k1*k1)*H*J*StF(pplusqminusk1minusk,Rminusb,Qs)*StF(k,Rminusb,Qs)
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
@@ -575,6 +575,7 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
   // dM
   // dqtilde
   // dphi
+  // d2k
   // d2k1
   //remember factor 2 for p and q direction (not included yet)
 
@@ -654,7 +655,7 @@ int main(int argc, char *argv[]) {
   int LAST = 4;
   int MINEVAL = 0;
   //int MAXEVAL = 100000000;
-  int MAXEVAL = 10000000;
+  int MAXEVAL = 100000000;
   int KEY = 0;
   
   //vegas
