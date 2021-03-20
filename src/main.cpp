@@ -466,10 +466,10 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
 #define qq4k1 xx[10]
 #define qq4phik1 xx[11]
 
-  double kscale = 1.;
-  double pscale = 1.;
-  double Rscale = 0.1/constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bscale = 0.1/constants::hbarc; // bscale needs to be the same in all terms
+  double kscale = 10.;
+  double pscale = 10.;
+  double Rscale = 1./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 10./constants::hbarc; // bscale needs to be the same in all terms
   // Qs will be made rapidity dependent
   double Qs = static_cast<params*>(userdata)->Qs;
   double Y = static_cast<params*>(userdata)->Y;
@@ -567,6 +567,7 @@ static int JPsiIntegrand4(const int *ndim, const cubareal xx[],
   // dphi
   // d2k
   // d2k1
+  
   //remember factor 2 for p and q direction (not included yet)
 
   return 0;
@@ -759,12 +760,12 @@ int main(int argc, char *argv[]) {
   int NCOMP = 1;
   int NVEC = 1;
   //  double EPSREL = 5e-4;
-  double EPSREL = 5e-2;
+  double EPSREL = 1e-2;
   double EPSABS = 1e-12;
   int VERBOSE = 0;
   int LAST = 4;
   int MINEVAL = 0;
-  int MAXEVAL = 100000000;
+  int MAXEVAL = 1000000000;
   int KEY = 0;
   
   //vegas
@@ -815,19 +816,28 @@ int main(int argc, char *argv[]) {
   // printf("%.8f +- %.8f\t\n", JPsi1result, JPsi1error);
 
 
-  NDIM = 6;
-  Vegas(NDIM, NCOMP, JPsiIntegrandTest, userdata, NVEC,
-        EPSREL, EPSABS, VERBOSE, SEED,
-        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        GRIDNO, NULL, NULL,
-        &neval, &fail, integral, error, prob);
+  // NDIM = 6;
+  // Vegas(NDIM, NCOMP, JPsiIntegrandTest, userdata, NVEC,
+  //       EPSREL, EPSABS, VERBOSE, SEED,
+  //       MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+  //       GRIDNO, NULL, NULL,
+  //       &neval, &fail, integral, error, prob);
   
-  // Print the result
-  double JPsi2result = (double)integral[0];
-  double JPsi2error = (double)error[0];
-  printf("%.12f +- %.12f\t\n", JPsi2result, JPsi2error);
+  // // Print the result
+  // double JPsi2result = (double)integral[0];
+  // double JPsi2error = (double)error[0];
+  // printf("%.12f +- %.12f\t\n", JPsi2result, JPsi2error);
 
-
+  // for(int i=0; i<100; i++){
+  //   double k1 = i*0.1;
+  //   cout << Hard::qqqq(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) << " " 
+  //        << Hard::qqg(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) << " " 
+  //        << Hard::gg(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) << " " 
+  //        << Hard::all(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) << " " 
+  //        << Hard::qqqq(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) 
+  //     + Hard::qqg(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) 
+  //     + Hard::gg(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) << endl;
+  // }
   NDIM = 12;
 
   // Run 12D Vegas integration
@@ -838,8 +848,8 @@ int main(int argc, char *argv[]) {
         &neval, &fail, integral, error, prob);
   
   // Print the result
-  JPsi2result = (double)integral[0];
-  JPsi2error = (double)error[0];
+  double JPsi2result = (double)integral[0];
+  double JPsi2error = (double)error[0];
   printf("%.8f +- %.8f\t\n", JPsi2result, JPsi2error);
 
 
