@@ -17,7 +17,7 @@ namespace Hard{
     // a_T = q_T-k_T (2D vectors)
     double at2 = q*q + k*k - 2*q*k*cos(phiq-phik);
     // b_T = q_T-k_T-k1_T (2D vectors)
-    double bt2 = at2 + k1*k1 -2.*q*k1*cos(phiq-phik1) - 2.*k*k1*cos(phik-phik1);
+    double bt2 = at2 + k1*k1 -2.*q*k1*cos(phiq-phik1) + 2.*k*k1*cos(phik-phik1);
     double adotb = at2 + k*k1*cos(phik-phik1) - q*k1*cos(phiq-phik1);
     double adotq = q*q - k*q*cos(phik-phiq);
     double bdotq = adotq - k1*q*cos(phik1-phiq);
@@ -35,10 +35,10 @@ namespace Hard{
     double pq = 0.5*(pplus*qminus + pminus*qplus) - p*q*cos(phip-phiq);
     double C2 = Cplus*Cminus - ( k2*k2+k1*k1-2.*k1*k2*cos(phik2-phik1) );
     
-    return 32.*pplus*qplus*(m*m+at2)*(m*m+bt2)/pow((2.*pplus*(m*m+at2)+2.*qplus*(m*m+bt2)),2.)+
-      4./((m*m+pq)*(pplus*(m*m+at2)+qplus*(m*m+bt2)))*
-      ((m*m+adotb)*(qplus*Cp+pplus*Cq-Cplus*(m*m+pq))+Cplus*((m*m+bdotq)*(m*m-adotp)-(m*m+adotq)*(m*m-bdotp))+pplus*(adotC*(m*m+bdotq)-bdotC*(m*m+adotq))+qplus*(adotC*(m*m-bdotp)-bdotC*(m*m-adotp)));
-    +(2.*Cp*Cq - (m*m+pq)*C2)/pow((m*m+pq),2.);
+    return (32.*pplus*qplus*(m*m+at2)*(m*m+bt2)/pow((2.*pplus*(m*m+at2)+2.*qplus*(m*m+bt2)),2.))
+      + (4./((m*m+pq)*(pplus*(m*m+at2)+qplus*(m*m+bt2)))*
+         ((m*m+adotb)*(qplus*Cp+pplus*Cq-Cplus*(m*m+pq))+Cplus*((m*m+bdotq)*(m*m-adotp)-(m*m+adotq)*(m*m-bdotp))+pplus*(adotC*(m*m+bdotq)-bdotC*(m*m+adotq))+qplus*(adotC*(m*m-bdotp)-bdotC*(m*m-adotp))))
+      +((2.*Cp*Cq - (m*m+pq)*C2)/pow((m*m+pq),2.));
   }
 
   double qqqq(const double p, const double phip, const double q, const double phiq, 
@@ -53,7 +53,7 @@ namespace Hard{
     // a_T = q_T-k_T (2D vectors)
     double at2 = q*q + k*k - 2*q*k*cos(phiq-phik);
     // b_T = q_T-k_T-k1_T (2D vectors)
-    double bt2 = at2 + k1*k1 -2.*q*k1*cos(phiq-phik1) - 2.*k*k1*cos(phik-phik1);
+    double bt2 = at2 + k1*k1 -2.*q*k1*cos(phiq-phik1) + 2.*k*k1*cos(phik-phik1);
 
     return 32.*pplus*qplus*(m*m+at2)*(m*m+bt2)/pow((2.*pplus*(m*m+at2)+2.*qplus*(m*m+bt2)),2.);
 
@@ -85,7 +85,7 @@ namespace Hard{
     // a_T = q_T-k_T (2D vectors)
     double at2 = q*q + k*k - 2*q*k*cos(phiq-phik);
     // b_T = q_T-k_T-k1_T (2D vectors)
-    double bt2 = at2 + k1*k1 -2.*q*k1*cos(phiq-phik1) - 2.*k*k1*cos(phik-phik1);
+    double bt2 = at2 + k1*k1 -2.*q*k1*cos(phiq-phik1) + 2.*k*k1*cos(phik-phik1);
     double adotb = at2 + k*k1*cos(phik-phik1) - q*k1*cos(phiq-phik1);
     double adotq = q*q - k*q*cos(phik-phiq);
     double bdotq = adotq - k1*q*cos(phik1-phiq);
