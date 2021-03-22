@@ -121,7 +121,6 @@ double TA(double R){
   gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
 
   double result, error;
-  double expected = -4.0;
 
   gsl_function F;
   F.function = &rhoA;
@@ -147,8 +146,8 @@ double Phit(double k, double R, double Qs){
 }
 
 // FT of fundamental S of the target
-double StF(double k, double R, double Qs){
-  return 2.*exp(-(k*k/(Qs*Qs*TA(R))))/(Qs*Qs*TA(R));
+double StF(double k, double myTA, double Qs){
+  return 2.*exp(-(k*k/(Qs*Qs*myTA)))/(Qs*Qs*myTA);
 } 
 
 // Integrand for the first J/Psi integral
@@ -665,13 +664,15 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double gammax = 1./sqrt(1.-betax*betax);
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
 
+  double myTA = TA(Rminusb);
+
   f = 2.*M_PI*constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qs)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,Rminusb,Qs)*StF(k,Rminusb,Qs)
-      +StF(pplusqminusk1minusk,Rminusb,0.0001)*StF(k,Rminusb,0.0001)
-      +StF(pplusqminusk1minusk,Rminusb,Qs)*StF(k,Rminusb,0.0001)
-      +StF(pplusqminusk1minusk,Rminusb,0.0001)*StF(k,Rminusb,Qs)
+    *(StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,Qs)
+      +StF(pplusqminusk1minusk,myTA,0.0001)*StF(k,myTA,0.0001)
+      +StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,0.0001)
+      +StF(pplusqminusk1minusk,myTA,0.0001)*StF(k,myTA,Qs)
       )
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
@@ -820,7 +821,6 @@ static int JPsiIntegrandTest(const int *ndim, const cubareal xx[],
 static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-  // others defined in Integrand1
 #define nqqR xx[0]
 #define nqqphiR xx[1]
 #define nqqb xx[2]
@@ -834,7 +834,6 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 #define nqq4phik1 xx[10]
 
   double kscale = 100.;
-  double pscale = 10.;
   double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 9./constants::hbarc; // bscale needs to be the same in all terms
   // Qs will be made rapidity dependent
@@ -847,8 +846,6 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   double M = constants::mJPsi + qqM*(2.*constants::mD-constants::mJPsi); 
   double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
   double qtilde = qqqtilde*qtildescale;
-  //double PT = qqPT*pscale; 
-  //double phiPT = qqphiPT*2.*M_PI;
   double R = qqR*Rscale;
   double b = qqb*bscale;
   double k = qq4k*kscale;
@@ -913,14 +910,15 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   double betax = PT/sqrt(M*M+PT*PT);
   double gammax = 1./sqrt(1.-betax*betax);
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
+  double myTA = TA(Rminusb);
 
   f = 2.*M_PI*constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qs)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,Rminusb,Qs)*StF(k,Rminusb,Qs)
-      +StF(pplusqminusk1minusk,Rminusb,0.0001)*StF(k,Rminusb,0.0001)
-      +StF(pplusqminusk1minusk,Rminusb,Qs)*StF(k,Rminusb,0.0001)
-      +StF(pplusqminusk1minusk,Rminusb,0.0001)*StF(k,Rminusb,Qs)
+    *(StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,Qs)
+      +StF(pplusqminusk1minusk,myTA,0.0001)*StF(k,myTA,0.0001)
+      +StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,0.0001)
+      +StF(pplusqminusk1minusk,myTA,0.0001)*StF(k,myTA,Qs)
       )
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
