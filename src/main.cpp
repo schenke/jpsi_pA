@@ -917,12 +917,12 @@ int main(int argc, char *argv[]) {
   int NCOMP = 1;
   const long long int NVEC = 1;
   //  double EPSREL = 5e-4;
-  double EPSREL = 1e-3;
+  double EPSREL = 1e-4;
   double EPSABS = 1e-12;
   int VERBOSE = 0;
   int LAST = 4;
   const long long int MINEVAL = 0;
-  const long long int MAXEVAL = 10000000000;
+  const long long int MAXEVAL = 20000000000;
   int KEY = 0;
   
   //vegas
@@ -1025,8 +1025,8 @@ int main(int argc, char *argv[]) {
 
  
   // Integrate 11D to get PT-spectrum
-  int ppoints = 20; // Points in |p| to compute
-  double pstep = 0.5; // Step width in |p|
+  int ppoints = 30; // Points in |p| to compute
+  double pstep = 0.25; // Step width in |p|
 
   NDIM = 11;
   int runs = 1;
