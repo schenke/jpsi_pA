@@ -817,9 +817,9 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qs)/(k1*k1)*H*J
     *(StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,Qs)
-      +StF(pplusqminusk1minusk,myTA,0.001)*StF(k,myTA,0.001)
-      +StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,0.001)
-      +StF(pplusqminusk1minusk,myTA,0.001)*StF(k,myTA,Qs)
+      +StF(pplusqminusk1minusk,myTA,0.000001)*StF(k,myTA,0.000001)
+      +StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,0.000001)
+      +StF(pplusqminusk1minusk,myTA,0.000001)*StF(k,myTA,Qs)
       )
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
