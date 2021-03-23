@@ -685,8 +685,8 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
     *Phip(k1, R, Qs)/(k1*k1)*H*J
     *(StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,Qs)
       +StF(pplusqminusk1minusk,myTA,0.0001)*StF(k,myTA,0.0001)
-      +StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,0.0001)
-      +StF(pplusqminusk1minusk,myTA,0.0001)*StF(k,myTA,Qs)
+      -StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,0.0001)
+      -StF(pplusqminusk1minusk,myTA,0.0001)*StF(k,myTA,Qs)
       )
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
@@ -816,10 +816,10 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   f = 2.*M_PI*constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qs)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,Qs)
-      +StF(pplusqminusk1minusk,myTA,0.000001)*StF(k,myTA,0.000001)
-      +StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,0.000001)
-      +StF(pplusqminusk1minusk,myTA,0.000001)*StF(k,myTA,Qs)
+    *(StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,Qs)+
+      StF(pplusqminusk1minusk,myTA,0.0000001)*StF(k,myTA,0.0000001)-
+      StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,0.0000001)-
+      StF(pplusqminusk1minusk,myTA,0.0000001)*StF(k,myTA,Qs)
       )
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
@@ -1005,18 +1005,34 @@ int main(int argc, char *argv[]) {
   //   double myR = double(i)/10./constants::hbarc;
   //   cout << returnTA(myR,TAclass) <<  " " << TA(myR) << endl;
   // }
+
+  double JPsi2result;
+  double JPsi2error;
+
+  
+  // NDIM = 10;
+  // llVegas(NDIM, NCOMP, JPsiIntegrand3, userdata, NVEC,
+  //       EPSREL, EPSABS, VERBOSE, SEED,
+  //       MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+  //       GRIDNO, NULL, NULL,
+  //       &neval, &fail, integral, error, prob);
+  
+  // // Print the result
+  // JPsi2result = (double)integral[0];
+  // JPsi2error = (double)error[0];
+  // printf("%.8f +- %.8f\t\n", JPsi2result, JPsi2error);
+
+
  
   // Integrate 11D to get PT-spectrum
   int ppoints = 20; // Points in |p| to compute
   double pstep = 0.5; // Step width in |p|
-  double JPsi2result;
-  double JPsi2error;
 
   NDIM = 11;
   int runs = 1;
   for (int r=0; r<runs; r++){
     for (int i=0; i<=ppoints; i++){
-      data.PT = 0.1+i*(pstep-0.1);
+      data.PT = 0.1+i*(pstep);
       userdata = &data;
       SEED = time(NULL)+r*10000;
       
