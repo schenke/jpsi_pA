@@ -1,6 +1,7 @@
 set (SOURCES
     pretty_ostream.cpp
     hard.cpp
+    TAInt.cpp
 )
 
 set(CompileFlags "")
