@@ -319,8 +319,8 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 #define nqq4phik1 xx[10]
 
   double kscale = 10.;
-  double Rscale = 20./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bscale = 20./constants::hbarc; // bscale needs to be the same in all terms
+  double Rscale = 30./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 30./constants::hbarc; // bscale needs to be the same in all terms
   // Qs will be made rapidity dependent
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
@@ -420,7 +420,6 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   // last rows are scaling of integration measures:
   // d2R
   // d2b
-  // d2PT
   // dM
   // dqtilde
   // dphi
@@ -557,8 +556,8 @@ int main(int argc, char *argv[]) {
   params *userdata, data;
 
   data.Qs = 0.; // Saturation scale in GeV
-  data.Qsp = 0.4; // Saturation scale in GeV
-  data.QsA = 0.7; // Saturation scale in GeV
+  data.Qsp = 0.5; // Saturation scale in GeV
+  data.QsA = 1.5; // Saturation scale in GeV
   data.lambda = 0.1; // Infrared cutoff on p integral in GeV
   data.Y = 0.;
   userdata = &data; // Set the parameters to be passed to the integrand
