@@ -1,6 +1,5 @@
 #include "TAInt.h"
 
-
 // Constants to be used
 namespace constants {
   const int Nc = 3;
@@ -20,7 +19,7 @@ double TAInt::rhoA(double z, void * params) {
 
 void TAInt::computeTAIntegral(){
   for(int i=0; i<200; i++){
-    double R = double(i)/10./constants::hbarc;
+    double R = double(i)/200.*20./constants::hbarc;
     gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
     double result, error;
     gsl_function F;
@@ -47,10 +46,12 @@ double TAInt::returnTA(double R){
   // gsl_interp_accel_free (acc);
 
   // simple linear interpolation
-  int i = int(R*10.*constants::hbarc);
+  int i = int(R*200./20.*constants::hbarc);
   //cout << "i=" << i<< " R=" << R << endl;
-  double TA = (i+1-R*10.*constants::hbarc)*TAgrid[i] + (R*10.*constants::hbarc-i)*TAgrid[i+1];
-
+  double TA = (i+1-R*200./20.*constants::hbarc)*TAgrid[i] + (R*200./20.*constants::hbarc-i)*TAgrid[i+1];
+  if(R>20./constants::hbarc){
+    //cout << "range problem: " << TA << endl;
+    TA=0.;}
   return TA;
 }
 
