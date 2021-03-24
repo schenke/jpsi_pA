@@ -1,6 +1,5 @@
 #include "TAInt.h"
 
-
 // Constants to be used
 namespace constants {
   const int Nc = 3;
