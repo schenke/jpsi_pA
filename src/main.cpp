@@ -149,19 +149,19 @@ return TAclass.returnTA(R);
 // Unintegrated gluon distribution for the proton
 // 1/(2pi)^3 or 1/(4 (2pi)^2) or 1/4 ??
 double Phip(double k, double R, double Qs){
-  return 2.*M_PI*k*k*constants::Nc/(pow(2.*M_PI,3))/constants::alphas
+  return 2.*M_PI*k*k*constants::Nc/4./constants::alphas
     *2.*constants::CF*exp(R*R/(2.*constants::Bp))*exp(-constants::CF
                                                      *exp(R*R/(2.*constants::Bp))*k*k/(constants::CA*Qs*Qs))/(constants::CA*Qs*Qs);
 }
 
 // Unintegrated gluon distribution for lead
 double Phit(double k, double TA, double Qs){
-  return 2.*M_PI*k*k*constants::Nc/(pow(2.*M_PI,3))/constants::alphas*2.*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA))/(constants::CA*Qs*Qs*TA);
+  return 2.*M_PI*k*k*constants::Nc/4./constants::alphas*2.*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA))/(constants::CA*Qs*Qs*TA);
 }
 
 // FT of fundamental S of the target
-double StF(double k, double myTA, double Qs){
-  return 2.*M_PI*2.*exp(-(k*k/(Qs*Qs*myTA)))/(Qs*Qs*myTA);
+double StF(double k, double TA, double Qs){
+  return 2.*M_PI*2.*exp(-(k*k/(Qs*Qs*TA)))/(Qs*Qs*TA);
 } 
 
 // Integrand for the combined J/Psi integral
@@ -319,8 +319,8 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 #define nqq4phik1 xx[10]
 
   double kscale = 10.;
-  double Rscale = 30./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bscale = 30./constants::hbarc; // bscale needs to be the same in all terms
+  double Rscale = 40./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 40./constants::hbarc; // bscale needs to be the same in all terms
   // Qs will be made rapidity dependent
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
@@ -403,11 +403,7 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   f = 2.*M_PI*constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,QsA)
-      // +StF(pplusqminusk1minusk,myTA,0.000001)*StF(k,myTA,0.000001)-
-      // StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,0.000001)-
-      // StF(pplusqminusk1minusk,myTA,0.000001)*StF(k,myTA,QsA)
-      )
+    *(StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,QsA))
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
@@ -483,10 +479,17 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   TAInt TAclass = static_cast<params*>(userdata)->TAclass;
   double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
 
-  f = 2.*constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)*2.*M_PI*k*kscale*R*Rscale*b*Rscale*Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI*pscale*(p*pscale+lambda); // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+  f = constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)/pow((2*M_PI*M_PI),3.)*2.*M_PI*k*kscale*R*Rscale*b*Rscale*Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI*pscale*(p*pscale+lambda); // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   return 0;
 }
 
+double Qsp(double pT, double roots, double y){
+  return pow((0.0003*roots/pT/exp(-y)),0.288/2.);
+}
+
+double QsA(double pT, double roots, double y){
+  return sqrt(0.4*pow(208.,(1./3.))*pow(Qsp(pT,roots,y),2.));
+}
 
 // Main program
 int main(int argc, char *argv[]) {
@@ -516,12 +519,12 @@ int main(int argc, char *argv[]) {
   int NCOMP = 1;
   const long long int NVEC = 1;
   //  double EPSREL = 5e-4;
-  double EPSREL = 1e-3;
-  double EPSABS = 1e-14;
+  double EPSREL = 5e-4;
+  double EPSABS = 1e-15;
   int VERBOSE = 0;
   int LAST = 4;
   const long long int MINEVAL = 0;
-  const long long int MAXEVAL = 1000000000;
+  const long long int MAXEVAL = 5000000000;
   int KEY = 0;
   
   //vegas
@@ -555,51 +558,37 @@ int main(int argc, char *argv[]) {
 
   params *userdata, data;
 
-  data.Qs = 0.; // Saturation scale in GeV
-  data.Qsp = 0.5; // Saturation scale in GeV
-  data.QsA = 1.5; // Saturation scale in GeV
+  double QspPre = 1.; // prefactors for scaling
+  double QsAPre = 1.; // prefactors for scaling
+
+  double inQsp = QspPre*Qsp(0.8,8160.,0);
+  double inQsA = QsAPre*QsA(0.8,8160.,0);
+
+  double JPsi2result;
+  double JPsi2error;
+  data.Qs = 0.; // Saturation scale in GeV - not used anymore
   data.lambda = 0.1; // Infrared cutoff on p integral in GeV
   data.Y = 0.;
+  data.Qsp = inQsp; // midrapidity proton Saturation scale in GeV
+  data.QsA = inQsA; // midrapidity Pb Saturation scale in GeV
   userdata = &data; // Set the parameters to be passed to the integrand
 
-  // // Run 9D Vegas integration
-  // Vegas(NDIM, NCOMP, JPsiIntegrand1, userdata, NVEC,
-  //       EPSREL, EPSABS, VERBOSE, SEED,
-  //       MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-  //       GRIDNO, NULL, NULL,
-  //       &neval, &fail, integral, error, prob);
-  
-  // // Print the result
-  // double JPsi1result = (double)integral[0];
-  // double JPsi1error = (double)error[0];
-  // printf("%.8f +- %.8f\t\n", JPsi1result, JPsi1error);
-
-
-  // NDIM = 6;
-  // Vegas(NDIM, NCOMP, JPsiIntegrandTest, userdata, NVEC,
-  //       EPSREL, EPSABS, VERBOSE, SEED,
-  //       MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-  //       GRIDNO, NULL, NULL,
-  //       &neval, &fail, integral, error, prob);
-  
-  // // Print the result
-  // double JPsi2result = (double)integral[0];
-  // double JPsi2error = (double)error[0];
-  // printf("%.12f +- %.12f\t\n", JPsi2result, JPsi2error);
-
-  // for(int i=0; i<100; i++){
-  //   double k1 = i*0.1;
-  //   cout << Hard::qqqq(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) << " " 
-  //        << Hard::qqg(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) << " " 
-  //        << Hard::gg(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) << " " 
-  //        << Hard::all(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) << " " 
-  //        << Hard::qqqq(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) 
-  //     + Hard::qqg(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) 
-  //     + Hard::gg(1, 0, 1, 0, k1, 0, 1-k1, 0, 1, 0, 0, 0, 1) << endl;
-  // }
-
-
   TAInt TAclass;
+
+  cout << "Qsp(y=0) = " << inQsp << endl;
+  cout << "QsA(y=0) = " << inQsA << endl;
+
+  double inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
+  double inQsA_fwd = QsAPre*QsA(3,8160.,3.);
+
+  cout << "Qsp(y=3) = " << inQsp_fwd << endl;
+  cout << "QsA(y=3) = " << inQsA_fwd << endl;
+
+  double inQsp_bck = QspPre*Qsp(3,8160.,3.8);
+  double inQsA_bck = QsAPre*QsA(3,8160.,-3.8);
+
+  cout << "Qsp(y=-3.8) = " << inQsp_bck << endl;
+  cout << "QsA(y=-3.8) = " << inQsA_bck << endl;
 
   // // test the interpolation routine
   // for(int i=0;i<100;i++){
@@ -607,10 +596,73 @@ int main(int argc, char *argv[]) {
   //   cout << returnTA(myR,TAclass) <<  " " << TA(myR) << endl;
   // }
 
-  double JPsi2result;
-  double JPsi2error;
+  // gluon number
+  NDIM = 8;
+  // Run 8D Vegas integration
+  llVegas(NDIM, NCOMP, FullIntegrand, userdata, NVEC,
+        EPSREL, EPSABS, VERBOSE, SEED,
+        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+        GRIDNO, NULL, NULL,
+        &neval, &fail, integral, error, prob);
+  
+  // Print the result
+  double gresult = (double)integral[0];
+  double gerror = (double)error[0];
+  printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
+  
+  data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
+  data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
 
- 
+  userdata = &data; // Set the parameters to be passed to the integrand
+
+  // JPsi cross section
+    NDIM = 12;
+  llVegas(NDIM, NCOMP, JPsiIntegrandAll, userdata, NVEC,
+        EPSREL, EPSABS, VERBOSE, SEED,
+        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+        GRIDNO, NULL, NULL,
+        &neval, &fail, integral, error, prob);
+  
+  // Print the result
+  JPsi2result = (double)integral[0];
+  JPsi2error = (double)error[0];
+  printf("Forward JPsi: %.8f +- %.8f\t\n", JPsi2result, JPsi2error);
+
+  data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
+  data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
+
+  userdata = &data; // Set the parameters to be passed to the integrand
+
+  double JPsi2result2;
+  double JPsi2error2;
+
+  // JPsi cross section
+  NDIM = 12;
+  llVegas(NDIM, NCOMP, JPsiIntegrandAll, userdata, NVEC,
+        EPSREL, EPSABS, VERBOSE, SEED,
+        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+        GRIDNO, NULL, NULL,
+        &neval, &fail, integral, error, prob);
+  
+  // Print the result
+  JPsi2result2 = (double)integral[0];
+  JPsi2error2 = (double)error[0];
+  printf("Backward JPsi: %.8f +- %.8f\t\n", JPsi2result2, JPsi2error2);
+
+  cout << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
+
+  stringstream strfilename;
+  strfilename << "output.dat";
+  string filename;
+  filename = strfilename.str();
+  fstream fout(filename.c_str(), ios::app);
+
+  fout << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " " << QspPre << " " << QsAPre << endl;
+  fout.close();
+
+  cout << " - - - - - - - - - - - - - - - - - " << endl;
+
+
   // Integrate 11D to get PT-spectrum
   int ppoints = 30; // Points in |p| to compute
   double pstep = 0.25; // Step width in |p|
@@ -634,38 +686,6 @@ int main(int argc, char *argv[]) {
       printf("%.3f \t \t%.8e \t%.8e\n", data.PT, JPsi2result, JPsi2error);
     }
   }
-
-
-  
-  NDIM = 12;
-  llVegas(NDIM, NCOMP, JPsiIntegrandAll, userdata, NVEC,
-        EPSREL, EPSABS, VERBOSE, SEED,
-        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        GRIDNO, NULL, NULL,
-        &neval, &fail, integral, error, prob);
-  
-  // Print the result
-  JPsi2result = (double)integral[0];
-  JPsi2error = (double)error[0];
-  printf("%.8f +- %.8f\t\n", JPsi2result, JPsi2error);
-
-
-
-
-  NDIM = 8;
-
-  // Run 8D Vegas integration
-  llVegas(NDIM, NCOMP, FullIntegrand, userdata, NVEC,
-        EPSREL, EPSABS, VERBOSE, SEED,
-        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        GRIDNO, NULL, NULL,
-        &neval, &fail, integral, error, prob);
-  
-  // Print the result
-  double gresult = (double)integral[0];
-  double gerror = (double)error[0];
-  printf("%.8f +- %.8f\t\n", gresult, gerror);
-  
 
   // // Integrate 7D to get |p|-spectrum
   // int ppoints = 20; // Points in |p| to compute
@@ -705,8 +725,8 @@ int main(int argc, char *argv[]) {
   //     //       NULL, NULL,
   //     //       &nregions, &neval, &fail, integral, error, prob);
       
-  //     gresult = 2.*constants::alphas/constants::CF/data.pe/data.pe*(double)integral[0];
-  //     gerror = 2.*constants::alphas/constants::CF/data.pe/data.pe*(double)error[0];
+  //     gresult = constants::alphas/constants::CF/pow((2*M_PI*M_PI),3.)/data.pe/data.pe*(double)integral[0];
+  //     gerror = constants::alphas/constants::CF/pow((2*M_PI*M_PI),3.)/data.pe/data.pe*(double)error[0];
   //     printf("%.3f \t \t%.8f \t%.8f\n", data.pe, gresult, gerror);
   //   }
   // }
