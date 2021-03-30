@@ -186,7 +186,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
 
   double kscale = 10.;
   double pscale = 10.;
-  double Rscale = 3./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double Rscale = 10./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 10./constants::hbarc; // bscale needs to be the same in all terms
   // Qs will be made rapidity dependent
   double Qsp = static_cast<params*>(userdata)->Qsp;
@@ -485,7 +485,8 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
 }
 
 double Qsp(double pT, double roots, double y){
-  return pow((0.0003*roots/pT/exp(-y)),0.288/2.);
+  //return pow((0.0003*roots/pT/exp(-y)),0.288/2.);
+  return pow((0.000041*roots/pT/exp(-y)),0.277/2.);
 }
 
 double QsA(double pT, double roots, double y){
@@ -513,7 +514,7 @@ int main(int argc, char *argv[]) {
   display_logo();
   messager.flush("info");
   
-  long int seed = 1;
+  long int seed = time(NULL)+rank*100000;
 
   Parameters *Glauber_param;
   Glauber_param = new Parameters();
@@ -522,7 +523,7 @@ int main(int argc, char *argv[]) {
 
   Random *random;
   random = new Random();
-  random->init_genrand64(Glauber_param->getSeed());
+  random->init_genrand64(seed);
 
   Glauber *glauber;
   glauber = new Glauber(Glauber_param);
@@ -577,8 +578,8 @@ int main(int argc, char *argv[]) {
 
   params *userdata, data;
 
-  double QspPre = 1.; // prefactors for scaling
-  double QsAPre = 1.; // prefactors for scaling
+  double QspPre = 0.5; // prefactors for scaling
+  double QsAPre = 0.5; // prefactors for scaling
 
   double inQsp = QspPre*Qsp(0.8,8160.,0);
   double inQsA = QsAPre*QsA(0.8,8160.,0);

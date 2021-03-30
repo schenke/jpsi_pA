@@ -44,7 +44,6 @@ namespace Hard{
     double Cq = (Cplus*qminus + Cminus*qplus) - k2*q*cosk2q + k1*q*cosqk1;
     double pq = (pplus*qminus + pminus*qplus) - p*q*cos(phip-phiq);
     double C2 = 2.*Cplus*Cminus - ( k2*k2+k1*k1-2.*k1*k2*cosk1k2 );
-    
     return (32.*pplus*qplus*(m*m+at2)*(m*m+bt2)/pow((2.*pplus*(m*m+at2)+2.*qplus*(m*m+bt2)),2.))
       + (4./((m*m+pq)*(pplus*(m*m+at2)+qplus*(m*m+bt2)))*
          ((m*m+adotb)*(qplus*Cp+pplus*Cq-Cplus*(m*m+pq))+Cplus*((m*m+bdotq)*(m*m-adotp)-(m*m+adotq)*(m*m-bdotp))+pplus*(adotC*(m*m+bdotq)-bdotC*(m*m+adotq))+qplus*(adotC*(m*m-bdotp)-bdotC*(m*m-adotp))))
