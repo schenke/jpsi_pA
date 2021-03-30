@@ -2,6 +2,9 @@ set (SOURCES
     pretty_ostream.cpp
     hard.cpp
     TAInt.cpp
+    Glauber.cpp
+    Random.cpp
+    Parameters.cpp
 )
 
 set(CompileFlags "")

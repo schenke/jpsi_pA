@@ -17,6 +17,7 @@
 #include "pretty_ostream.h"
 #include "hard.h"
 #include "TAInt.h"
+#include "Glauber.h"
 
 #define _SECURE_SCL 0
 #define _HAS_ITERATOR_DEBUGGING 0
@@ -470,7 +471,7 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
 
 #define p xx[7]
 
-  double kscale = 100.;
+  double kscale = 10.;
   double pscale = 10.;
   double Rscale = 10./constants::hbarc;
   double Qsp = static_cast<params*>(userdata)->Qsp;
@@ -512,6 +513,22 @@ int main(int argc, char *argv[]) {
   display_logo();
   messager.flush("info");
   
+  long int seed = 1;
+
+  Parameters *Glauber_param;
+  Glauber_param = new Parameters();
+  Glauber_param->setParameters();
+
+
+  Random *random;
+  random = new Random();
+  random->init_genrand64(Glauber_param->getSeed());
+
+  Glauber *glauber;
+  glauber = new Glauber(Glauber_param);
+  glauber->init(random);
+
+
   //printf("%.17f \n", TA(0.));
 
   // Cuba's parameters for integration
