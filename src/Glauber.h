@@ -62,27 +62,16 @@ class Glauber{
   } Nucleus;
 
   int setNucleusParameters(Nucleus *nucleus, string name);
-  int collide(Random *random);
-  int getNpart();
   double FermiDistribution(Nucleus *nucleus, double r);
   void init(Random *random);
   void makeHistograms(Random *random);
   Nucleon sampleRho(Nucleus *nucleus, Random *random); 
   Quark sampleQuark(Random *random);
-  void outputNucleonPositions();
-  void outputQuarkPositions();
   double ExponentialDistribution(double a, double r);
   void makeNuclei(Random *random);
-  int getAverageNumberOfCollisions();
-  vector<complex <double> > eccentricity(int n, string folder);
-  void standard_eccentricity(int event, string folder);
-
-  double unitStep(double a);
   
   Nucleus getTarget(){return Target;}
   Nucleus getProjectile(){return Projectile;}
-
-  void computeSigmaNN(Random* random);
 
 
  private:
