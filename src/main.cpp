@@ -162,7 +162,7 @@ double Phit(double k, double TA, double Qs){
 // FT of fundamental S of the target
 double StF(double k, double TA, double Qs){
   return 2.*M_PI*2.*exp(-(k*k/(Qs*Qs*TA)))/(Qs*Qs*TA);
-} 
+}
 
 // Integrand for the combined J/Psi integral
 static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
@@ -196,11 +196,11 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
 
   double m = constants::mc;//static_cast<params*>(userdata)->m;
 
-  // scale the integration variables 
-  double M = constants::mJPsi + qqM*(2.*constants::mD-constants::mJPsi); 
+  // scale the integration variables
+  double M = constants::mJPsi + qqM*(2.*constants::mD-constants::mJPsi);
   double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
   double qtilde = qqqtilde*qtildescale;
-  double PT = qqPT*pscale; 
+  double PT = qqPT*pscale;
   //double phiPT = qqphiPT*2.*M_PI;
   double R = qqR*Rscale;
   double b = qqb*bscale;
@@ -229,9 +229,9 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double yq = out.yq;
   
   // get sums of vectors
-  double px = p*cos(phip); 
+  double px = p*cos(phip);
   double py = p*sin(phip);
-  double qx = q*cos(phiq); 
+  double qx = q*cos(phiq);
   double qy = q*sin(phiq);
   double kx = k*cos(phik);
   double ky = k*sin(phik);
@@ -299,7 +299,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   //remember factor 2 for p and q direction (not included yet)
 
   return 0;
-}  
+}
 
 
 // Integrand for the combined J/Psi integral
@@ -331,8 +331,8 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   TAInt TAclass = static_cast<params*>(userdata)->TAclass;
 
 
-  // scale the integration variables 
-  double M = constants::mJPsi + qqM*(2.*constants::mD-constants::mJPsi); 
+  // scale the integration variables
+  double M = constants::mJPsi + qqM*(2.*constants::mD-constants::mJPsi);
   double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
   double qtilde = qqqtilde*qtildescale;
   double R = qqR*Rscale;
@@ -362,9 +362,9 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   double yq = out.yq;
   
   // get sums of vectors
-  double px = p*cos(phip); 
+  double px = p*cos(phip);
   double py = p*sin(phip);
-  double qx = q*cos(phiq); 
+  double qx = q*cos(phiq);
   double qy = q*sin(phiq);
   double kx = k*cos(phik);
   double ky = k*sin(phik);
@@ -412,6 +412,7 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
     *k*kscale*2.*M_PI
     *k1*kscale*2.*M_PI
     *2.; // for p and q direction
+    //; // F, J/Psi
   // scaled momenta above (in PT)
   // last rows are scaling of integration measures:
   // d2R
@@ -423,7 +424,7 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   // d2k1
   
 
-  //alternative delta function for testing     
+  //alternative delta function for testing
   //   *(StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,Qs)
   // +2./(0.0001*sqrt(M_PI))*exp(-pplusqminusk1minusk*pplusqminusk1minusk/(0.0001*0.0001))/pplusqminusk1minusk*
   // 2./(0.0001*sqrt(M_PI))*exp(-k*k/(0.0001*0.0001))/k
@@ -435,7 +436,7 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   //don't forget F, it is one at the moment.
 
   return 0;
-}  
+}
 
 
 
@@ -479,7 +480,7 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   TAInt TAclass = static_cast<params*>(userdata)->TAclass;
   double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
 
-  f = constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)/pow((2*M_PI*M_PI),3.)*2.*M_PI*k*kscale*R*Rscale*b*Rscale*Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI*pscale*(p*pscale+lambda); // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+  f = constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)/pow((2*M_PI*M_PI),3.)*2.*M_PI*k*kscale*R*Rscale*b*Rscale*Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI*pscale*(p*pscale+lambda); // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube)
   return 0;
 }
 
@@ -557,38 +558,57 @@ int main(int argc, char *argv[]) {
   cubareal integral[NCOMP], error[NCOMP], prob[NCOMP];
 
   params *userdata, data;
+  
 
-  double QspPre = 1.; // prefactors for scaling
-  double QsAPre = 1.; // prefactors for scaling
 
-  double inQsp = QspPre*Qsp(0.8,8160.,0);
-  double inQsA = QsAPre*QsA(0.8,8160.,0);
+  double nmin_ip = 0.5;
+  double nmax_ip = 3.;
+  double nmin_it = 0.5;
+  double nmax_it = 3;
+  double psteps = 5.;
+  double tsteps = 5.;
 
-  double JPsi2result;
-  double JPsi2error;
-  data.Qs = 0.; // Saturation scale in GeV - not used anymore
-  data.lambda = 0.1; // Infrared cutoff on p integral in GeV
-  data.Y = 0.;
-  data.Qsp = inQsp; // midrapidity proton Saturation scale in GeV
-  data.QsA = inQsA; // midrapidity Pb Saturation scale in GeV
-  userdata = &data; // Set the parameters to be passed to the integrand
+  stringstream strfilename;
+  strfilename << "av_gluons_jpsi_Qsvariations_all.dat";
+  string filename;
+  filename = strfilename.str();
+  fstream fout(filename.c_str(), ios::app);
 
-  TAInt TAclass;
+  //for (int ip=0; ip<psteps; ip++){
+      //double QspPre = nmin_ip+(double)ip*(nmax_ip-nmin_ip)/psteps; // prefactors for scaling
+      double QspPre = 1.;
+      double inQsp = QspPre*Qsp(0.8,8160.,0);
+      data.Qsp = inQsp; // midrapidity proton Saturation scale in GeV
+     // cout << "eo" << endl;
+    //  for (int it=0; it<tsteps; it++){
+     // double QsAPre = nmin_it+(double)it*(nmax_it-nmin_it)/tsteps; // prefactors for scaling
+      double QsAPre = 1.;
+      double inQsA = QsAPre*QsA(0.8,8160.,0);
+      //cout << "eo" << inQsA << endl;
+      double JPsi2result;
+      double JPsi2error;
+      data.Qs = 0.; // Saturation scale in GeV - not used anymore
+      data.lambda = 0.1; // Infrared cutoff on p integral in GeV
+      data.Y = 0.;
+      data.QsA = inQsA; // midrapidity Pb Saturation scale in GeV
+      userdata = &data; // Set the parameters to be passed to the integrand
 
-  cout << "Qsp(y=0) = " << inQsp << endl;
-  cout << "QsA(y=0) = " << inQsA << endl;
+      TAInt TAclass;
 
-  double inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
-  double inQsA_fwd = QsAPre*QsA(3,8160.,3.);
+     cout << "Qsp(y=0) = " << inQsp << endl;
+     cout << "QsA(y=0) = " << inQsA << endl;
 
-  cout << "Qsp(y=3) = " << inQsp_fwd << endl;
-  cout << "QsA(y=3) = " << inQsA_fwd << endl;
+  //double inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
+  //double inQsA_fwd = QsAPre*QsA(3,8160.,3.);
 
-  double inQsp_bck = QspPre*Qsp(3,8160.,3.8);
-  double inQsA_bck = QsAPre*QsA(3,8160.,-3.8);
+  //cout << "Qsp(y=3) = " << inQsp_fwd << endl;
+  //cout << "QsA(y=3) = " << inQsA_fwd << endl;
 
-  cout << "Qsp(y=-3.8) = " << inQsp_bck << endl;
-  cout << "QsA(y=-3.8) = " << inQsA_bck << endl;
+  //double inQsp_bck = QspPre*Qsp(3,8160.,3.8);
+  //double inQsA_bck = QsAPre*QsA(3,8160.,-3.8);
+
+  //cout << "Qsp(y=-3.8) = " << inQsp_bck << endl;
+  //cout << "QsA(y=-3.8) = " << inQsA_bck << endl;
 
   // // test the interpolation routine
   // for(int i=0;i<100;i++){
@@ -597,95 +617,102 @@ int main(int argc, char *argv[]) {
   // }
 
   // gluon number
-  NDIM = 8;
+    NDIM = 8;
   // Run 8D Vegas integration
-  llVegas(NDIM, NCOMP, FullIntegrand, userdata, NVEC,
+    llVegas(NDIM, NCOMP, FullIntegrand, userdata, NVEC,
         EPSREL, EPSABS, VERBOSE, SEED,
         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
         GRIDNO, NULL, NULL,
         &neval, &fail, integral, error, prob);
   
   // Print the result
-  double gresult = (double)integral[0];
-  double gerror = (double)error[0];
-  printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
+    double gresult = (double)integral[0];
+    double gerror = (double)error[0];
+    double gresult_units = gresult * pow(0.1973,2)*10/2000; // number of gluons
+    double gerror_units = gerror * pow(0.1973,2)*10/2000;
+    printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult_units, gerror_units);
   
-  data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
-  data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
+ // data.Qsp = inQsp; // forward proton Saturation scale in GeV
+ // data.QsA = inQsA; // forward Pb Saturation scale in GeV
+
+ // userdata = &data; // Set the parameters to be passed to the integrand
+   double inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
+   double inQsA_fwd = QsAPre*QsA(3,8160.,3.);
+   double inQsp_bwd = QspPre*Qsp(3,8160.,3.8);
+   double inQsA_bwd = QsAPre*QsA(3,8160.,-3.8);
+
+   data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
+   data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
+   userdata = &data; // Set the parameters to be passed to the integrand
+  // JPsi cross section
+   NDIM = 12;
+  llVegas(NDIM, NCOMP, JPsiIntegrandAll, userdata, NVEC,
+         EPSREL, EPSABS, VERBOSE, SEED,
+         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+         GRIDNO, NULL, NULL,
+         &neval, &fail, integral, error, prob);
+  double JPsi2result_fwd;
+  double JPsi2error_fwd;
+  // Print the result
+  JPsi2result_fwd = (double)integral[0];
+  JPsi2error_fwd = (double)error[0];
+  cout << "eo" << JPsi2result << endl;
+  printf("JPsi: %.8f +- %.8f\t\n", JPsi2result_fwd, JPsi2error_fwd);
+
+  data.Qsp = inQsp_bwd; // forward proton Saturation scale in GeV
+  data.QsA = inQsA_bwd; // forward Pb Saturation scale in GeV
 
   userdata = &data; // Set the parameters to be passed to the integrand
 
-  // JPsi cross section
-    NDIM = 12;
-  llVegas(NDIM, NCOMP, JPsiIntegrandAll, userdata, NVEC,
-        EPSREL, EPSABS, VERBOSE, SEED,
-        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        GRIDNO, NULL, NULL,
-        &neval, &fail, integral, error, prob);
-  
-  // Print the result
-  JPsi2result = (double)integral[0];
-  JPsi2error = (double)error[0];
-  printf("Forward JPsi: %.8f +- %.8f\t\n", JPsi2result, JPsi2error);
-
-  data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
-  data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
-
-  userdata = &data; // Set the parameters to be passed to the integrand
-
-  double JPsi2result2;
-  double JPsi2error2;
+  double JPsi2result_bwd;
+  double JPsi2error_bwd;
 
   // JPsi cross section
-  NDIM = 12;
-  llVegas(NDIM, NCOMP, JPsiIntegrandAll, userdata, NVEC,
-        EPSREL, EPSABS, VERBOSE, SEED,
-        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        GRIDNO, NULL, NULL,
-        &neval, &fail, integral, error, prob);
+   NDIM = 12;
+   llVegas(NDIM, NCOMP, JPsiIntegrandAll, userdata, NVEC,
+         EPSREL, EPSABS, VERBOSE, SEED,
+         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+         GRIDNO, NULL, NULL,
+         &neval, &fail, integral, error, prob);
   
   // Print the result
-  JPsi2result2 = (double)integral[0];
-  JPsi2error2 = (double)error[0];
-  printf("Backward JPsi: %.8f +- %.8f\t\n", JPsi2result2, JPsi2error2);
+   JPsi2result_bwd = (double)integral[0];
+   JPsi2error_bwd = (double)error[0];
+   printf("Backward JPsi: %.8f +- %.8f\t\n", JPsi2result_bwd, JPsi2error_bwd);
 
-  cout << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
+  //cout << gresult_units << " " << gerror_units << endl;
 
-  stringstream strfilename;
-  strfilename << "output.dat";
-  string filename;
-  filename = strfilename.str();
-  fstream fout(filename.c_str(), ios::app);
-
-  fout << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " " << QspPre << " " << QsAPre << endl;
+  fout << gresult_units << " " << gerror_units << " " << JPsi2result_fwd << " " << JPsi2error_fwd << " " << JPsi2result_bwd << " " << JPsi2error_bwd << " " << inQsp << " " << inQsA  << " "  << inQsp_fwd << " " << inQsA_fwd << " " << inQsp_bwd << " " << inQsA_bwd << endl;
+  // }
+  //}
   fout.close();
 
   cout << " - - - - - - - - - - - - - - - - - " << endl;
 
 
   // Integrate 11D to get PT-spectrum
-  int ppoints = 30; // Points in |p| to compute
-  double pstep = 0.25; // Step width in |p|
+  //int ppoints = 30; // Points in |p| to compute
+  //double pstep = 0.25; // Step width in |p|
 
-  NDIM = 11;
-  int runs = 1;
-  for (int r=0; r<runs; r++){
-    for (int i=0; i<=ppoints; i++){
-      data.PT = 0.1+i*(pstep);
-      userdata = &data;
-      SEED = time(NULL)+r*10000;
+ // NDIM = 11;
+ // int runs = 1;
+ // for (int r=0; r<runs; r++){
+ //   for (int i=0; i<=ppoints; i++){
+  //    data.PT = 0.1+i*(pstep);
+  //    userdata = &data;
+  //    SEED = time(NULL)+r*10000;
       
-      llVegas(NDIM, NCOMP, JPsiIntegrandNoPT, userdata, NVEC,
-            EPSREL, EPSABS, VERBOSE, SEED,
-            MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-            GRIDNO, NULL, NULL,
-            &neval, &fail, integral, error, prob);
+  //    llVegas(NDIM, NCOMP, JPsiIntegrandNoPT, userdata, NVEC,
+   //         EPSREL, EPSABS, VERBOSE, SEED,
+   //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+   //         GRIDNO, NULL, NULL,
+   //         &neval, &fail, integral, error, prob);
       
-      JPsi2result = (double)integral[0];
-      JPsi2error = (double)error[0];
-      printf("%.3f \t \t%.8e \t%.8e\n", data.PT, JPsi2result, JPsi2error);
-    }
-  }
+   //   JPsi2result = (double)integral[0];
+   //   JPsi2error = (double)error[0];
+   //   printf("%.3f \t \t%.8e \t%.8e\n", data.PT, JPsi2result, JPsi2error);
+  //  }
+ // }
 
   // // Integrate 7D to get |p|-spectrum
   // int ppoints = 20; // Points in |p| to compute
@@ -742,4 +769,5 @@ void display_logo() {
   cout << "- compute JPsi production with fluctuations -------------------------------------------------------------------" << endl;
   cout << endl;
 }
+
 
