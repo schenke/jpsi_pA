@@ -68,6 +68,20 @@ namespace Hard{
     return 32.*pplus*qplus*(m*m+at2)*(m*m+bt2)/pow((2.*pplus*(m*m+at2)+2.*qplus*(m*m+bt2)),2.);
 
   }
+
+  // Collinear version of the hard matrix element, i.e. expansion at linear order in k1
+  double qqqq_col(const double p, const double phip, const double q, const double phiq, 
+            const double k1, const double phik1, const double k2, const double phik2, 
+            const double k, const double phik, const double yp, const double yq, const double m){ 
+  // a_T = q_T-k_T (2D vectors)
+    double at2 = q*q + k*k - 2*q*k*cos(phiq-phik);
+    double pplus = sqrt(m*m+p*p)*exp(yp/2.);
+    double qplus = sqrt(m*m+q*q)*exp(yq/2.);
+
+    double prefactor = 8.*pplus*qplus/(pow(pplus+qplus,2)*(pow(at2+m*m,2)));
+    double brackets = m*m+(pplus*pplus+qplus*qplus)*at2/pow(pplus+qplus,2);
+    return prefactor*brackets;
+  }
   
   double qqg(const double p, const double phip, const double q, const double phiq, 
              const double k1, const double phik1, const double k2, const double phik2, 
@@ -123,5 +137,6 @@ namespace Hard{
     return (2.*Cp*Cq - (m*m+pq)*C2)/pow((m*m+pq),2.);
     
   }
+  
 
 }
