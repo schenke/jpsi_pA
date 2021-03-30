@@ -50,7 +50,7 @@ double TAInt::returnTA(double R){
   // simple linear interpolation
   int i = int(R*200./20.*constants::hbarc);
   //cout << "i=" << i<< " R=" << R << endl;
-  double TA = (i+1-R*200./20.*constants::hbarc)*TAgrid[i] + (R*200./20.*constants::hbarc-i)*TAgrid[i+1];
+  double TA = (double(i)+1.-R*200./20.*constants::hbarc)*TAgrid[i] + (R*200./20.*constants::hbarc-double(i))*TAgrid[i+1];
   if(R>20./constants::hbarc){
     //cout << "range problem: " << TA << endl;
     TA=0.;}

@@ -34,7 +34,7 @@ namespace constants {
   const double alphas = 0.3;
   const double Bp = 4.;
   const double mD = 1.864;
-  const double mc = 1.275; //vary?
+  const double mc = 1.275; //vary? 1.4?
   const double mJPsi = 3.096916;
 }
 
@@ -111,6 +111,11 @@ kinqq convert(kinPair input) {
   return output;
 }
   
+
+double returnTA2D(double x, double y, Glauber *glauberClass){
+  return glauberClass->returnNucleusTA(x, y);
+}
+
   
 double returnTA(double R, TAInt TAclass){
 return TAclass.returnTA(R);
@@ -148,7 +153,6 @@ return TAclass.returnTA(R);
 
 
 // Unintegrated gluon distribution for the proton
-// 1/(2pi)^3 or 1/(4 (2pi)^2) or 1/4 ??
 double Phip(double k, double R, double Qs){
   return 2.*M_PI*k*k*constants::Nc/4./constants::alphas
     *2.*constants::CF*exp(R*R/(2.*constants::Bp))*exp(-constants::CF
@@ -259,8 +263,6 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   // double Rminusb = sqrt(Rminusbx*Rminusbx+Rminusby*Rminusby);
   // double phi_Rminusb = atan2(Rminusby,Rminusbx);
   
-  // since these 3 parts only appear in a sum, we should combine them to do only one
-  // function call
   double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
  // get Jacobian
@@ -272,11 +274,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   f = 2.*M_PI*constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,QsA)
-      //+StF(pplusqminusk1minusk,myTA,0.00001)*StF(k,myTA,0.00001)
-      //-StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,0.00001)
-      //-StF(pplusqminusk1minusk,myTA,0.00001)*StF(k,myTA,QsA)
-      )
+    *(StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,QsA))
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *PT*pscale*2.*M_PI
@@ -320,8 +318,8 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 #define nqq4phik1 xx[10]
 
   double kscale = 10.;
-  double Rscale = 40./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bscale = 40./constants::hbarc; // bscale needs to be the same in all terms
+  double Rscale = 20./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 20./constants::hbarc; // bscale needs to be the same in all terms
   // Qs will be made rapidity dependent
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
@@ -531,6 +529,7 @@ int main(int argc, char *argv[]) {
 
   glauber->makeNuclei(random, constants::Bp);
 
+  cout << returnTA2D(1.1,1.1,glauber) << endl;
 
   //printf("%.17f \n", TA(0.));
 
@@ -581,8 +580,8 @@ int main(int argc, char *argv[]) {
   double QspPre = 0.5; // prefactors for scaling
   double QsAPre = 0.5; // prefactors for scaling
 
-  double inQsp = QspPre*Qsp(0.8,8160.,0);
-  double inQsA = QsAPre*QsA(0.8,8160.,0);
+  double inQsp = QspPre*Qsp(0.8,8160.,0.);
+  double inQsA = QsAPre*QsA(0.8,8160.,0.);
 
   double JPsi2result;
   double JPsi2error;
@@ -632,7 +631,6 @@ int main(int argc, char *argv[]) {
   
   data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
   data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
-
   userdata = &data; // Set the parameters to be passed to the integrand
 
   // JPsi cross section
@@ -650,7 +648,6 @@ int main(int argc, char *argv[]) {
 
   data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
   data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
-
   userdata = &data; // Set the parameters to be passed to the integrand
 
   double JPsi2result2;

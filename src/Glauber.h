@@ -70,7 +70,8 @@ class Glauber{
   double ExponentialDistribution(double a, double r);
   void makeNuclei(Random *random, double Bp);
   void generateNucleusTA(Nucleus *nuc, double Bp);
-  
+  double returnNucleusTA(double x, double y);
+
   Nucleus getTarget(){return Target;}
   Nucleus getProjectile(){return Projectile;}
   double returnTA2D(double x, double y);

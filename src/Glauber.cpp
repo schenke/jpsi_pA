@@ -336,6 +336,19 @@ void Glauber::generateNucleusTA(Nucleus *nuc, double Bp){
   fout.close();
 }
 
+//takes x and y in GeV^-1
+double Glauber::returnNucleusTA(double x, double y){
+  double hbarc = 0.1973269804;
+  // simple linear interpolation
+  int ix = int((x*hbarc+10.)*200./20.);
+  int iy = int((y*hbarc+10.)*200./20.);
+  cout << ix << " " << iy << endl;
+  double TAx1 = (double(ix+1)-(x*hbarc+10.)*200./20.)*TAgrid2D[ix][iy] + ((x*hbarc+10.)*200./20.-double(ix))*TAgrid2D[ix+1][iy];
+  double TAx2 = (double(ix+1)-(x*hbarc+10.)*200./20.)*TAgrid2D[ix][iy+1] + ((x*hbarc+10.)*200./20.-double(ix))*TAgrid2D[ix+1][iy+1];
+  double TA = (double(iy+1)-(y*hbarc+10.)*200./20.)*TAx1 + ((y*hbarc+10.)*200./20.-double(iy))*TAx2;
+
+  return TA;
+}
 
 
 int Glauber::setNucleusParameters(Nucleus *nuc, string name) {
