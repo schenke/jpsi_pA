@@ -68,10 +68,12 @@ class Glauber{
   Nucleon sampleRho(Nucleus *nucleus, Random *random); 
   Quark sampleQuark(Random *random);
   double ExponentialDistribution(double a, double r);
-  void makeNuclei(Random *random);
+  void makeNuclei(Random *random, double Bp);
+  void generateNucleusTA(Nucleus *nuc, double Bp);
   
   Nucleus getTarget(){return Target;}
   Nucleus getProjectile(){return Projectile;}
+  double returnTA2D(double x, double y);
 
 
  private:
@@ -84,6 +86,7 @@ class Glauber{
   gsl_rng * gslRan;
 
   int numberOfQuarks;
+  double TAgrid2D[200][200]; 
 
  };
 #endif

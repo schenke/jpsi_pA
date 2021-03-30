@@ -12,7 +12,7 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
-
+#include "Glauber.h"
 
 using namespace std;
 
@@ -20,7 +20,7 @@ using namespace std;
 class TAInt{
  private:
   double TAgrid[200]; 
-  double xgrid[200]; 
+  //  double xgrid[200]; 
   void computeTAIntegral();
   static double rhoA(double z, void * params);
 

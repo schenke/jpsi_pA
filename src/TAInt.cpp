@@ -27,11 +27,13 @@ void TAInt::computeTAIntegral(){
     F.params = &R;
     gsl_integration_qagi(&F, 1e-12, 1e-7, 1000, w, &result, &error);
     gsl_integration_workspace_free (w);
-    xgrid[i] = R;
+    //    xgrid[i] = R;
     TAgrid[i] = result/67.09678472225216694;// normalization for above parameters RA=6.62fm and d=0.546fm - adjust if parameters change;
     //    cout << xgrid[i] << " " << TAgrid[i] << endl;
   }
 }
+
+
   
 double TAInt::returnTA(double R){
   // gsl_interp_accel *acc

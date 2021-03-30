@@ -150,9 +150,6 @@ void Glauber::makeHistograms(Random *random)
   thetahist.close();
 }
 
-
-
-
 void Glauber::init(Random *random)
 {
   if(!setNucleusParameters(&Target, param->getTarget()))
@@ -170,15 +167,14 @@ void Glauber::init(Random *random)
   int rank = MPI::COMM_WORLD.Get_rank(); //number of current processor
 } 
 
-void Glauber::makeNuclei(Random *random)
+void Glauber::makeNuclei(Random *random, double Bp)
 {
   int Nx = param->getOutputNumberOfTransverseCells();
   //reset hadron distribution
-  for(int j=0; j<Nx*Nx; j++)
-    {
-
-      hadronBins[j] = 0.;
-    }
+  // for(int j=0; j<Nx*Nx; j++)
+  //   {
+  //    hadronBins[j] = 0.;
+  //   }
 
   Target.nucleonList.clear();
   Projectile.nucleonList.clear();
@@ -311,7 +307,35 @@ void Glauber::makeNuclei(Random *random)
     {
       Projectile.nucleonList.at(i).x=Projectile.nucleonList.at(i).x+param->getb()/2.;
     }   
+
+  generateNucleusTA(&Target, Bp); 
 }
+
+void Glauber::generateNucleusTA(Nucleus *nuc, double Bp){
+  // Bp is in GeV^-2
+  double hbarc = 0.1973269804;
+  
+  stringstream strfilename;
+  strfilename << "TA.dat";
+  string filename;
+  filename = strfilename.str();
+  fstream fout(filename.c_str(), ios::out);
+
+  for(int ix=0; ix<200; ix++){
+    double x = (double(ix)/200.*20.-10.);
+    for(int iy=0; iy<200; iy++){
+      double y = (double(iy)/200.*20.-10.);
+      for(unsigned int i=0; i<nuc->nucleonList.size(); i++){
+        double xpos = nuc->nucleonList.at(i).x; 
+        double ypos = nuc->nucleonList.at(i).y; 
+        TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))/hbarc/hbarc/2./Bp);
+      }
+      fout << x << " " << y << " " << TAgrid2D[ix][iy] << endl;
+    }
+  }
+  fout.close();
+}
+
 
 
 int Glauber::setNucleusParameters(Nucleus *nuc, string name) {

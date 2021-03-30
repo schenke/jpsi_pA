@@ -32,7 +32,7 @@ namespace constants {
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3;
-  const double Bp = 0.4;
+  const double Bp = 4.;
   const double mD = 1.864;
   const double mc = 1.275; //vary?
   const double mJPsi = 3.096916;
@@ -527,6 +527,8 @@ int main(int argc, char *argv[]) {
   Glauber *glauber;
   glauber = new Glauber(Glauber_param);
   glauber->init(random);
+
+  glauber->makeNuclei(random, constants::Bp);
 
 
   //printf("%.17f \n", TA(0.));
