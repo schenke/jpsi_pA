@@ -154,19 +154,18 @@ return TAclass.returnTA(R);
 
 // Unintegrated gluon distribution for the proton
 double Phip(double k, double R, double Qs){
-  return 2.*M_PI*k*k*constants::Nc/4./constants::alphas
-    *2.*constants::CF*exp(R*R/(2.*constants::Bp))*exp(-constants::CF
-                                                     *exp(R*R/(2.*constants::Bp))*k*k/(constants::CA*Qs*Qs))/(constants::CA*Qs*Qs);
+  return constants::CF*k*k*constants::Nc*M_PI/constants::alphas/constants::CA/Qs/Qs*exp(R*R/(2.*constants::Bp))
+    *exp(-constants::CF*exp(R*R/(2.*constants::Bp))*k*k/(constants::CA*Qs*Qs));
 }
 
 // Unintegrated gluon distribution for lead
 double Phit(double k, double TA, double Qs){
-  return 2.*M_PI*k*k*constants::Nc/4./constants::alphas*2.*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA))/(constants::CA*Qs*Qs*TA);
+  return M_PI*k*k*constants::Nc/constants::alphas*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA))/(constants::CA*Qs*Qs*TA);
 }
 
 // FT of fundamental S of the target
 double StF(double k, double TA, double Qs){
-  return 2.*M_PI*2.*exp(-(k*k/(Qs*Qs*TA)))/(Qs*Qs*TA);
+  return 4.*M_PI*exp(-(k*k/(Qs*Qs*TA)))/(Qs*Qs*TA);
 } 
 
 // Integrand for the combined J/Psi integral
@@ -271,7 +270,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
   double myTA = returnTA(Rminusb,TAclass);
 
-  f = 2.*M_PI*constants::alphas*double(constants::Nc)*double(constants::Nc)
+  f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp)/(k1*k1)*H*J
     *(StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,QsA))
@@ -421,16 +420,6 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   // d2k
   // d2k1
   
-
-  //alternative delta function for testing     
-  //   *(StF(pplusqminusk1minusk,myTA,Qs)*StF(k,myTA,Qs)
-  // +2./(0.0001*sqrt(M_PI))*exp(-pplusqminusk1minusk*pplusqminusk1minusk/(0.0001*0.0001))/pplusqminusk1minusk*
-  // 2./(0.0001*sqrt(M_PI))*exp(-k*k/(0.0001*0.0001))/k
-  // -StF(pplusqminusk1minusk,myTA,Qs)*2./(0.0001*sqrt(M_PI))*exp(-k*k/(0.0001*0.0001))/k
-  // -2./(0.0001*sqrt(M_PI))*exp(-pplusqminusk1minusk*pplusqminusk1minusk/(0.0001*0.0001))/pplusqminusk1minusk*StF(k,myTA,Qs)
-  //  )
- 
-  
   //don't forget F, it is one at the moment.
 
   return 0;
@@ -459,7 +448,13 @@ static int Integrand(const int *ndim, const cubareal xx[],
   TAInt TAclass = static_cast<params*>(userdata)->TAclass;
   double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
 
-  f = 2*M_PI*k*kscale*R*Rscale*b*Rscale*Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt(p*p + k*k*kscale*kscale - 2.*p*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI; // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube)
+  f = constants::alphas/constants::CF/(p)/(p)/pow((2*M_PI*M_PI),3.)
+    *Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt(p*p + k*k*kscale*kscale - 2.*p*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)
+    *2.*M_PI*k*kscale*kscale  //kdkdphik
+    *2.*M_PI*R*Rscale*Rscale  //RdRdphiR
+    *2.*M_PI*b*Rscale*Rscale;  //bdbdphib
+
+  //  f = 2*M_PI*k*kscale*R*Rscale*b*Rscale*Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt(p*p + k*k*kscale*kscale - 2.*p*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI; // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube)
   return 0;
 }
 
@@ -478,7 +473,13 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   TAInt TAclass = static_cast<params*>(userdata)->TAclass;
   double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
 
-  f = constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)/pow((2*M_PI*M_PI),3.)*2.*M_PI*k*kscale*R*Rscale*b*Rscale*Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI*pscale*(p*pscale+lambda); // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+  f = constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)/pow((2*M_PI*M_PI),3.)
+    *Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)
+    *2.*M_PI*k*kscale*kscale  //kdkdphik
+    *2.*M_PI*R*Rscale*Rscale  //RdRdphiR
+    *2.*M_PI*b*Rscale*Rscale  //bdbdphib
+    *2.*M_PI*pscale*(p*pscale+lambda); //pdpdphip
+  // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   return 0;
 }
 
@@ -577,8 +578,8 @@ int main(int argc, char *argv[]) {
 
   params *userdata, data;
 
-  double QspPre = 0.5; // prefactors for scaling
-  double QsAPre = 0.5; // prefactors for scaling
+  double QspPre = 1.; // prefactors for scaling
+  double QsAPre = 1.; // prefactors for scaling
 
   double inQsp = QspPre*Qsp(0.8,8160.,0.);
   double inQsA = QsAPre*QsA(0.8,8160.,0.);
