@@ -121,37 +121,6 @@ double returnTA(double R, TAInt TAclass){
 return TAclass.returnTA(R);
 }
 
-
-
-// // moved this part to its own class, using interpolation
-// // Nuclear density for lead
-// double rhoA(double z, void * params) {
-//   // do everything in GeV^some power
-//   double RA = 6.62/constants::hbarc;
-//   double d = 0.546/constants::hbarc;
-//   double R = *(double *) params;
-//   double f = 1/(1 + exp((sqrt(R*R + z*z) - RA)/d))/1.;
-//   return f;
-// }
-
-// double TA(double R){
-//   gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
-
-//   double result, error;
-
-//   gsl_function F;
-//   F.function = &rhoA;
-//   F.params = &R;
-
-//   gsl_integration_qagi(&F, 1e-12, 1e-7, 1000, w, &result, &error);
-
-//   gsl_integration_workspace_free (w);
-  
-//   return result/67.09678472225216694;// normalization for above parameters RA=6.62fm and d=0.546fm - adjust if parameters change;
-// }
-
-
-
 // Unintegrated gluon distribution for the proton
 double Phip(double k, double R, double Qs){
   return constants::CF*k*k*constants::Nc*M_PI/constants::alphas/constants::CA/Qs/Qs*exp(R*R/(2.*constants::Bp))
@@ -188,8 +157,8 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
 
   double kscale = 10.;
   double pscale = 10.;
-  double Rscale = 10./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bscale = 10./constants::hbarc; 
+  double Rscale = 20./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 20./constants::hbarc; 
   // Qs will be made rapidity dependent
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
@@ -454,8 +423,6 @@ static int Integrand(const int *ndim, const cubareal xx[],
     *2.*M_PI*k*kscale*kscale  //kdkdphik
     *2.*M_PI*R*Rscale*Rscale  //RdRdphiR
     *2.*M_PI*b*Rscale*Rscale;  //bdbdphib
-
-  //  f = 2*M_PI*k*kscale*R*Rscale*b*Rscale*Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt(p*p + k*k*kscale*kscale - 2.*p*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)*2*M_PI*2*M_PI*kscale*Rscale*2*M_PI*Rscale*2*M_PI; // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube)
   return 0;
 }
 
@@ -467,7 +434,7 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
 
   double kscale = 10.;
   double pscale = 10.;
-  double Rscale = 10./constants::hbarc;
+  double Rscale = 20./constants::hbarc;
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
   double lambda = static_cast<params*>(userdata)->lambda;
@@ -579,8 +546,8 @@ int main(int argc, char *argv[]) {
 
   params *userdata, data;
 
-  double QspPre = 1.; // prefactors for scaling
-  double QsAPre = 1.; // prefactors for scaling
+  double QspPre = 0.9; // prefactors for scaling
+  double QsAPre = 0.9; // prefactors for scaling
 
   double inQsp = QspPre*Qsp(0.8,8160.,0.);
   double inQsA = QsAPre*QsA(0.8,8160.,0.);
@@ -588,7 +555,7 @@ int main(int argc, char *argv[]) {
   double JPsi2result;
   double JPsi2error;
   data.Qs = 0.; // Saturation scale in GeV - not used anymore
-  data.lambda = 0.1; // Infrared cutoff on p integral in GeV
+  data.lambda = 0.05; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
   data.Y = 0.;
   data.Qsp = inQsp; // midrapidity proton Saturation scale in GeV
   data.QsA = inQsA; // midrapidity Pb Saturation scale in GeV
@@ -705,52 +672,7 @@ int main(int argc, char *argv[]) {
       printf("%.3f \t \t%.8e \t%.8e\n", data.PT, JPsi2result, JPsi2error);
     }
   }
-
-  // // Integrate 7D to get |p|-spectrum
-  // int ppoints = 20; // Points in |p| to compute
-  // double pstep = 0.1; // Step width in |p|
-  
-  // NDIM = 7;
-  // int runs = 1;
-  // for (int r=0; r<runs; r++){
-  //   for (int i=1; i<=ppoints; i++){
-  //     data.pe = i*pstep;
-  //     userdata = &data;
-  //     SEED = time(NULL)+r*10000;
-
-  //     // Suave(NDIM, NCOMP, Integrand, userdata, NVEC,
-  //     //       EPSREL, EPSABS, VERBOSE | LAST, SEED,
-  //     //       MINEVAL, MAXEVAL, NNEW, NMIN, FLATNESS,
-  //     //       NULL, NULL,
-  //     //       &nregions, &neval, &fail, integral, error, prob);
-      
-  //     // Divonne(NDIM, NCOMP, Integrand, userdata, NVEC,
-  //     //         EPSREL, EPSABS, VERBOSE, SEED,
-  //     //         MINEVAL, MAXEVAL, KEY1, KEY2, KEY3, MAXPASS,
-  //     //         BORDER, MAXCHISQ, MINDEVIATION,
-  //     //         NGIVEN, LDXGIVEN, NULL, NEXTRA, NULL,
-  //     //         NULL, NULL,
-  //     //         &nregions, &neval, &fail, integral, error, prob);
-
-  //     Vegas(NDIM, NCOMP, Integrand, userdata, NVEC,
-  //           EPSREL, EPSABS, VERBOSE, SEED,
-  //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-  //           GRIDNO, NULL, NULL,
-  //           &neval, &fail, integral, error, prob);
-      
-  //     // Cuhre(NDIM, NCOMP, Integrand, userdata, NVEC,
-  //     //       EPSREL, EPSABS, VERBOSE | LAST,
-  //     //       MINEVAL, MAXEVAL, KEY,
-  //     //       NULL, NULL,
-  //     //       &nregions, &neval, &fail, integral, error, prob);
-      
-  //     gresult = constants::alphas/constants::CF/pow((2*M_PI*M_PI),3.)/data.pe/data.pe*(double)integral[0];
-  //     gerror = constants::alphas/constants::CF/pow((2*M_PI*M_PI),3.)/data.pe/data.pe*(double)error[0];
-  //     printf("%.3f \t \t%.8f \t%.8f\n", data.pe, gresult, gerror);
-  //   }
-  // }
     
-
   MPI_Finalize();
 
   return 1;
