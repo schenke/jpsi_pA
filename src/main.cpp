@@ -172,7 +172,6 @@ double StF(double k, double TA, double Qs){
 static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-  // others defined in Integrand1
 #define qqR xx[0]
 #define qqphiR xx[1]
 #define qqb xx[2]
@@ -190,7 +189,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double kscale = 10.;
   double pscale = 10.;
   double Rscale = 10./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bscale = 10./constants::hbarc; // bscale needs to be the same in all terms
+  double bscale = 10./constants::hbarc; 
   // Qs will be made rapidity dependent
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
@@ -264,10 +263,11 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   
   double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
- // get Jacobian
+  // get Jacobian
   double betax = PT/sqrt(M*M+PT*PT);
   double gammax = 1./sqrt(1.-betax*betax);
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
+
   double myTA = returnTA(Rminusb,TAclass);
 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
@@ -317,8 +317,8 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 #define nqq4phik1 xx[10]
 
   double kscale = 10.;
-  double Rscale = 20./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bscale = 20./constants::hbarc; // bscale needs to be the same in all terms
+  double Rscale = 20./constants::hbarc; // choose a small scale (proton Phip will cut off at large R)
+  double bscale = 20./constants::hbarc; 
   // Qs will be made rapidity dependent
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
@@ -330,22 +330,23 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 
 
   // scale the integration variables 
-  double M = constants::mJPsi + qqM*(2.*constants::mD-constants::mJPsi); 
+  double M = constants::mJPsi + nqqM*(2.*constants::mD-constants::mJPsi); 
   double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
   double qtilde = qqqtilde*qtildescale;
-  double R = qqR*Rscale;
-  double b = qqb*bscale;
-  double k = qq4k*kscale;
-  double phik = qq4phik*2.*M_PI;
-  double k1 = qq4k1*kscale;
-  double phik1 = qq4phik1*2.*M_PI;
-  double phiR = qqphiR*2*M_PI;
-  double phib = qqphib*2*M_PI;
+  double R = nqqR*Rscale;
+  double b = nqqb*bscale;
+  double k = nqq4k*kscale;
+  double phik = nqq4phik*2.*M_PI;
+  double k1 = nqq4k1*kscale;
+  double phik1 = nqq4phik1*2.*M_PI;
+  double phiR = nqqphiR*2*M_PI;
+  double phib = nqqphib*2*M_PI;
+
 
   kinPair in;
   in.M = M;
   in.PT  = PT;
-  in.phi = qqphi*2.*M_PI; // not the PT phi
+  in.phi = nqqphi*2.*M_PI; // not the PT phi
   in.qtilde = qtilde;
   in.Y = Y;
   in.m = m;
@@ -398,7 +399,7 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 
   double myTA = returnTA(Rminusb,TAclass); //TA(Rminusb);
 
-  f = 2.*M_PI*constants::alphas*double(constants::Nc)*double(constants::Nc)
+  f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp)/(k1*k1)*H*J
     *(StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,QsA))
