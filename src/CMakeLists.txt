@@ -5,6 +5,7 @@ set (SOURCES
     Glauber.cpp
     Random.cpp
     Parameters.cpp
+    MV.cpp
 )
 
 set(CompileFlags "")

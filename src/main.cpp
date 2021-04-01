@@ -17,6 +17,7 @@
 #include "pretty_ostream.h"
 #include "hard.h"
 #include "TAInt.h"
+#include "MV.h"
 #include "Glauber.h"
 
 #define _SECURE_SCL 0
@@ -50,6 +51,7 @@ struct params {
   double m;
   double PT;
   TAInt TAclass;
+  MV *mv;
 };
 
 struct kinqq {
@@ -121,11 +123,18 @@ double returnTA(double R, TAInt TAclass){
 return TAclass.returnTA(R);
 }
 
-// Unintegrated gluon distribution for the proton
-double Phip(double k, double R, double Qs){
+// Unintegrated gluon distribution for the proton in GBW
+double PhipGBW(double k, double R, double Qs){
   return constants::CF*k*k*constants::Nc*M_PI/constants::alphas/constants::CA/Qs/Qs*exp(R*R/(2.*constants::Bp))
     *exp(-constants::CF*exp(R*R/(2.*constants::Bp))*k*k/(constants::CA*Qs*Qs));
 }
+
+
+double Phip(double k, double R, double Qs, MV *mv){
+  return mv->Phip(k, R, Qs);
+  //  return PhipGBW(double k, double R, double Qs);
+}
+
 
 // Unintegrated gluon distribution for lead
 double Phit(double k, double TA, double Qs){
@@ -155,16 +164,21 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
 #define qq4phik1 xx[11]
 #define f ff[0]
 
+  // double kscale = 10.;
+  // double pscale = 10.;
+  // double Rscale = 20./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  // double bscale = 20./constants::hbarc; 
   double kscale = 10.;
   double pscale = 10.;
-  double Rscale = 20./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bscale = 20./constants::hbarc; 
+  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 12./constants::hbarc; 
   // Qs will be made rapidity dependent
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
   double Y = static_cast<params*>(userdata)->Y;
 
   TAInt TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
 
   double m = constants::mc;//static_cast<params*>(userdata)->m;
 
@@ -241,7 +255,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp)/(k1*k1)*H*J
+    *Phip(k1, R, Qsp, mv)/(k1*k1)*H*J
     *(StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,QsA))
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
@@ -286,8 +300,8 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 #define nqq4phik1 xx[10]
 
   double kscale = 10.;
-  double Rscale = 20./constants::hbarc; // choose a small scale (proton Phip will cut off at large R)
-  double bscale = 20./constants::hbarc; 
+  double Rscale = 2./constants::hbarc; // choose a small scale (proton Phip will cut off at large R)
+  double bscale = 12./constants::hbarc; 
   // Qs will be made rapidity dependent
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
@@ -296,12 +310,13 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   double m = constants::mc;//static_cast<params*>(userdata)->m;
 
   TAInt TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
 
 
   // scale the integration variables 
   double M = constants::mJPsi + nqqM*(2.*constants::mD-constants::mJPsi); 
   double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
-  double qtilde = qqqtilde*qtildescale;
+  double qtilde = nqqqtilde*qtildescale;
   double R = nqqR*Rscale;
   double b = nqqb*bscale;
   double k = nqq4k*kscale;
@@ -370,7 +385,7 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp)/(k1*k1)*H*J
+    *Phip(k1, R, Qsp,mv)/(k1*k1)*H*J
     *(StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,QsA))
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
@@ -410,16 +425,17 @@ static int Integrand(const int *ndim, const cubareal xx[],
 #define phib xx[5]
 #define phi xx[6]
 
-  double kscale = 100.;
+  double kscale = 10.;
   double Rscale = 10./constants::hbarc;
   double p = static_cast<params*>(userdata)->pe;
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
   TAInt TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
   double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
 
   f = constants::alphas/constants::CF/(p)/(p)/pow((2*M_PI*M_PI),3.)
-    *Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt(p*p + k*k*kscale*kscale - 2.*p*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)
+    *Phip(k*kscale, R*Rscale, Qsp, mv)*Phit(sqrt(p*p + k*k*kscale*kscale - 2.*p*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)
     *2.*M_PI*k*kscale*kscale  //kdkdphik
     *2.*M_PI*R*Rscale*Rscale  //RdRdphiR
     *2.*M_PI*b*Rscale*Rscale;  //bdbdphib
@@ -434,20 +450,22 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
 
   double kscale = 10.;
   double pscale = 10.;
-  double Rscale = 20./constants::hbarc;
+  double Rscale = 2./constants::hbarc;
+  double bscale = 12./constants::hbarc;
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
   double lambda = static_cast<params*>(userdata)->lambda;
   TAInt TAclass = static_cast<params*>(userdata)->TAclass;
-  double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
+  MV *mv = static_cast<params*>(userdata)->mv;
+  double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*bscale*bscale - 2.*R*b*Rscale*bscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
 
   f = constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)/pow((2*M_PI*M_PI),3.)
-    *Phip(k*kscale, R*Rscale, Qsp)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)
+    *Phip(k*kscale, R*Rscale, Qsp, mv)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)
     *2.*M_PI*k*kscale*kscale  //kdkdphik
     *2.*M_PI*R*Rscale*Rscale  //RdRdphiR
-    *2.*M_PI*b*Rscale*Rscale  //bdbdphib
+    *2.*M_PI*b*bscale*bscale  //bdbdphib
     *2.*M_PI*pscale*(p*pscale+lambda); //pdpdphip
-  // bscale = Rscale //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+   //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   return 0;
 }
 
@@ -498,9 +516,10 @@ int main(int argc, char *argv[]) {
 
   glauber->makeNuclei(random, constants::Bp);
 
-  cout << returnTA2D(1.1,1.1,glauber) << endl;
-
-  //printf("%.17f \n", TA(0.));
+  MV *mv;
+  mv = new MV();
+  mv->computePhip();
+  cout << "Phip=" << mv->Phip(0.1,1.,1.) << endl;
 
   // Cuba's parameters for integration
   int NDIM = 9;
@@ -546,8 +565,8 @@ int main(int argc, char *argv[]) {
 
   params *userdata, data;
 
-  double QspPre = 0.9; // prefactors for scaling
-  double QsAPre = 0.9; // prefactors for scaling
+  double QspPre = 0.5; // prefactors for scaling
+  double QsAPre = 0.5; // prefactors for scaling
 
   double inQsp = QspPre*Qsp(0.8,8160.,0.);
   double inQsA = QsAPre*QsA(0.8,8160.,0.);
@@ -559,10 +578,11 @@ int main(int argc, char *argv[]) {
   data.Y = 0.;
   data.Qsp = inQsp; // midrapidity proton Saturation scale in GeV
   data.QsA = inQsA; // midrapidity Pb Saturation scale in GeV
+  data.mv = mv; // MV class
   userdata = &data; // Set the parameters to be passed to the integrand
 
   TAInt TAclass;
-
+ 
   cout << "Qsp(y=0) = " << inQsp << endl;
   cout << "QsA(y=0) = " << inQsA << endl;
 
@@ -674,6 +694,7 @@ int main(int argc, char *argv[]) {
   }
     
   MPI_Finalize();
+
 
   return 1;
 }
