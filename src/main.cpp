@@ -1,3 +1,7 @@
+// Jpsi and gluon cross section calculation in MV or GBW models 
+// including fluctuating geometries 
+// 2021 Bjoern Schenke
+
 #include "mpi.h"
 #include <cmath>
 #include <complex>
@@ -113,12 +117,10 @@ kinqq convert(kinPair input) {
   return output;
 }
   
-
 double returnTA2D(double x, double y, Glauber *glauberClass){
   return glauberClass->returnNucleusTA(x, y);
 }
 
-  
 double returnTA(double R, TAInt TAclass){
 return TAclass.returnTA(R);
 }
@@ -129,22 +131,35 @@ double PhipGBW(double k, double R, double Qs){
     *exp(-constants::CF*exp(R*R/(2.*constants::Bp))*k*k/(constants::CA*Qs*Qs));
 }
 
-
+// choose between MV and GBW - should make this choice a parameter of course
 double Phip(double k, double R, double Qs, MV *mv){
   return mv->Phip(k, R, Qs);
-  //  return PhipGBW(double k, double R, double Qs);
+  //return PhipGBW(k, R, Qs);
 }
 
-
 // Unintegrated gluon distribution for lead
-double Phit(double k, double TA, double Qs){
+double PhitGBW(double k, double TA, double Qs){
   return M_PI*k*k*constants::Nc/constants::alphas*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA))/(constants::CA*Qs*Qs*TA);
 }
 
+// choose between MV and GBW - should make this choice a parameter of course
+double Phit(double k, double TA, double Qs, MV *mv){
+  return mv->Phit(k, TA, Qs);
+  //return PhitGBW(k, TA, Qs);
+}
+
 // FT of fundamental S of the target
-double StF(double k, double TA, double Qs){
+double StFGBW(double k, double TA, double Qs){
   return 4.*M_PI*exp(-(k*k/(Qs*Qs*TA)))/(Qs*Qs*TA);
 } 
+
+// choose between MV and GBW - should make this choice a parameter of course
+double StF(double k, double TA, double Qs, MV *mv){
+  return mv->StF(k, TA, Qs);
+//return StFGBW(k, TA, Qs);
+}
+
+
 
 // Integrand for the combined J/Psi integral
 static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
@@ -256,7 +271,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp, mv)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,QsA))
+    *(StF(pplusqminusk1minusk,myTA,QsA,mv)*StF(k,myTA,QsA,mv))
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *PT*pscale*2.*M_PI
@@ -386,7 +401,7 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp,mv)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,myTA,QsA)*StF(k,myTA,QsA))
+    *(StF(pplusqminusk1minusk,myTA,QsA,mv)*StF(k,myTA,QsA,mv))
     *R*Rscale*2.*M_PI
     *b*bscale*2.*M_PI
     *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
@@ -435,7 +450,7 @@ static int Integrand(const int *ndim, const cubareal xx[],
   double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
 
   f = constants::alphas/constants::CF/(p)/(p)/pow((2*M_PI*M_PI),3.)
-    *Phip(k*kscale, R*Rscale, Qsp, mv)*Phit(sqrt(p*p + k*k*kscale*kscale - 2.*p*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)
+    *Phip(k*kscale, R*Rscale, Qsp, mv)*Phit(sqrt(p*p + k*k*kscale*kscale - 2.*p*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA, mv)
     *2.*M_PI*k*kscale*kscale  //kdkdphik
     *2.*M_PI*R*Rscale*Rscale  //RdRdphiR
     *2.*M_PI*b*Rscale*Rscale;  //bdbdphib
@@ -460,7 +475,7 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*bscale*bscale - 2.*R*b*Rscale*bscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
 
   f = constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)/pow((2*M_PI*M_PI),3.)
-    *Phip(k*kscale, R*Rscale, Qsp, mv)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA)
+    *Phip(k*kscale, R*Rscale, Qsp, mv)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA, mv)
     *2.*M_PI*k*kscale*kscale  //kdkdphik
     *2.*M_PI*R*Rscale*Rscale  //RdRdphiR
     *2.*M_PI*b*bscale*bscale  //bdbdphib
@@ -519,7 +534,7 @@ int main(int argc, char *argv[]) {
   MV *mv;
   mv = new MV();
   mv->computePhip();
-  cout << "Phip=" << mv->Phip(0.1,1.,1.) << endl;
+  //cout << "Phip=" << mv->Phip(0.1,1.,1.) << endl;
 
   // Cuba's parameters for integration
   int NDIM = 9;
@@ -565,8 +580,8 @@ int main(int argc, char *argv[]) {
 
   params *userdata, data;
 
-  double QspPre = 0.5; // prefactors for scaling
-  double QsAPre = 0.5; // prefactors for scaling
+  double QspPre = 0.43; // prefactors for scaling
+  double QsAPre = 0.43; // prefactors for scaling
 
   double inQsp = QspPre*Qsp(0.8,8160.,0.);
   double inQsA = QsAPre*QsA(0.8,8160.,0.);

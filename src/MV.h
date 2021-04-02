@@ -22,14 +22,14 @@ class MV{
   
  public:
   MV(){  
-    Phip_array = new double*[200];
-    for (int i = 0; i < 200; i++) {
-      Phip_array[i] = new double[200];
+    Phip_array = new double*[800];
+    for (int i = 0; i < 800; i++) {
+      Phip_array[i] = new double[400];
     }
   };
 
   ~MV(){  
-    for(int i = 0; i < 200; ++i) {
+    for(int i = 0; i < 800; ++i) {
       delete[] Phip_array[i];  
     }
     delete[] Phip_array;  
@@ -37,6 +37,8 @@ class MV{
   
   void computePhip();
   double Phip(double k, double R, double Qs);
+  double Phit(double k, double TA, double Qs);
+  double StF(double k, double TA, double Qs);
 
 };
 
