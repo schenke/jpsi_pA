@@ -27,7 +27,6 @@ double MV::MVintegrandForList(double z, void * params) {
 
 // Unintegrated gluon distribution in MV
 void MV::computePhip(){
-  gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
   double result, error;
   gsl_function F;
   F.function = &MV::MVintegrandForList;
@@ -45,9 +44,11 @@ void MV::computePhip(){
       sum=0.;
       double params[] = { A, k };
       F.params = params;  
-      for(int n=0; n < max_steps; n++)
+#pragma omp parallel for private(result,a,b) reduction(+:sum)
+     for(int n=0; n < max_steps; n++)
         {
-          if(n==0){
+          gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
+         if(n==0){
             a=0.;
             b=gsl_sf_bessel_zero_J0(1)/k;
           }
@@ -66,6 +67,7 @@ void MV::computePhip(){
                                &result,
                                &error);
           sum += result;
+          gsl_integration_workspace_free (w);
         }
       
       if (sum<0.){
@@ -75,7 +77,6 @@ void MV::computePhip(){
     }
   }
    
-  gsl_integration_workspace_free (w);
 }
 
 
