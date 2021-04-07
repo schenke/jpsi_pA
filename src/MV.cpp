@@ -223,7 +223,7 @@ int MV::readTable(){
   std::ifstream InStream;
   InStream.precision(10);
   InStream.open(MVTableName, std::ios::in | std::ios::binary);
-  cout << "Reading MV table from file" << MVTableName << endl;
+  cout << "Reading MV table from file " << MVTableName << endl;
   
   if(InStream.is_open())
     {

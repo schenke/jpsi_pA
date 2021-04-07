@@ -55,7 +55,7 @@ struct params {
   double Y;
   double m;
   double PT;
-  TAInt TAclass;
+  TAInt *TAclass;
   MV *mv;
 };
 
@@ -122,8 +122,8 @@ double returnTA2D(double x, double y, Glauber *glauberClass){
   return glauberClass->returnNucleusTA(x, y);
 }
 
-double returnTA(double R, TAInt TAclass){
-return TAclass.returnTA(R);
+double returnTA(double R, TAInt *TAclass){
+return TAclass->returnTA(R);
 }
 
 // Unintegrated gluon distribution for the proton in GBW
@@ -193,7 +193,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double QsA = static_cast<params*>(userdata)->QsA;
   double Y = static_cast<params*>(userdata)->Y;
 
-  TAInt TAclass = static_cast<params*>(userdata)->TAclass;
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
 
   double m = constants::mc;//static_cast<params*>(userdata)->m;
@@ -268,7 +268,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
 
   double myTA = returnTA(Rminusb,TAclass);
-
+  
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp, mv)/(k1*k1)*H*J
@@ -325,7 +325,7 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   double PT = static_cast<params*>(userdata)->PT;
   double m = constants::mc;//static_cast<params*>(userdata)->m;
 
-  TAInt TAclass = static_cast<params*>(userdata)->TAclass;
+  TAInt* TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
 
 
@@ -446,7 +446,7 @@ static int Integrand(const int *ndim, const cubareal xx[],
   double p = static_cast<params*>(userdata)->pe;
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
-  TAInt TAclass = static_cast<params*>(userdata)->TAclass;
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
   double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
 
@@ -471,9 +471,11 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
   double lambda = static_cast<params*>(userdata)->lambda;
-  TAInt TAclass = static_cast<params*>(userdata)->TAclass;
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
+  //  cout << "test" << endl;
   double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*bscale*bscale - 2.*R*b*Rscale*bscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
+  //cout << "test2" << endl;
 
   f = constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)/pow((2*M_PI*M_PI),3.)
     *Phip(k*kscale, R*Rscale, Qsp, mv)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA, mv)
@@ -540,9 +542,11 @@ int main(int argc, char *argv[]) {
   Glauber *glauber;
   glauber = new Glauber(Glauber_param);
   glauber->init(random);
-
   glauber->makeNuclei(random, constants::Bp);
 
+  TAInt *TAclass;
+  TAclass = new TAInt();
+  TAclass->computeTAIntegral();
 
   // Make the MV table 
   MV *mv;
@@ -620,9 +624,9 @@ int main(int argc, char *argv[]) {
   data.Qsp = inQsp; // midrapidity proton Saturation scale in GeV
   data.QsA = inQsA; // midrapidity Pb Saturation scale in GeV
   data.mv = mv; // MV class
+  data.TAclass = TAclass; // TA class
   userdata = &data; // Set the parameters to be passed to the integrand
 
-  TAInt TAclass;
  
   cout << "Qsp(y=0) = " << inQsp << endl;
   cout << "QsA(y=0) = " << inQsA << endl;
@@ -738,6 +742,7 @@ int main(int argc, char *argv[]) {
   delete random;
   delete glauber;
   delete mv;
+  delete TAclass;
 
   MPI_Finalize();
 

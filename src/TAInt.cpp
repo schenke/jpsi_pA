@@ -27,9 +27,8 @@ void TAInt::computeTAIntegral(){
     F.params = &R;
     gsl_integration_qagi(&F, 1e-12, 1e-7, 1000, w, &result, &error);
     gsl_integration_workspace_free (w);
-    //    xgrid[i] = R;
+    //xgrid[i] = R;
     TAgrid[i] = result/67.09678472225216694;// normalization for above parameters RA=6.62fm and d=0.546fm - adjust if parameters change;
-    //    cout << xgrid[i] << " " << TAgrid[i] << endl;
   }
 }
 
@@ -49,7 +48,6 @@ double TAInt::returnTA(double R){
 
   // simple linear interpolation
   int i = int(R*200./20.*constants::hbarc);
-  //cout << "i=" << i<< " R=" << R << endl;
   double TA = (double(i)+1.-R*200./20.*constants::hbarc)*TAgrid[i] + (R*200./20.*constants::hbarc-double(i))*TAgrid[i+1];
   if(R>20./constants::hbarc){
     //cout << "range problem: " << TA << endl;

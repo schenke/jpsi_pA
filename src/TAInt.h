@@ -19,16 +19,18 @@ using namespace std;
 
 class TAInt{
  private:
-  double TAgrid[200]; 
+  double *TAgrid; 
   //  double xgrid[200]; 
-  void computeTAIntegral();
   static double rhoA(double z, void * params);
 
  public:
   TAInt(){
-    computeTAIntegral();
+    TAgrid = new double[200];
       };
-  ~TAInt(){};
+  ~TAInt(){ 
+    delete[] TAgrid;
+  };
+  void computeTAIntegral();
   double returnTA(double R);
 
 };

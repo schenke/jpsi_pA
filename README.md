@@ -6,5 +6,5 @@ To generate the MV tables and then run the calculation:<br>
 ./main <br>
 or<br>
 ./main -readTable 0<br>
-To read in the MV tables from filw and then do the calculation (faster):<br>
+To read in the MV tables from file and then do the calculation (faster):<br>
 ./main -readTable 1<br>
