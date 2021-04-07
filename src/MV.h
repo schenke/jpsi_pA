@@ -19,6 +19,11 @@ class MV{
  private:
   static double MVintegrandForList(double z, void * params);
   double ** Phip_array;
+  int sizeA=800;
+  int sizek=400;
+  double deltaA=1./80.;
+  double deltak=1./10.;
+
   
  public:
   MV(){  
@@ -39,6 +44,9 @@ class MV{
   double Phip(double k, double R, double Qs);
   double Phit(double k, double TA, double Qs);
   double StF(double k, double TA, double Qs);
+  int writeTable();
+  int readTable();
+
 
 };
 

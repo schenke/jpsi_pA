@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <ctype.h>
 
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_interp.h>
@@ -497,12 +498,24 @@ double QsA(double pT, double roots, double y){
 int main(int argc, char *argv[]) {
   int rank;
   int size;
+  int readTable = 0;
 
-  int nev = 1;
-  if (argc == 3) {
-    nev = atoi(argv[2]);
+  display_logo();
+
+  if(argc > 2){
+    if( std::string(argv[1]) == "-readTable" ){
+      if(!isdigit(argv[2][0]))
+        { 
+          cerr << " Value " << argv[2] << " not acceptable. Options are 0 or 1." << endl;
+          exit(0);
+        }
+      readTable = atoi(argv[2]); 
+    }
   }
-
+  
+  
+  cout << "readTable = " << readTable << endl;
+    
   // initialize MPI
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank); // get current process id
@@ -511,7 +524,6 @@ int main(int argc, char *argv[]) {
   int h5Flag = 0;
   pretty_ostream messager;
 
-  display_logo();
   messager.flush("info");
   
   long int seed = time(NULL)+rank*100000;
@@ -531,10 +543,24 @@ int main(int argc, char *argv[]) {
 
   glauber->makeNuclei(random, constants::Bp);
 
+
+  // Make the MV table 
   MV *mv;
   mv = new MV();
-  mv->computePhip();
-  //cout << "Phip=" << mv->Phip(0.1,1.,1.) << endl;
+
+  if (readTable == 0){
+    mv->computePhip();
+    mv->writeTable();
+  }
+  else if (readTable == 1){
+    mv->readTable();
+  }
+  else{
+    cerr << "Unknown option readTable = " << readTable << ". Options are 0 or 1." << endl;
+    exit(0);
+  }
+
+  //  cout << "Phip=" << mv->Phip(0.1,1.,1.) << endl;
 
   // Cuba's parameters for integration
   int NDIM = 9;
@@ -708,15 +734,20 @@ int main(int argc, char *argv[]) {
     }
   }
     
+  delete Glauber_param;
+  delete random;
+  delete glauber;
+  delete mv;
+
   MPI_Finalize();
 
 
   return 1;
 }
 
+
 void display_logo() {
   cout << endl;
   cout << "- compute JPsi production with fluctuations -------------------------------------------------------------------" << endl;
   cout << endl;
 }
-
