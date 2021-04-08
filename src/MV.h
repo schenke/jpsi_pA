@@ -20,7 +20,7 @@ class MV{
   static double MVintegrandForList(double z, void * params);
   double ** Phip_array;
   int sizeA=800;
-  int sizek=400;
+  int sizek=600;
   double deltaA=1./80.;
   double deltak=1./10.;
   
@@ -28,7 +28,7 @@ class MV{
   MV(){  
     Phip_array = new double*[800];
     for (int i = 0; i < 800; i++) {
-      Phip_array[i] = new double[400];
+      Phip_array[i] = new double[600];
     }
   };
 

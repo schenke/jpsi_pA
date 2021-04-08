@@ -177,10 +177,10 @@ int MV::writeTable(){
   ofstream Outfile1;
   Outfile1.open(MVTableName.c_str(), ios::out | ios::binary);
 
-  sizeA = 800;
-  sizek = 400;
-  deltaA = 1./80.;
-  deltak = 1./10.;
+  // sizeA = 800;
+  // sizek = 600;
+  // deltaA = 1./80.;
+  // deltak = 1./10.;
   
   // print header ------------- //
   Outfile1.write((char *)&sizeA, sizeof(int));
