@@ -46,7 +46,7 @@ void MV::computePhip(){
 #pragma omp parallel for private(result,a,b) reduction(+:sum)
      for(int n=0; n < max_steps; n++)
         {
-          gsl_integration_workspace * w = gsl_integration_workspace_alloc (1000);
+         gsl_integration_workspace * w = gsl_integration_workspace_alloc(1000);
          if(n==0){
             a=0.;
             b=gsl_sf_bessel_zero_J0(1)/k;
@@ -66,7 +66,7 @@ void MV::computePhip(){
                                &result,
                                &error);
           sum += result;
-          gsl_integration_workspace_free (w);
+          gsl_integration_workspace_free(w);
         }
       
       if (sum<0.){

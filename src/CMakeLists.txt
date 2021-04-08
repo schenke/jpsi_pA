@@ -29,3 +29,4 @@ else ()
     target_link_libraries (${exename} ${GSL_LIBRARIES} ${MPI_CXX_LIBRARIES} ${FFTW_LIBRARIES} ${Cuba_LIBRARIES}) 
     install(TARGETS ${exename} DESTINATION ${CMAKE_HOME_DIRECTORY})
 endif ()
+

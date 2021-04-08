@@ -14,7 +14,6 @@ Glauber::Glauber(Parameters *inParam)
 Glauber::~Glauber()
 {
   delete param;
-  delete hadronBins;
 }
 
 double Glauber::FermiDistribution(Nucleus *nuc, double r)
@@ -164,7 +163,7 @@ void Glauber::init(Random *random)
       exit(1);
     }
 
-  int rank = MPI::COMM_WORLD.Get_rank(); //number of current processor
+  //  int rank = MPI::COMM_WORLD.Get_rank(); //number of current processor
 } 
 
 void Glauber::makeNuclei(Random *random, double Bp)

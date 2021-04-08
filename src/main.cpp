@@ -12,12 +12,12 @@
 #include <sstream>
 #include <stdio.h>
 #include <string>
-#include <vector>
-#include <ctype.h>
+//#include <vector>
+//#include <ctype.h>
 
 #include <gsl/gsl_integration.h>
-#include <gsl/gsl_interp.h>
-#include <gsl/gsl_spline.h>
+//#include <gsl/gsl_interp.h>
+//#include <gsl/gsl_spline.h>
 #include "cuba.h"
 #include "pretty_ostream.h"
 #include "hard.h"
@@ -157,7 +157,7 @@ double StFGBW(double k, double TA, double Qs){
 // choose between MV and GBW - should make this choice a parameter of course
 double StF(double k, double TA, double Qs, MV *mv){
   return mv->StF(k, TA, Qs);
-//return StFGBW(k, TA, Qs);
+  //return StFGBW(k, TA, Qs);
 }
 
 
@@ -426,20 +426,17 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   return 0;
 }  
 
-
-
-
 // Integrand for integral over everything but |p|
 static int Integrand(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-#define k xx[0]
-#define phik xx[1]
-#define R xx[2]
-#define phiR xx[3]
-#define b xx[4]
-#define phib xx[5]
-#define phi xx[6]
+#define gk xx[0]
+#define gphik xx[1]
+#define gR xx[2]
+#define gphiR xx[3]
+#define gb xx[4]
+#define gphib xx[5]
+#define gphi xx[6]
 
   double kscale = 10.;
   double Rscale = 10./constants::hbarc;
@@ -448,13 +445,13 @@ static int Integrand(const int *ndim, const cubareal xx[],
   double QsA = static_cast<params*>(userdata)->QsA;
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
-  double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*Rscale*Rscale - 2.*R*b*Rscale*Rscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
+  double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*Rscale*Rscale - 2.*gR*gb*Rscale*Rscale*cos((gphiR - gphib)*2.*M_PI),0.)),TAclass);
 
   f = constants::alphas/constants::CF/(p)/(p)/pow((2*M_PI*M_PI),3.)
-    *Phip(k*kscale, R*Rscale, Qsp, mv)*Phit(sqrt(p*p + k*k*kscale*kscale - 2.*p*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA, mv)
-    *2.*M_PI*k*kscale*kscale  //kdkdphik
-    *2.*M_PI*R*Rscale*Rscale  //RdRdphiR
-    *2.*M_PI*b*Rscale*Rscale;  //bdbdphib
+    *Phip(gk*kscale, gR*Rscale, Qsp, mv)*Phit(sqrt(p*p + gk*gk*kscale*kscale - 2.*p*gk*kscale*cos((gphi - gphik)*2.*M_PI)), TA, QsA, mv)
+    *2.*M_PI*gk*kscale*kscale  //kdkdphik
+    *2.*M_PI*gR*Rscale*Rscale  //RdRdphiR
+    *2.*M_PI*gb*Rscale*Rscale;  //bdbdphib
   return 0;
 }
 
@@ -462,7 +459,14 @@ static int Integrand(const int *ndim, const cubareal xx[],
 static int FullIntegrand(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-#define p xx[7]
+#define gp xx[7]
+
+  //cout << "xx[0] = " << xx[0] << endl;
+  if (xx[0]>1.){
+    cout << "xx[0] = " << xx[0] << endl;
+    cout << "xx[7] = " << xx[7] << endl;
+    cout << "f=" << f << endl;
+ }
 
   double kscale = 10.;
   double pscale = 10.;
@@ -473,18 +477,18 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   double lambda = static_cast<params*>(userdata)->lambda;
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
-  //  cout << "test" << endl;
-  double TA = returnTA(sqrt(max(R*Rscale*R*Rscale + b*b*bscale*bscale - 2.*R*b*Rscale*bscale*cos((phiR - phib)*2.*M_PI),0.)),TAclass);
-  //cout << "test2" << endl;
 
-  f = constants::alphas/constants::CF/(p*pscale+lambda)/(p*pscale+lambda)/pow((2*M_PI*M_PI),3.)
-    *Phip(k*kscale, R*Rscale, Qsp, mv)*Phit(sqrt((p*pscale+lambda)*(p*pscale+lambda) + k*k*kscale*kscale - 2.*(p*pscale+lambda)*k*kscale*cos((phi - phik)*2.*M_PI)), TA, QsA, mv)
-    *2.*M_PI*k*kscale*kscale  //kdkdphik
-    *2.*M_PI*R*Rscale*Rscale  //RdRdphiR
-    *2.*M_PI*b*bscale*bscale  //bdbdphib
-    *2.*M_PI*pscale*(p*pscale+lambda); //pdpdphip
-   //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
-  return 0;
+  double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*bscale*bscale - 2.*gR*gb*Rscale*bscale*cos((gphiR - gphib)*2.*M_PI),0.)),TAclass);
+ 
+  f = constants::alphas/constants::CF/(gp*pscale+lambda)/(gp*pscale+lambda)/pow((2*M_PI*M_PI),3.)
+    *Phip(gk*kscale, gR*Rscale, Qsp, mv)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*M_PI)), TA, QsA, mv)
+    *2.*M_PI*gk*kscale*kscale  //kdkdphik
+    *2.*M_PI*gR*Rscale*Rscale  //RdRdphiR
+    *2.*M_PI*gb*bscale*bscale  //bdbdphib
+    *2.*M_PI*pscale*(gp*pscale+lambda); //pdpdphip
+  //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+
+  return 1;
 }
 
 double Qsp(double pT, double roots, double y){
@@ -498,7 +502,7 @@ double QsA(double pT, double roots, double y){
 
 // Main program
 int main(int argc, char *argv[]) {
-  int rank;
+  int rank=0;
   int size;
   int readTable = 0;
 
@@ -524,25 +528,25 @@ int main(int argc, char *argv[]) {
   MPI_Comm_size(MPI_COMM_WORLD, &size); // get number of processes
 
   int h5Flag = 0;
-  pretty_ostream messager;
+  pretty_ostream messenger;
 
-  messager.flush("info");
+  messenger.flush("info");
   
   long int seed = time(NULL)+rank*100000;
+  //long int seed = 1;
 
-  Parameters *Glauber_param;
-  Glauber_param = new Parameters();
-  Glauber_param->setParameters();
+  // Parameters *Glauber_param;
+  // Glauber_param = new Parameters();
+  // Glauber_param->setParameters();
 
+  // Random *random;
+  // random = new Random();
+  // random->init_genrand64(seed);
 
-  Random *random;
-  random = new Random();
-  random->init_genrand64(seed);
-
-  Glauber *glauber;
-  glauber = new Glauber(Glauber_param);
-  glauber->init(random);
-  glauber->makeNuclei(random, constants::Bp);
+  // Glauber *glauber;
+  // glauber = new Glauber(Glauber_param);
+  // glauber->init(random);
+  // glauber->makeNuclei(random, constants::Bp);
 
   TAInt *TAclass;
   TAclass = new TAInt();
@@ -564,6 +568,8 @@ int main(int argc, char *argv[]) {
     exit(0);
   }
 
+  messenger.flush("info");
+
   //  cout << "Phip=" << mv->Phip(0.1,1.,1.) << endl;
 
   // Cuba's parameters for integration
@@ -580,7 +586,7 @@ int main(int argc, char *argv[]) {
   int KEY = 0;
   
   //vegas
-  int SEED = time(NULL);
+  int SEED = time(NULL)+rank*100000;
   const long long int NSTART = 10000000;
   const long long int NINCREASE = 1000000;
   const long long int NBATCH = 10000;
@@ -608,7 +614,7 @@ int main(int argc, char *argv[]) {
 
   cubareal integral[NCOMP], error[NCOMP], prob[NCOMP];
 
-  params *userdata, data;
+  params data;
 
   double QspPre = 0.43; // prefactors for scaling
   double QsAPre = 0.43; // prefactors for scaling
@@ -618,6 +624,10 @@ int main(int argc, char *argv[]) {
 
   double JPsi2result;
   double JPsi2error;
+  data.PT = 0.; // dummy for now
+  data.pe = 0.; // dummy for now
+  data.k = 0.;  // dummy for now
+  data.m = 0.;
   data.Qs = 0.; // Saturation scale in GeV - not used anymore
   data.lambda = 0.05; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
   data.Y = 0.;
@@ -625,8 +635,6 @@ int main(int argc, char *argv[]) {
   data.QsA = inQsA; // midrapidity Pb Saturation scale in GeV
   data.mv = mv; // MV class
   data.TAclass = TAclass; // TA class
-  userdata = &data; // Set the parameters to be passed to the integrand
-
  
   cout << "Qsp(y=0) = " << inQsp << endl;
   cout << "QsA(y=0) = " << inQsA << endl;
@@ -652,7 +660,7 @@ int main(int argc, char *argv[]) {
   // gluon number
   NDIM = 8;
   // Run 8D Vegas integration
-  llVegas(NDIM, NCOMP, FullIntegrand, userdata, NVEC,
+  llVegas(NDIM, NCOMP, FullIntegrand, &data, NVEC,
         EPSREL, EPSABS, VERBOSE, SEED,
         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
         GRIDNO, NULL, NULL,
@@ -665,11 +673,10 @@ int main(int argc, char *argv[]) {
   
   data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
   data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
-  userdata = &data; // Set the parameters to be passed to the integrand
 
   // JPsi cross section
     NDIM = 12;
-  llVegas(NDIM, NCOMP, JPsiIntegrandAll, userdata, NVEC,
+  llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
         EPSREL, EPSABS, VERBOSE, SEED,
         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
         GRIDNO, NULL, NULL,
@@ -682,14 +689,13 @@ int main(int argc, char *argv[]) {
 
   data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
   data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
-  userdata = &data; // Set the parameters to be passed to the integrand
 
   double JPsi2result2;
   double JPsi2error2;
 
   // JPsi cross section
   NDIM = 12;
-  llVegas(NDIM, NCOMP, JPsiIntegrandAll, userdata, NVEC,
+  llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
         EPSREL, EPSABS, VERBOSE, SEED,
         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
         GRIDNO, NULL, NULL,
@@ -713,7 +719,6 @@ int main(int argc, char *argv[]) {
 
   cout << " - - - - - - - - - - - - - - - - - " << endl;
 
-
   // Integrate 11D to get PT-spectrum
   int ppoints = 30; // Points in |p| to compute
   double pstep = 0.25; // Step width in |p|
@@ -723,10 +728,9 @@ int main(int argc, char *argv[]) {
   for (int r=0; r<runs; r++){
     for (int i=0; i<=ppoints; i++){
       data.PT = 0.1+i*(pstep);
-      userdata = &data;
       SEED = time(NULL)+r*10000;
       
-      llVegas(NDIM, NCOMP, JPsiIntegrandNoPT, userdata, NVEC,
+      llVegas(NDIM, NCOMP, JPsiIntegrandNoPT, &data, NVEC,
             EPSREL, EPSABS, VERBOSE, SEED,
             MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
             GRIDNO, NULL, NULL,
@@ -738,14 +742,12 @@ int main(int argc, char *argv[]) {
     }
   }
     
-  delete Glauber_param;
-  delete random;
-  delete glauber;
+  // delete Glauber_param;
+  // delete random;
   delete mv;
   delete TAclass;
 
   MPI_Finalize();
-
 
   return 1;
 }

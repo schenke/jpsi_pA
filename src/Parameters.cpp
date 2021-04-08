@@ -77,10 +77,10 @@ void Parameters::setParameters()
   if(readParameter("seed"))
     {
       if (getTimeForSeed())
-	{ convert<<temp; convert >> longParameter; setSeed(time(0)+longParameter*10000+getMPIRank()*1000); 
+	{ convert<<temp; convert >> longParameter; setSeed(time(0)+longParameter*10000+1000); 
 	  convert.str(""); convert.clear(); }
       else 
-	{ convert<<temp; convert >> longParameter; setSeed(longParameter*10000+getMPIRank()*1000); 
+	{ convert<<temp; convert >> longParameter; setSeed(longParameter*10000+1000); 
 	  convert.str(""); convert.clear(); }
     }
 
@@ -184,7 +184,7 @@ void Parameters::setParameters()
     convert.str(""); convert.clear(); } 
 
 
-  int rank = MPI::COMM_WORLD.Get_rank(); //number of current processor
+  int rank = 0;//MPI::COMM_WORLD.Get_rank(); //number of current processor
   if(rank==0)
     {
   // output parameter info

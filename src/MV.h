@@ -23,7 +23,6 @@ class MV{
   int sizek=400;
   double deltaA=1./80.;
   double deltak=1./10.;
-
   
  public:
   MV(){  
@@ -33,12 +32,12 @@ class MV{
     }
   };
 
-  ~MV(){  
+  ~MV(){
     for(int i = 0; i < 800; ++i) {
-      delete[] Phip_array[i];  
+      delete[] Phip_array[i];
     }
-    delete[] Phip_array;  
-  };
+    delete[] Phip_array;
+  }; 
   
   void computePhip();
   double Phip(double k, double R, double Qs);
@@ -46,7 +45,6 @@ class MV{
   double StF(double k, double TA, double Qs);
   int writeTable();
   int readTable();
-
 
 };
 
