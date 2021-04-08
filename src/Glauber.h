@@ -79,6 +79,7 @@ class Glauber{
 
  private:
   Parameters *param;
+  const double PI = 3.14159265358979323846;
   Nucleus Target;
   Nucleus Projectile;
 

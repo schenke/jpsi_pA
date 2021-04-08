@@ -2,6 +2,7 @@
 
 // Constants to be used
 namespace constants {
+  const double PI = 3.14159265358979323846;
   const int Nc = 3;
   const double hbarc = 0.1973269804;
   const double CA = double(Nc);
@@ -19,8 +20,8 @@ double MV::MVintegrandForList(double z, void * params) {
   double lambda = 0.2; // IR regulator in GeV
   double A = ((double *)params)[0];
   double k = ((double *)params)[1];
-  double f = 2.*M_PI*pow(2.718281828+(1./lambda/lambda)/z/z,-A*z*z)*z*gsl_sf_bessel_J0(z*k);
-  //double f = 2.*M_PI*exp(-A*z*z)*z*gsl_sf_bessel_J0(z*k); //GBW for testing the numerics only
+  double f = 2.*constants::PI*pow(2.718281828+(1./lambda/lambda)/z/z,-A*z*z)*z*gsl_sf_bessel_J0(z*k);
+  //double f = 2.*constants::PI*exp(-A*z*z)*z*gsl_sf_bessel_J0(z*k); //GBW for testing the numerics only
   return f;
 }
 
@@ -198,7 +199,7 @@ int MV::writeTable(){
     }
   }
   
-  delete[] val1;
+  delete val1;
   
   if (Outfile1.good() == false) {
     std::cerr << "Error -- binary output of MV Table failed."
