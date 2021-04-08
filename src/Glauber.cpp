@@ -90,8 +90,8 @@ void Glauber::makeHistograms(Random *random)
 	}
       for(int j=0; j<39; j++)
 	{
-	  if(theta<M_PI/40.*(j+1) && theta>M_PI/40.*j)
-	    thetabins[j]+=1./samples/(M_PI/40.);
+	  if(theta<PI/40.*(j+1) && theta>PI/40.*j)
+	    thetabins[j]+=1./samples/(PI/40.);
 	}
     }
 
@@ -143,7 +143,7 @@ void Glauber::makeHistograms(Random *random)
   
   for(int j=0; j<39; j++)
     {
-      thetahist << M_PI/40.*(j+0.5) << " " << thetabins[j] << endl;
+      thetahist << PI/40.*(j+0.5) << " " << thetabins[j] << endl;
     }
   
   thetahist.close();
@@ -516,7 +516,7 @@ Nucleon Glauber::sampleRho(Nucleus *nuc, Random *random)
   double a_WS = nuc->a_WS;
   double R_WS = nuc->R_WS;
    
-  phi = 2.*M_PI*random->genrand64_real1();
+  phi = 2.*PI*random->genrand64_real1();
   theta = acos(1. - 2.*random->genrand64_real1());
  
   do
@@ -556,7 +556,7 @@ Quark Glauber::sampleQuark(Random *random)
   double a = 3.87;
   double xQuark[numberOfQuarks];
 
-  phi = 2.*M_PI*random->genrand64_real1();
+  phi = 2.*PI*random->genrand64_real1();
   theta = acos(1. - 2.*random->genrand64_real1());
  
   do

@@ -33,6 +33,7 @@ void display_logo();
 
 // Constants to be used
 namespace constants {
+  const double PI = 3.14159265358979323846;
   const int Nc = 3;
   const double hbarc = 0.1973269804;
   const double CA = double(Nc);
@@ -128,7 +129,7 @@ return TAclass->returnTA(R);
 
 // Unintegrated gluon distribution for the proton in GBW
 double PhipGBW(double k, double R, double Qs){
-  return constants::CF*k*k*constants::Nc*M_PI/constants::alphas/constants::CA/Qs/Qs*exp(R*R/(2.*constants::Bp))
+  return constants::CF*k*k*constants::Nc*constants::PI/constants::alphas/constants::CA/Qs/Qs*exp(R*R/(2.*constants::Bp))
     *exp(-constants::CF*exp(R*R/(2.*constants::Bp))*k*k/(constants::CA*Qs*Qs));
 }
 
@@ -140,7 +141,7 @@ double Phip(double k, double R, double Qs, MV *mv){
 
 // Unintegrated gluon distribution for lead
 double PhitGBW(double k, double TA, double Qs){
-  return M_PI*k*k*constants::Nc/constants::alphas*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA))/(constants::CA*Qs*Qs*TA);
+  return constants::PI*k*k*constants::Nc/constants::alphas*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA))/(constants::CA*Qs*Qs*TA);
 }
 
 // choose between MV and GBW - should make this choice a parameter of course
@@ -151,7 +152,7 @@ double Phit(double k, double TA, double Qs, MV *mv){
 
 // FT of fundamental S of the target
 double StFGBW(double k, double TA, double Qs){
-  return 4.*M_PI*exp(-(k*k/(Qs*Qs*TA)))/(Qs*Qs*TA);
+  return 4.*constants::PI*exp(-(k*k/(Qs*Qs*TA)))/(Qs*Qs*TA);
 } 
 
 // choose between MV and GBW - should make this choice a parameter of course
@@ -203,20 +204,20 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
   double qtilde = qqqtilde*qtildescale;
   double PT = qqPT*pscale; 
-  //double phiPT = qqphiPT*2.*M_PI;
+  //double phiPT = qqphiPT*2.*constants::PI;
   double R = qqR*Rscale;
   double b = qqb*bscale;
   double k = qq4k*kscale;
-  double phik = qq4phik*2.*M_PI;
+  double phik = qq4phik*2.*constants::PI;
   double k1 = qq4k1*kscale;
-  double phik1 = qq4phik1*2.*M_PI;
-  double phiR = qqphiR*2*M_PI;
-  double phib = qqphib*2*M_PI;
+  double phik1 = qq4phik1*2.*constants::PI;
+  double phiR = qqphiR*2*constants::PI;
+  double phib = qqphib*2*constants::PI;
 
   kinPair in;
   in.M = M;
   in.PT  = PT;
-  in.phi = qqphi*2.*M_PI; // not the PT phi
+  in.phi = qqphi*2.*constants::PI; // not the PT phi
   in.qtilde = qtilde;
   in.Y = Y;
   in.m = m;
@@ -270,17 +271,17 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double myTA = returnTA(Rminusb,TAclass);
   
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
-    /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp, mv)/(k1*k1)*H*J
     *(StF(pplusqminusk1minusk,myTA,QsA,mv)*StF(k,myTA,QsA,mv))
-    *R*Rscale*2.*M_PI
-    *b*bscale*2.*M_PI
-    *PT*pscale*2.*M_PI
+    *R*Rscale*2.*constants::PI
+    *b*bscale*2.*constants::PI
+    *PT*pscale*2.*constants::PI
     *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
     *qtildescale
-    *2.*M_PI
-    *k*kscale*2.*M_PI
-    *k1*kscale*2.*M_PI
+    *2.*constants::PI
+    *k*kscale*2.*constants::PI
+    *k1*kscale*2.*constants::PI
     *2.; // for p and q direction
   // scaled momenta above (in PT)
   // last rows are scaling of integration measures:
@@ -336,17 +337,17 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   double R = nqqR*Rscale;
   double b = nqqb*bscale;
   double k = nqq4k*kscale;
-  double phik = nqq4phik*2.*M_PI;
+  double phik = nqq4phik*2.*constants::PI;
   double k1 = nqq4k1*kscale;
-  double phik1 = nqq4phik1*2.*M_PI;
-  double phiR = nqqphiR*2*M_PI;
-  double phib = nqqphib*2*M_PI;
+  double phik1 = nqq4phik1*2.*constants::PI;
+  double phiR = nqqphiR*2*constants::PI;
+  double phib = nqqphib*2*constants::PI;
 
 
   kinPair in;
   in.M = M;
   in.PT  = PT;
-  in.phi = nqqphi*2.*M_PI; // not the PT phi
+  in.phi = nqqphi*2.*constants::PI; // not the PT phi
   in.qtilde = qtilde;
   in.Y = Y;
   in.m = m;
@@ -400,16 +401,16 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   double myTA = returnTA(Rminusb,TAclass); //TA(Rminusb);
 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
-    /(2.*pow(2.*M_PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp,mv)/(k1*k1)*H*J
     *(StF(pplusqminusk1minusk,myTA,QsA,mv)*StF(k,myTA,QsA,mv))
-    *R*Rscale*2.*M_PI
-    *b*bscale*2.*M_PI
+    *R*Rscale*2.*constants::PI
+    *b*bscale*2.*constants::PI
     *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
     *qtildescale
-    *2.*M_PI
-    *k*kscale*2.*M_PI
-    *k1*kscale*2.*M_PI
+    *2.*constants::PI
+    *k*kscale*2.*constants::PI
+    *k1*kscale*2.*constants::PI
     *2.; // for p and q direction
   // scaled momenta above (in PT)
   // last rows are scaling of integration measures:
@@ -445,13 +446,13 @@ static int Integrand(const int *ndim, const cubareal xx[],
   double QsA = static_cast<params*>(userdata)->QsA;
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
-  double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*Rscale*Rscale - 2.*gR*gb*Rscale*Rscale*cos((gphiR - gphib)*2.*M_PI),0.)),TAclass);
+  double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*Rscale*Rscale - 2.*gR*gb*Rscale*Rscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass);
 
-  f = constants::alphas/constants::CF/(p)/(p)/pow((2*M_PI*M_PI),3.)
-    *Phip(gk*kscale, gR*Rscale, Qsp, mv)*Phit(sqrt(p*p + gk*gk*kscale*kscale - 2.*p*gk*kscale*cos((gphi - gphik)*2.*M_PI)), TA, QsA, mv)
-    *2.*M_PI*gk*kscale*kscale  //kdkdphik
-    *2.*M_PI*gR*Rscale*Rscale  //RdRdphiR
-    *2.*M_PI*gb*Rscale*Rscale;  //bdbdphib
+  f = constants::alphas/constants::CF/(p)/(p)/pow((2*constants::PI*constants::PI),3.)
+    *Phip(gk*kscale, gR*Rscale, Qsp, mv)*Phit(sqrt(p*p + gk*gk*kscale*kscale - 2.*p*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv)
+    *2.*constants::PI*gk*kscale*kscale  //kdkdphik
+    *2.*constants::PI*gR*Rscale*Rscale  //RdRdphiR
+    *2.*constants::PI*gb*Rscale*Rscale;  //bdbdphib
   return 0;
 }
 
@@ -478,14 +479,14 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
 
-  double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*bscale*bscale - 2.*gR*gb*Rscale*bscale*cos((gphiR - gphib)*2.*M_PI),0.)),TAclass);
+  double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*bscale*bscale - 2.*gR*gb*Rscale*bscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass);
  
-  f = constants::alphas/constants::CF/(gp*pscale+lambda)/(gp*pscale+lambda)/pow((2*M_PI*M_PI),3.)
-    *Phip(gk*kscale, gR*Rscale, Qsp, mv)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*M_PI)), TA, QsA, mv)
-    *2.*M_PI*gk*kscale*kscale  //kdkdphik
-    *2.*M_PI*gR*Rscale*Rscale  //RdRdphiR
-    *2.*M_PI*gb*bscale*bscale  //bdbdphib
-    *2.*M_PI*pscale*(gp*pscale+lambda); //pdpdphip
+  f = constants::alphas/constants::CF/(gp*pscale+lambda)/(gp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
+    *Phip(gk*kscale, gR*Rscale, Qsp, mv)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv)
+    *2.*constants::PI*gk*kscale*kscale  //kdkdphik
+    *2.*constants::PI*gR*Rscale*Rscale  //RdRdphiR
+    *2.*constants::PI*gb*bscale*bscale  //bdbdphib
+    *2.*constants::PI*pscale*(gp*pscale+lambda); //pdpdphip
   //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
 
   return 1;
@@ -589,8 +590,8 @@ int main(int argc, char *argv[]) {
   int SEED = time(NULL)+rank*100000;
   const long long int NSTART = 10000000;
   const long long int NINCREASE = 1000000;
-  const long long int NBATCH = 10000;
-  int GRIDNO = 2;
+  const long long int NBATCH = 1000;
+  int GRIDNO = 0;
 
   //suave
   int NNEW = 2000;
