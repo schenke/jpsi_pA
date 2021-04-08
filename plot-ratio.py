@@ -35,8 +35,8 @@ with PdfPages('plots-jpsi.pdf') as pdf:
     plt.ylabel(r'$J/\Psi$ yield',fontsize=16)
 
     
-    av_g, avg_error, avj_fwd, avj_fwd_error, avj_bwd, avj_bwd_error, av_qsp,av_qst,av_fwd_qsp, av_fwd_qst, av_bwd_qsp, av_bwd_qst  = np.loadtxt('av_gluons_jpsi_Qsvariations_all_mv.dat', delimiter =' ', unpack = True)
-    glue, glue_error, jpsi_fwd, jpsierror_fwd, jpsi_bwd, jpsierror_bwd, qsp, qst, qsp_fwd, qst_fwd,qsp_bwd, qst_bwd  = np.loadtxt('gluons_jpsi_Qsvariations_all_mv.dat', delimiter =' ', unpack = True)
+    av_g, avg_error, avj_fwd, avj_fwd_error, avj_bwd, avj_bwd_error, av_qsp,av_qst,av_fwd_qsp, av_fwd_qst, av_bwd_qsp, av_bwd_qst  = np.loadtxt('averages_mv.dat', delimiter =' ', unpack = True)
+    glue, glue_error, jpsi_fwd, jpsierror_fwd, jpsi_bwd, jpsierror_bwd, qsp, qst, qsp_fwd, qst_fwd,qsp_bwd, qst_bwd  = np.loadtxt('qsdep-mv.dat', delimiter =' ', unpack = True)
     
     glue_yield = glue/av_g
     jpsi_yield_fwd = jpsi_fwd/avj_fwd
