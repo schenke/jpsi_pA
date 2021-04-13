@@ -56,6 +56,8 @@ struct params {
   double Y;
   double m;
   double PT;
+  double bx;
+  double by;
   TAInt *TAclass;
   MV *mv;
   Glauber *glauberClass; 
@@ -501,11 +503,12 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 #define fgphik xx[1]
 #define fgRx xx[2]
 #define fgRy xx[3]
-#define fgbx xx[4]
-#define fgby xx[5]
-#define fgphi xx[6]
-#define fgp xx[7]
-  
+  //#define fgbx xx[4]
+  //#define fgby xx[5]
+#define fgphi xx[4]
+#define fgp xx[5]
+
+
   double kscale = 15.;
   double pscale = 15.;
   double Rscale = 8./constants::hbarc;
@@ -514,8 +517,12 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   //double bscale = 4./constants::hbarc;
   double Rx = fgRx*Rscale-Rscale/2.;
   double Ry = fgRy*Rscale-Rscale/2.;
-  double bx = fgbx*bscale-bscale/2.;
-  double by = fgby*bscale-bscale/2.;
+  //double bx = fgbx*bscale-bscale/2.;
+  //double by = fgby*bscale-bscale/2.;
+
+  double bx=0;
+  double by=0;
+
 
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
@@ -533,7 +540,7 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
     *Phip(fgk*kscale, R, Qsp, mv)*Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv)
     *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
     *Rscale*Rscale  //dRxdRy
-    *bscale*bscale  //bdxdby
+    //    *bscale*bscale  //bdxdby
     *2.*constants::PI*pscale*(fgp*pscale+lambda); //pdpdphip
 
   return 1;
@@ -754,17 +761,33 @@ int main(int argc, char *argv[]) {
     printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
   }
   else{
-  // Run 8D Vegas integration with fluctuations
-  llVegas(NDIM, NCOMP, FullIntegrandFluc, &data, NVEC,
-        EPSREL, EPSABS, VERBOSE, SEED,
-        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        GRIDNO, NULL, NULL,
-        &neval, &fail, integral, error, prob);
-  
-  // Print the result
-  gresult = (double)integral[0];
-  gerror = (double)error[0];
-  printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
+    // Run 8D Vegas integration with fluctuations
+    
+    //sample b
+    double bmin = 0.;
+    double bmax = 10.;
+    
+    double xb =
+      random->genrand64_real1(); // uniformly distributed random variable
+    double b = sqrt((bmax * bmax - bmin * bmin) * xb + bmin * bmin);
+    double phib = 2.*constants::PI*random->genrand64_real1();
+    
+    data.bx = b*cos(phib);
+    data.by = b*sin(phib);
+   
+    cout << "b=" << b << ", phib=" << phib << endl;
+ 
+    NDIM = 6;
+    llVegas(NDIM, NCOMP, FullIntegrandFluc, &data, NVEC,
+            EPSREL, EPSABS, VERBOSE, SEED,
+            MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+            GRIDNO, NULL, NULL,
+            &neval, &fail, integral, error, prob);
+    
+    // Print the result
+    gresult = (double)integral[0];
+    gerror = (double)error[0];
+    printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
   }
   
   data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
