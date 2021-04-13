@@ -185,8 +185,8 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   // double pscale = 10.;
   // double Rscale = 20./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   // double bscale = 20./constants::hbarc; 
-  double kscale = 19.;
-  double pscale = 19.;
+  double kscale = 15.;
+  double pscale = 15.;
   double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 12./constants::hbarc; 
   // Qs will be made rapidity dependent
@@ -316,7 +316,7 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 #define nqq4k1 xx[9]
 #define nqq4phik1 xx[10]
 
-  double kscale = 19.;
+  double kscale = 15.;
   double Rscale = 2./constants::hbarc; // choose a small scale (proton Phip will cut off at large R)
   double bscale = 12./constants::hbarc; 
   // Qs will be made rapidity dependent
@@ -439,7 +439,7 @@ static int Integrand(const int *ndim, const cubareal xx[],
 #define gphib xx[5]
 #define gphi xx[6]
 
-  double kscale = 10.;
+  double kscale = 15.;
   double Rscale = 10./constants::hbarc;
   double p = static_cast<params*>(userdata)->pe;
   double Qsp = static_cast<params*>(userdata)->Qsp;
@@ -469,8 +469,8 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
     cout << "f=" << f << endl;
  }
 
-  double kscale = 19.;
-  double pscale = 19.;
+  double kscale = 15.;
+  double pscale = 15.;
   double Rscale = 2./constants::hbarc;
   double bscale = 12./constants::hbarc;
   double Qsp = static_cast<params*>(userdata)->Qsp;
