@@ -12,6 +12,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string>
+#include <unistd.h>
 //#include <vector>
 //#include <ctype.h>
 
@@ -560,23 +561,35 @@ int main(int argc, char *argv[]) {
   int rank=0;
   int size;
   int readTable = 0;
-  int useFluc = 1;
+  int useFluc = 0;
 
   display_logo();
 
-  if(argc > 2){
-    if( std::string(argv[1]) == "-readTable" ){
-      if(!isdigit(argv[2][0]))
-        { 
-          cerr << " Value " << argv[2] << " not acceptable. Options are 0 or 1." << endl;
-          exit(0);
-        }
-      readTable = atoi(argv[2]); 
+  std::vector <std::string> sources;
+  std::string destination;
+  for (int i = 1; i < argc; ++i) {
+    if (std::string(argv[i]) == "--readTable") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        readTable = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--readTable option requires one argument, 0 or 1." << std::endl;
+        return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "--fluctuations") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        useFluc = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--fluctuations option requires one argument, 0 or 1." << std::endl;
+        return 1;
+      }  
     }
   }
-  
-  
-  cout << "readTable = " << readTable << endl;
+ 
+  cout << "Options: readTable = " << readTable << ", fluctuations = " << useFluc << endl;
+
     
   // initialize MPI
   MPI_Init(&argc, &argv);
