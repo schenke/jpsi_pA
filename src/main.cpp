@@ -58,6 +58,7 @@ struct params {
   double PT;
   TAInt *TAclass;
   MV *mv;
+  Glauber *glauberClass; 
 };
 
 struct kinqq {
@@ -492,6 +493,52 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   return 1;
 }
 
+// Integrand for the full 8D integral
+static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define fgk xx[0]
+#define fgphik xx[1]
+#define fgRx xx[2]
+#define fgRy xx[3]
+#define fgbx xx[4]
+#define fgby xx[5]
+#define fgphi xx[6]
+#define fgp xx[7]
+  
+  double kscale = 15.;
+  double pscale = 15.;
+  double Rscale = 8./constants::hbarc;
+  double bscale = 24./constants::hbarc;
+  //double Rscale = 1./constants::hbarc;
+  //double bscale = 4./constants::hbarc;
+  double Rx = fgRx*Rscale-Rscale/2.;
+  double Ry = fgRy*Rscale-Rscale/2.;
+  double bx = fgbx*bscale-bscale/2.;
+  double by = fgby*bscale-bscale/2.;
+
+  double Qsp = static_cast<params*>(userdata)->Qsp;
+  double QsA = static_cast<params*>(userdata)->QsA;
+  double lambda = static_cast<params*>(userdata)->lambda;
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double R = sqrt(Rx*Rx+Ry*Ry);
+  double b = sqrt(bx*bx+by*by);
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  //double TA = returnTA(sqrt((Rx-bx)*(Rx-bx)+(Ry-by)*(Ry-by)),TAclass);
+ 
+  f = constants::alphas/constants::CF/(fgp*pscale+lambda)/(fgp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
+    *Phip(fgk*kscale, R, Qsp, mv)*Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv)
+    *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
+    *Rscale*Rscale  //dRxdRy
+    *bscale*bscale  //bdxdby
+    *2.*constants::PI*pscale*(fgp*pscale+lambda); //pdpdphip
+
+  return 1;
+}
+
 double Qsp(double pT, double roots, double y){
   //return pow((0.0003*roots/pT/exp(-y)),0.288/2.);
   return pow((0.000041*roots/pT/exp(-y)),0.277/2.);
@@ -506,6 +553,7 @@ int main(int argc, char *argv[]) {
   int rank=0;
   int size;
   int readTable = 0;
+  int useFluc = 1;
 
   display_logo();
 
@@ -536,18 +584,18 @@ int main(int argc, char *argv[]) {
   long int seed = time(NULL)+rank*100000;
   //long int seed = 1;
 
-  // Parameters *Glauber_param;
-  // Glauber_param = new Parameters();
-  // Glauber_param->setParameters();
+  Parameters *Glauber_param;
+  Glauber_param = new Parameters();
+  Glauber_param->setParameters();
 
-  // Random *random;
-  // random = new Random();
-  // random->init_genrand64(seed);
+  Random *random;
+  random = new Random();
+  random->init_genrand64(seed);
 
-  // Glauber *glauber;
-  // glauber = new Glauber(Glauber_param);
-  // glauber->init(random);
-  // glauber->makeNuclei(random, constants::Bp);
+  Glauber *glauber;
+  glauber = new Glauber(Glauber_param);
+  glauber->init(random);
+  glauber->makeNuclei(random, constants::Bp);
 
   TAInt *TAclass;
   TAclass = new TAInt();
@@ -620,8 +668,18 @@ int main(int argc, char *argv[]) {
   double QspPre = 0.43; // prefactors for scaling
   double QsAPre = 0.43; // prefactors for scaling
 
-  double inQsp = QspPre*Qsp(0.8,8160.,0.);
-  double inQsA = QsAPre*QsA(0.8,8160.,0.);
+
+  double inQsp;
+  double inQsA;
+
+  if(useFluc ==0){
+    inQsp = QspPre*Qsp(0.8,8160.,0.);
+    inQsA = QsAPre*QsA(0.8,8160.,0.);
+  }
+  else{
+    inQsp = QspPre*Qsp(0.8,8160.,0.);
+    inQsA = QsAPre*Qsp(0.8,8160.,0.);
+  }
 
   double JPsi2result;
   double JPsi2error;
@@ -636,18 +694,38 @@ int main(int argc, char *argv[]) {
   data.QsA = inQsA; // midrapidity Pb Saturation scale in GeV
   data.mv = mv; // MV class
   data.TAclass = TAclass; // TA class
+  data.glauberClass = glauber; // Glauber class
  
   cout << "Qsp(y=0) = " << inQsp << endl;
   cout << "QsA(y=0) = " << inQsA << endl;
 
-  double inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
-  double inQsA_fwd = QsAPre*QsA(3,8160.,3.);
+
+  double inQsp_fwd;
+  double inQsA_fwd;
+
+  if(useFluc == 0){
+    inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
+    inQsA_fwd = QsAPre*QsA(3,8160.,3.);
+  }
+  else{
+    inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
+    inQsA_fwd = QsAPre*Qsp(3,8160.,3.);
+  }
 
   cout << "Qsp(y=3) = " << inQsp_fwd << endl;
   cout << "QsA(y=3) = " << inQsA_fwd << endl;
 
-  double inQsp_bck = QspPre*Qsp(3,8160.,3.8);
-  double inQsA_bck = QsAPre*QsA(3,8160.,-3.8);
+  double inQsp_bck;
+  double inQsA_bck;
+
+  if(useFluc == 0){
+    inQsp_bck = QspPre*Qsp(3,8160.,3.8);
+    inQsA_bck = QsAPre*QsA(3,8160.,-3.8);
+  }
+  else{
+    inQsp_bck = QspPre*Qsp(3,8160.,3.8);
+    inQsA_bck = QsAPre*Qsp(3,8160.,-3.8);
+  }
 
   cout << "Qsp(y=-3.8) = " << inQsp_bck << endl;
   cout << "QsA(y=-3.8) = " << inQsA_bck << endl;
@@ -658,19 +736,36 @@ int main(int argc, char *argv[]) {
   //   cout << returnTA(myR,TAclass) <<  " " << TA(myR) << endl;
   // }
 
-  // gluon number
-  NDIM = 8;
-  // Run 8D Vegas integration
-  llVegas(NDIM, NCOMP, FullIntegrand, &data, NVEC,
+  double gresult;
+  double gerror;
+  if(useFluc == 0){
+    // gluon number
+    NDIM = 8;
+    // Run 8D Vegas integration
+    llVegas(NDIM, NCOMP, FullIntegrand, &data, NVEC,
+            EPSREL, EPSABS, VERBOSE, SEED,
+            MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+            GRIDNO, NULL, NULL,
+            &neval, &fail, integral, error, prob);
+    
+    // Print the result
+    gresult = (double)integral[0];
+    gerror = (double)error[0];
+    printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
+  }
+  else{
+  // Run 8D Vegas integration with fluctuations
+  llVegas(NDIM, NCOMP, FullIntegrandFluc, &data, NVEC,
         EPSREL, EPSABS, VERBOSE, SEED,
         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
         GRIDNO, NULL, NULL,
         &neval, &fail, integral, error, prob);
   
   // Print the result
-  double gresult = (double)integral[0];
-  double gerror = (double)error[0];
-  printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
+  gresult = (double)integral[0];
+  gerror = (double)error[0];
+  printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
+  }
   
   data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
   data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
@@ -743,10 +838,11 @@ int main(int argc, char *argv[]) {
     }
   }
     
-  // delete Glauber_param;
-  // delete random;
+  delete Glauber_param;
+  delete random;
   delete mv;
   delete TAclass;
+  delete glauber;
 
   MPI_Finalize();
 

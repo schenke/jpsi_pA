@@ -45,13 +45,15 @@ double TAInt::returnTA(double R){
   // double TA = gsl_spline_eval (spline, R, acc);
   // gsl_spline_free (spline);
   // gsl_interp_accel_free (acc);
-
-  // simple linear interpolation
-  int i = int(R*200./20.*constants::hbarc);
-  double TA = (double(i)+1.-R*200./20.*constants::hbarc)*TAgrid[i] + (R*200./20.*constants::hbarc-double(i))*TAgrid[i+1];
+  double TA;
   if(R>20./constants::hbarc){
     //cout << "range problem: " << TA << endl;
     TA=0.;}
+  // simple linear interpolation
+  else{
+      int i = int(R*200./20.*constants::hbarc);
+      TA = (double(i)+1.-R*200./20.*constants::hbarc)*TAgrid[i] + (R*200./20.*constants::hbarc-double(i))*TAgrid[i+1];
+    }
   return TA;
 }
 

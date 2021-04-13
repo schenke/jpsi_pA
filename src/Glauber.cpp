@@ -169,11 +169,6 @@ void Glauber::init(Random *random)
 void Glauber::makeNuclei(Random *random, double Bp)
 {
   int Nx = param->getOutputNumberOfTransverseCells();
-  //reset hadron distribution
-  // for(int j=0; j<Nx*Nx; j++)
-  //   {
-  //    hadronBins[j] = 0.;
-  //   }
 
   Target.nucleonList.clear();
   Projectile.nucleonList.clear();
@@ -216,43 +211,43 @@ void Glauber::makeNuclei(Random *random, double Bp)
 	}
       
     }
-  if( Projectile.A == 1 )
-    {
-      Nucleon nucleon;
-      nucleon.x = 0.;
-      nucleon.y = 0.;
-      nucleon.z = 0.;
-      nucleon.collided = 0;
-      Projectile.nucleonList.push_back(nucleon);
-    }
-  else
-    {
-      for(int i=0; i<Projectile.A; i++)
-	{
-	  Projectile.nucleonList.push_back(sampleRho(&Projectile, random));
-	}
+  // if( Projectile.A == 1 )
+  //   {
+  //     Nucleon nucleon;
+  //     nucleon.x = 0.;
+  //     nucleon.y = 0.;
+  //     nucleon.z = 0.;
+  //     nucleon.collided = 0;
+  //     Projectile.nucleonList.push_back(nucleon);
+  //   }
+  // else
+  //   {
+  //     for(int i=0; i<Projectile.A; i++)
+  //       {
+  //         Projectile.nucleonList.push_back(sampleRho(&Projectile, random));
+  //       }
       
-      //shift to center of mass
-      double meanx=0, meany=0, meanz=0;
+  //     //shift to center of mass
+  //     double meanx=0, meany=0, meanz=0;
       
-      for(int i=0; i<Projectile.A; i++)
-	{
-	  meanx += Projectile.nucleonList.at(i).x;
-	  meany += Projectile.nucleonList.at(i).y;
-	  meanz += Projectile.nucleonList.at(i).z;
-	}
+  //     for(int i=0; i<Projectile.A; i++)
+  //       {
+  //         meanx += Projectile.nucleonList.at(i).x;
+  //         meany += Projectile.nucleonList.at(i).y;
+  //         meanz += Projectile.nucleonList.at(i).z;
+  //       }
       
-      meanx /= double(Projectile.A);
-      meany /= double(Projectile.A);
-      meanz /= double(Projectile.A);
+  //     meanx /= double(Projectile.A);
+  //     meany /= double(Projectile.A);
+  //     meanz /= double(Projectile.A);
       
-      for(int i=0; i<Projectile.A; i++)
-	{
-	  Projectile.nucleonList.at(i).x -= meanx;
-	  Projectile.nucleonList.at(i).y -= meany;
-	  Projectile.nucleonList.at(i).z -= meanz;
-	}     
-    }
+  //     for(int i=0; i<Projectile.A; i++)
+  //       {
+  //         Projectile.nucleonList.at(i).x -= meanx;
+  //         Projectile.nucleonList.at(i).y -= meany;
+  //         Projectile.nucleonList.at(i).z -= meanz;
+  //       }     
+  //   }
 
 
 
@@ -261,51 +256,51 @@ void Glauber::makeNuclei(Random *random, double Bp)
     {
       double xQuark[numberOfQuarks];
       if( Target.A == 1 )
-	{
-	  for(int j=0; j<numberOfQuarks; j++)
-	    {
-	      Target.nucleonList.at(0).quarkList.push_back(sampleQuark(random));
-	    }
-	}
+        {
+          for(int j=0; j<numberOfQuarks; j++)
+            {
+              Target.nucleonList.at(0).quarkList.push_back(sampleQuark(random));
+            }
+        }
       else
-	{
-	  for(int i=0; i<Target.A; i++)
-	    {
-	      for(int j=0; j<numberOfQuarks; j++)
-		{
-		  Target.nucleonList.at(i).quarkList.push_back(sampleQuark(random));
-		}
-	    }
-	}
+        {
+          for(int i=0; i<Target.A; i++)
+            {
+              for(int j=0; j<numberOfQuarks; j++)
+        	{
+        	  Target.nucleonList.at(i).quarkList.push_back(sampleQuark(random));
+        	}
+            }
+        }
 
-      if( Projectile.A == 1 )
-	{
-	  for(int j=0; j<numberOfQuarks; j++)
-	    {
-	      Projectile.nucleonList.at(0).quarkList.push_back(sampleQuark(random));
-	    }
-	}
-      else
-	{
-	  for(int i=0; i<Projectile.A; i++)
-	    {
-	      for(int j=0; j<numberOfQuarks; j++)
-		{
-		  Projectile.nucleonList.at(i).quarkList.push_back(sampleQuark(random));
-		}
-	    }
-	}
+  //     if( Projectile.A == 1 )
+  //       {
+  //         for(int j=0; j<numberOfQuarks; j++)
+  //           {
+  //             Projectile.nucleonList.at(0).quarkList.push_back(sampleQuark(random));
+  //           }
+  //       }
+  //     else
+  //       {
+  //         for(int i=0; i<Projectile.A; i++)
+  //           {
+  //             for(int j=0; j<numberOfQuarks; j++)
+  //       	{
+  //       	  Projectile.nucleonList.at(i).quarkList.push_back(sampleQuark(random));
+  //       	}
+  //           }
+  //       }
     } 
    
-  for (int i = 0; i<Target.A; i++) // shift the target's position by -b/2
-    {
-      Target.nucleonList.at(i).x=Target.nucleonList.at(i).x-param->getb()/2.;
-    }   
+  // for (int i = 0; i<Target.A; i++) // shift the target's position by -b/2
+  //   {
+  //     Target.nucleonList.at(i).x=Target.nucleonList.at(i).x-param->getb()/2.;
+  //   }   
 
-  for (int i = 0; i<Projectile.A; i++) // shift the projectile's position by +b/2 
-    {
-      Projectile.nucleonList.at(i).x=Projectile.nucleonList.at(i).x+param->getb()/2.;
-    }   
+  // for (int i = 0; i<Projectile.A; i++) // shift the projectile's position by +b/2 
+  //   {
+  //     Projectile.nucleonList.at(i).x=Projectile.nucleonList.at(i).x+param->getb()/2.;
+  //   }   
 
   generateNucleusTA(&Target, Bp); 
 }
@@ -339,9 +334,29 @@ void Glauber::generateNucleusTA(Nucleus *nuc, double Bp){
 double Glauber::returnNucleusTA(double x, double y){
   double hbarc = 0.1973269804;
   // simple linear interpolation
+  
+  if (x*hbarc<-9.9 || x*hbarc>9.9){
+    return 0.;
+  }      
+  if (y*hbarc<-9.9 || y*hbarc>9.9){
+    return 0.;
+  }      
+ 
   int ix = int((x*hbarc+10.)*200./20.);
   int iy = int((y*hbarc+10.)*200./20.);
-  cout << ix << " " << iy << endl;
+
+  if (ix<0 || ix>198){
+    cout << " x out of range: " << endl;
+    cout << "x = " << x*hbarc << endl;
+    cout << "ix = " << ix << endl;
+  }
+  if (iy<0 || iy>198){
+    cout << " y out of range: " << endl;
+    cout << "y = " << y*hbarc << endl;
+    cout << "iy = " << iy << endl;
+    return 0.;
+  }
+
   double TAx1 = (double(ix+1)-(x*hbarc+10.)*200./20.)*TAgrid2D[ix][iy] + ((x*hbarc+10.)*200./20.-double(ix))*TAgrid2D[ix+1][iy];
   double TAx2 = (double(ix+1)-(x*hbarc+10.)*200./20.)*TAgrid2D[ix][iy+1] + ((x*hbarc+10.)*200./20.-double(ix))*TAgrid2D[ix+1][iy+1];
   double TA = (double(iy+1)-(y*hbarc+10.)*200./20.)*TAx1 + ((y*hbarc+10.)*200./20.-double(iy))*TAx2;
