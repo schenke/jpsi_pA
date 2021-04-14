@@ -4,7 +4,7 @@ using namespace std;
 
 Glauber::Glauber(Parameters *inParam)
 {
-  param = new Parameters();
+  //  param = new Parameters();
   param = inParam; 
   gslRan = gsl_rng_alloc (gsl_rng_taus);
   numberOfQuarks = 3;
@@ -13,7 +13,7 @@ Glauber::Glauber(Parameters *inParam)
 // destructor
 Glauber::~Glauber()
 {
-  delete param;
+  //delete param;
 }
 
 double Glauber::FermiDistribution(Nucleus *nuc, double r)
@@ -251,57 +251,29 @@ void Glauber::makeNuclei(Random *random, double Bp)
 
 
 
-  // if using quarks determine the quark positions within each nucleon
-  if(param->getUseQuarks())
-    {
-      double xQuark[numberOfQuarks];
-      if( Target.A == 1 )
-        {
-          for(int j=0; j<numberOfQuarks; j++)
-            {
-              Target.nucleonList.at(0).quarkList.push_back(sampleQuark(random));
-            }
-        }
-      else
-        {
-          for(int i=0; i<Target.A; i++)
-            {
-              for(int j=0; j<numberOfQuarks; j++)
-        	{
-        	  Target.nucleonList.at(i).quarkList.push_back(sampleQuark(random));
-        	}
-            }
-        }
-
-  //     if( Projectile.A == 1 )
+  // // if using quarks determine the quark positions within each nucleon
+  // if(param->getUseQuarks())
+  //   {
+  //     double xQuark[numberOfQuarks];
+  //     if( Target.A == 1 )
   //       {
   //         for(int j=0; j<numberOfQuarks; j++)
   //           {
-  //             Projectile.nucleonList.at(0).quarkList.push_back(sampleQuark(random));
+  //             Target.nucleonList.at(0).quarkList.push_back(sampleQuark(random));
   //           }
   //       }
   //     else
   //       {
-  //         for(int i=0; i<Projectile.A; i++)
+  //         for(int i=0; i<Target.A; i++)
   //           {
   //             for(int j=0; j<numberOfQuarks; j++)
   //       	{
-  //       	  Projectile.nucleonList.at(i).quarkList.push_back(sampleQuark(random));
+  //       	  Target.nucleonList.at(i).quarkList.push_back(sampleQuark(random));
   //       	}
   //           }
   //       }
     } 
    
-  // for (int i = 0; i<Target.A; i++) // shift the target's position by -b/2
-  //   {
-  //     Target.nucleonList.at(i).x=Target.nucleonList.at(i).x-param->getb()/2.;
-  //   }   
-
-  // for (int i = 0; i<Projectile.A; i++) // shift the projectile's position by +b/2 
-  //   {
-  //     Projectile.nucleonList.at(i).x=Projectile.nucleonList.at(i).x+param->getb()/2.;
-  //   }   
-
   generateNucleusTA(&Target, Bp); 
 }
 

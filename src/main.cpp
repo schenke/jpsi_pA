@@ -161,11 +161,9 @@ double StFGBW(double k, double TA, double Qs){
 
 // choose between MV and GBW - should make this choice a parameter of course
 double StF(double k, double TA, double Qs, MV *mv){
-  return mv->StF(k, TA, Qs);
-  //return StFGBW(k, TA, Qs);
+return mv->StF(k, TA, Qs);
+//return StFGBW(k, TA, Qs);
 }
-
-
 
 // Integrand for the combined J/Psi integral
 static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
@@ -298,7 +296,146 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   // d2k
   // d2k1
   
-  //remember factor 2 for p and q direction (not included yet)
+  //remember factor 2 for p and q direction 
+
+  return 0;
+}  
+
+// Integrand for the combined J/Psi integral (no b integral) for fluctuations
+static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define fqqRx xx[0]
+#define fqqRy xx[1]
+#define fqqqtilde xx[2]
+#define fqqphi xx[3]
+#define fqqM xx[4]
+#define fqqPT xx[5]
+#define fqq4k xx[6]
+#define fqq4phik xx[7]
+#define fqq4k1 xx[8]
+#define fqq4phik1 xx[9]
+
+  double kscale = 15.;
+  double pscale = 15.;
+  double Rscale = 8./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  // double bscale = 24./constants::hbarc; 
+  // Qs will be made rapidity dependent
+  double Qsp = static_cast<params*>(userdata)->Qsp;
+  double QsA = static_cast<params*>(userdata)->QsA;
+  double Y = static_cast<params*>(userdata)->Y;
+  double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
+  double by=static_cast<params*>(userdata)->by/constants::hbarc;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+  Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
+ 
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables 
+  double M = constants::mJPsi + fqqM*(2.*constants::mD-constants::mJPsi); 
+  double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
+  double qtilde = fqqqtilde*qtildescale;
+  double PT = fqqPT*pscale; 
+  //double phiPT = qqphiPT*2.*constants::PI;
+
+  double Rx = fqqRx*Rscale-Rscale/2.;
+  double Ry = fqqRy*Rscale-Rscale/2.;
+  //double bx = fqqbx*bscale-bscale/2.;
+  //double by = fqqby*bscale-bscale/2.;
+  //double R = fqqR*Rscale;
+  //double b = fqqb*bscale;
+  //double phiR = fqqphiR*2*constants::PI;
+  //double phib = fqqphib*2*constants::PI;
+  double k = fqq4k*kscale;
+  double phik = fqq4phik*2.*constants::PI;
+  double k1 = fqq4k1*kscale;
+  double phik1 = fqq4phik1*2.*constants::PI;
+
+  kinPair in;
+  in.M = M;
+  in.PT  = PT;
+  in.phi = fqqphi*2.*constants::PI; // not the PT phi
+  in.qtilde = qtilde;
+  in.Y = Y;
+  in.m = m;
+
+  kinqq out = convert(in);
+  
+  double p = out.p;
+  double phip = out.phip;
+  double q = out.q;
+  double phiq = out.phiq;
+  double yp = out.yp;
+  double yq = out.yq;
+  
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double qx = q*cos(phiq); 
+  double qy = q*sin(phiq);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double pplusqminusk1minuskx = px+qx-kx-k1x;
+  double pplusqminusk1minusky = py+qy-ky-k1y;
+  double pplusqminusk1minusk = sqrt(pplusqminusk1minuskx*pplusqminusk1minuskx
+                                    +pplusqminusk1minusky*pplusqminusk1minusky);
+  double phi_pplusqminusk1minusk = atan2(pplusqminusk1minusky,pplusqminusk1minuskx);
+
+  double pplusqminusk1x = px+qx-k1x;
+  double pplusqminusk1y = py+qy-k1y;
+  double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
+  double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
+  //double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
+ 
+  // double Rx = R*cos(phiR);
+  // double Ry = R*sin(phiR);
+  // double bx = b*cos(phib);
+  // double by = b*sin(phib);
+  // double Rminusbx = Rx-bx;
+  // double Rminusby = Ry-by;
+  // double Rminusb = sqrt(Rminusbx*Rminusbx+Rminusby*Rminusby);
+  // double phi_Rminusb = atan2(Rminusby,Rminusbx);
+  
+  double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
+
+  // get Jacobian
+  double betax = PT/sqrt(M*M+PT*PT);
+  double gammax = 1./sqrt(1.-betax*betax);
+  double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
+ 
+  double R = sqrt(Rx*Rx+Ry*Ry);
+  //double b = sqrt(bx*bx+by*by);
+  //double TA = returnTA(sqrt((Rx-bx)*(Rx-bx)+(Ry-by)*(Ry-by)),TAclass);
+  
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+
+  f = constants::alphas*double(constants::Nc)*double(constants::Nc)
+    /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, R, Qsp, mv)/(k1*k1)*H*J
+    *(StF(pplusqminusk1minusk,TA,QsA,mv)*StF(k,TA,QsA,mv))
+    *Rscale*Rscale
+    //  *bscale*bscale
+    *PT*pscale*2.*constants::PI
+    *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
+    *qtildescale
+    *2.*constants::PI
+    *k*kscale*2.*constants::PI
+    *k1*kscale*2.*constants::PI
+    *2.; // for p and q direction
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // dRxdRy
+  // dbxdby
+  // d2PT
+  // dM
+  // dqtilde
+  // dphi
+  // d2k
+  // d2k1
 
   return 0;
 }  
@@ -521,10 +658,9 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   //double bx = fgbx*bscale-bscale/2.;
   //double by = fgby*bscale-bscale/2.;
 
-  double bx=0;
-  double by=0;
 
-
+  double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
+  double by=static_cast<params*>(userdata)->by/constants::hbarc;
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
   double lambda = static_cast<params*>(userdata)->lambda;
@@ -558,10 +694,14 @@ double QsA(double pT, double roots, double y){
 
 // Main program
 int main(int argc, char *argv[]) {
+  // MPI things
   int rank=0;
   int size;
+  
+  // Options
   int readTable = 0;
   int useFluc = 0;
+  int Nevents = 1;
 
   display_logo();
 
@@ -586,9 +726,18 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--Nevents") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        Nevents = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--Nevents option requires one argument, an integer >=1." << std::endl;
+        return 1;
+      }  
+    }
   }
  
-  cout << "Options: readTable = " << readTable << ", fluctuations = " << useFluc << endl;
+  cout << "Options: read MV dipole from file yes(1)/no(0)= " << readTable << ", fluctuations on(1)/off(0) = " << useFluc << ", Number of events = " << Nevents << endl;
 
     
   // initialize MPI
@@ -701,8 +850,6 @@ int main(int argc, char *argv[]) {
     inQsA = QsAPre*Qsp(0.8,8160.,0.);
   }
 
-  double JPsi2result;
-  double JPsi2error;
   data.PT = 0.; // dummy for now
   data.pe = 0.; // dummy for now
   data.k = 0.;  // dummy for now
@@ -756,12 +903,22 @@ int main(int argc, char *argv[]) {
   //   cout << returnTA(myR,TAclass) <<  " " << TA(myR) << endl;
   // }
 
+
+ 
   double gresult;
   double gerror;
+
+  double JPsi2result;
+  double JPsi2error;
+
+  double JPsi2result2;
+  double JPsi2error2;
+
+  // Now compute midrapidity gluons
   if(useFluc == 0){
-    // gluon number
-    NDIM = 8;
+    cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl;
     // Run 8D Vegas integration
+    NDIM = 8;
     llVegas(NDIM, NCOMP, FullIntegrand, &data, NVEC,
             EPSREL, EPSABS, VERBOSE, SEED,
             MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
@@ -772,107 +929,152 @@ int main(int argc, char *argv[]) {
     gresult = (double)integral[0];
     gerror = (double)error[0];
     printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
-  }
-  else{
-    // Run 8D Vegas integration with fluctuations
-    
-    //sample b
-    double bmin = 0.;
-    double bmax = 10.;
-    
-    double xb =
-      random->genrand64_real1(); // uniformly distributed random variable
-    double b = sqrt((bmax * bmax - bmin * bmin) * xb + bmin * bmin);
-    double phib = 2.*constants::PI*random->genrand64_real1();
-    
-    data.bx = b*cos(phib);
-    data.by = b*sin(phib);
-   
-    cout << "b=" << b << ", phib=" << phib << endl;
- 
-    NDIM = 6;
-    llVegas(NDIM, NCOMP, FullIntegrandFluc, &data, NVEC,
+
+    data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
+    data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
+
+    // JPsi cross section
+    NDIM = 12;
+    llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
             EPSREL, EPSABS, VERBOSE, SEED,
             MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
             GRIDNO, NULL, NULL,
             &neval, &fail, integral, error, prob);
     
     // Print the result
-    gresult = (double)integral[0];
-    gerror = (double)error[0];
-    printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
-  }
-  
-  data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
-  data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
+    JPsi2result = (double)integral[0];
+    JPsi2error = (double)error[0];
+    printf("Forward JPsi: %.8e +- %.8e\t\n", JPsi2result, JPsi2error);
 
-  // JPsi cross section
+    data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
+    data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
+
     NDIM = 12;
-  llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
-        EPSREL, EPSABS, VERBOSE, SEED,
-        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        GRIDNO, NULL, NULL,
-        &neval, &fail, integral, error, prob);
-  
-  // Print the result
-  JPsi2result = (double)integral[0];
-  JPsi2error = (double)error[0];
-  printf("Forward JPsi: %.8f +- %.8f\t\n", JPsi2result, JPsi2error);
-
-  data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
-  data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
-
-  double JPsi2result2;
-  double JPsi2error2;
-
-  // JPsi cross section
-  NDIM = 12;
-  llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
-        EPSREL, EPSABS, VERBOSE, SEED,
-        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        GRIDNO, NULL, NULL,
-        &neval, &fail, integral, error, prob);
-  
-  // Print the result
-  JPsi2result2 = (double)integral[0];
-  JPsi2error2 = (double)error[0];
-  printf("Backward JPsi: %.8f +- %.8f\t\n", JPsi2result2, JPsi2error2);
-
-  cout << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
-
-  stringstream strfilename;
-  strfilename << "output.dat";
-  string filename;
-  filename = strfilename.str();
-  fstream fout(filename.c_str(), ios::app);
-
-  fout << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " " << QspPre << " " << QsAPre << endl;
-  fout.close();
-
-  cout << " - - - - - - - - - - - - - - - - - " << endl;
-
-  // Integrate 11D to get PT-spectrum
-  int ppoints = 30; // Points in |p| to compute
-  double pstep = 0.25; // Step width in |p|
-
-  NDIM = 11;
-  int runs = 1;
-  for (int r=0; r<runs; r++){
-    for (int i=0; i<=ppoints; i++){
-      data.PT = 0.1+i*(pstep);
-      SEED = time(NULL)+r*10000;
-      
-      llVegas(NDIM, NCOMP, JPsiIntegrandNoPT, &data, NVEC,
+    llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
             EPSREL, EPSABS, VERBOSE, SEED,
             MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
             GRIDNO, NULL, NULL,
             &neval, &fail, integral, error, prob);
+    
+    // Print the result
+    JPsi2result2 = (double)integral[0];
+    JPsi2error2 = (double)error[0];
+    printf("Backward JPsi: %.8e +- %.8e\t\n", JPsi2result2, JPsi2error2);
+
+    cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
+    
+    stringstream strfilename;
+    strfilename << "output_bIntegrated.dat";
+    string filename;
+    filename = strfilename.str();
+    fstream fout(filename.c_str(), ios::app);
+    
+    fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " " << sqrt(data.bx*data.bx+data.by*data.by) << endl;
+    fout.close();
+
+
+  }
+  else{
+    for (int ni=0; ni<Nevents; ni++){
+      // Run Vegas integration with fluctuations
+      // Make a new target
+      glauber->makeNuclei(random, constants::Bp);
+
+      // Sample b
+      double bmin = 0.;
+      double bmax = 10.;
       
+      double xb =
+        random->genrand64_real1(); // uniformly distributed random variable
+      double b = sqrt((bmax * bmax - bmin * bmin) * xb + bmin * bmin);
+      double phib = 2.*constants::PI*random->genrand64_real1();
+      
+      data.bx = b*cos(phib);
+      data.by = b*sin(phib);
+      
+      cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
+      
+      // Do gluons:
+      NDIM = 6;
+      llVegas(NDIM, NCOMP, FullIntegrandFluc, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+      
+      // Print the result
+      gresult = (double)integral[0];
+      gerror = (double)error[0];
+      printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
+      
+      // Gluons done, her comes J/Psi
+      
+      data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
+      data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
+      
+      NDIM = 10;
+      llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+      
+      // Print the result
       JPsi2result = (double)integral[0];
       JPsi2error = (double)error[0];
-      printf("%.3f \t \t%.8e \t%.8e\n", data.PT, JPsi2result, JPsi2error);
+      printf("Forward JPsi: %.8e +- %.8e\t\n", JPsi2result, JPsi2error);   
+      
+      data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
+      data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
+      
+      llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+      
+      // Print the result
+      JPsi2result2 = (double)integral[0];
+      JPsi2error2 = (double)error[0];
+      printf("Backward JPsi: %.8e +- %.8e\t\n", JPsi2result2, JPsi2error2);   
+      
+      cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
+      
+      stringstream strfilename;
+      strfilename << "output.dat";
+      string filename;
+      filename = strfilename.str();
+      fstream fout(filename.c_str(), ios::app);
+      
+      fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " " << sqrt(data.bx*data.bx+data.by*data.by) << endl;
+      fout.close();
     }
   }
+  
+  cout << " - - - - - - - - - - - - - - - - - " << endl;
+
+  // // Integrate 11D to get PT-spectrum
+  // int ppoints = 30; // Points in |p| to compute
+  // double pstep = 0.25; // Step width in |p|
+
+  // NDIM = 11;
+  // int runs = 1;
+  // for (int r=0; r<runs; r++){
+  //   for (int i=0; i<=ppoints; i++){
+  //     data.PT = 0.1+i*(pstep);
+  //     SEED = time(NULL)+r*10000;
+      
+  //     llVegas(NDIM, NCOMP, JPsiIntegrandNoPT, &data, NVEC,
+  //           EPSREL, EPSABS, VERBOSE, SEED,
+  //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+  //           GRIDNO, NULL, NULL,
+  //           &neval, &fail, integral, error, prob);
+      
+  //     JPsi2result = (double)integral[0];
+  //     JPsi2error = (double)error[0];
+  //     printf("%.3f \t \t%.8e \t%.8e\n", data.PT, JPsi2result, JPsi2error);
+  //   }
+  // }
     
   delete Glauber_param;
   delete random;
