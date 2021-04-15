@@ -6,11 +6,11 @@
 
 
 find_path(Cuba_INCLUDE_DIR cuba.h
-          HINTS /usr/include
+          HINTS /usr/include /project/projectdirs/m1820/jpsi_pA/Cuba-4.2.1
           PATH_SUFFIXES Cuba )
 
 find_library(Cuba_LIBRARY NAMES cuba Cuba
-             HINTS /usr/lib64 )
+             HINTS /usr/lib64 /project/projectdirs/m1820/jpsi_pA/Cuba-4.2.1)
 
 set(Cuba_LIBRARIES ${Cuba_LIBRARY} )
 set(Cuba_INCLUDE_DIRS ${Cuba_INCLUDE_DIR} )
