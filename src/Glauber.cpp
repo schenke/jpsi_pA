@@ -271,9 +271,8 @@ void Glauber::makeNuclei(Random *random, double Bp)
   //       	  Target.nucleonList.at(i).quarkList.push_back(sampleQuark(random));
   //       	}
   //           }
-  //       }
-    } 
-   
+  //       } 
+  
   generateNucleusTA(&Target, Bp); 
 }
 

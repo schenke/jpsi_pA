@@ -316,8 +316,8 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
 #define fqq4k1 xx[8]
 #define fqq4phik1 xx[9]
 
-  double kscale = 15.;
-  double pscale = 15.;
+  double kscale = 30.;
+  double pscale = 30.;
   double Rscale = 8./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   // double bscale = 24./constants::hbarc; 
   // Qs will be made rapidity dependent
@@ -647,8 +647,8 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 #define fgp xx[5]
 
 
-  double kscale = 15.;
-  double pscale = 15.;
+  double kscale = 30.;
+  double pscale = 30.;
   double Rscale = 8./constants::hbarc;
   double bscale = 24./constants::hbarc;
   //double Rscale = 1./constants::hbarc;
