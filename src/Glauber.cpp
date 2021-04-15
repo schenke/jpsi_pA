@@ -290,6 +290,7 @@ void Glauber::generateNucleusTA(Nucleus *nuc, double Bp){
     double x = (double(ix)/200.*20.-10.);
     for(int iy=0; iy<200; iy++){
       double y = (double(iy)/200.*20.-10.);
+      TAgrid2D[ix][iy] = 0.;
       for(unsigned int i=0; i<nuc->nucleonList.size(); i++){
         double xpos = nuc->nucleonList.at(i).x; 
         double ypos = nuc->nucleonList.at(i).y; 
