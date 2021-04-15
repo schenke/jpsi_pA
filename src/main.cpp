@@ -834,8 +834,10 @@ int main(int argc, char *argv[]) {
 
   params data;
 
-  double QspPre = 0.43; // prefactors for scaling
-  double QsAPre = 0.43; // prefactors for scaling
+  //  double QspPre = 0.43; // prefactors for scaling
+  //  double QsAPre = 0.43; // prefactors for scaling
+  double QspPre = 0.7; // prefactors for scaling
+  double QsAPre = 0.7; // prefactors for scaling
 
 
   double inQsp;
@@ -1007,6 +1009,11 @@ int main(int argc, char *argv[]) {
       gerror = (double)error[0];
       printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
       
+      if(gresult<1.){
+        cout << "Gluon number < 1, skipping event" << endl;
+        continue;
+      }
+
       // Gluons done, her comes J/Psi
       
       data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
@@ -1041,7 +1048,7 @@ int main(int argc, char *argv[]) {
       cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
       
       stringstream strfilename;
-      strfilename << "output.dat";
+      strfilename << "output_" << rank << ".dat";
       string filename;
       filename = strfilename.str();
       fstream fout(filename.c_str(), ios::app);
