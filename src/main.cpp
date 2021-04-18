@@ -318,7 +318,7 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
 
   double kscale = 30.;
   double pscale = 30.;
-  double Rscale = 8./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   // double bscale = 24./constants::hbarc; 
   // Qs will be made rapidity dependent
   double Qsp = static_cast<params*>(userdata)->Qsp;
@@ -751,8 +751,8 @@ int main(int argc, char *argv[]) {
   messenger.flush("info");
   
   long int seed = time(NULL)+rank*100000;
-  //long int seed = 1;
-
+  //long int seed = 3;
+ 
   Parameters *Glauber_param;
   Glauber_param = new Parameters();
   Glauber_param->setParameters();
@@ -795,6 +795,8 @@ int main(int argc, char *argv[]) {
   int NCOMP = 1;
   const long long int NVEC = 1;
   //  double EPSREL = 5e-4;
+  //  double EPSREL = 5e-4;
+  //double EPSABS = 1e-15;
   double EPSREL = 5e-4;
   double EPSABS = 1e-15;
   int VERBOSE = 0;
@@ -1044,8 +1046,13 @@ int main(int argc, char *argv[]) {
       JPsi2result2 = (double)integral[0];
       JPsi2error2 = (double)error[0];
       printf("Backward JPsi: %.8e +- %.8e\t\n", JPsi2result2, JPsi2error2);   
-      
-      cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
+
+      double TA = returnTA2D(-data.bx,-data.by,glauber);
+
+      cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result 
+           << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 
+           << " " << sqrt(data.bx*data.bx+data.by*data.by) 
+           << " " << TA << endl;
       
       stringstream strfilename;
       strfilename << "output_" << rank << ".dat";
@@ -1053,7 +1060,10 @@ int main(int argc, char *argv[]) {
       filename = strfilename.str();
       fstream fout(filename.c_str(), ios::app);
       
-      fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " " << sqrt(data.bx*data.bx+data.by*data.by) << endl;
+      fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result 
+           << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " " 
+           << sqrt(data.bx*data.bx+data.by*data.by) 
+           << " " << TA << endl;
       fout.close();
     }
   }
