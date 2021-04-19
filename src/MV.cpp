@@ -84,7 +84,6 @@ double MV::Phip(double k, double R, double Qs){
 
   double A = constants::CA/4./constants::CF*exp(-R*R/2./constants::Bp)*Qs*Qs;
   
-  //int iA = int(log(A+1.)*150.); 
   int iA = int(A/deltaA); 
   int ik = int((k+0.0001)/deltak);
   //  cout << iA << " " << ik << endl;

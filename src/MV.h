@@ -19,21 +19,21 @@ class MV{
  private:
   static double MVintegrandForList(double z, void * params);
   double ** Phip_array;
-  int sizeA=800;
+  int sizeA=1600;
   int sizek=1000;
   double deltaA=1./80.;
   double deltak=1./10.;
   
  public:
   MV(){  
-    Phip_array = new double*[800];
-    for (int i = 0; i < 800; i++) {
-      Phip_array[i] = new double[1000];
+    Phip_array = new double*[sizeA];
+    for (int i = 0; i < sizeA; i++) {
+      Phip_array[i] = new double[sizek];
     }
   };
 
   ~MV(){
-    for(int i = 0; i < 800; ++i) {
+    for(int i = 0; i < sizeA; ++i) {
       delete[] Phip_array[i];
     }
     delete[] Phip_array;
