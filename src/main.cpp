@@ -802,7 +802,10 @@ int main(int argc, char *argv[]) {
   int VERBOSE = 0;
   int LAST = 4;
   const long long int MINEVAL = 0;
-  const long long int MAXEVAL = 5000000000;
+  
+  /// put the large number back in !!! 
+  //  const long long int MAXEVAL = 5000000000;
+  const long long int MAXEVAL = 50000000;
   int KEY = 0;
   
   //vegas
@@ -838,8 +841,8 @@ int main(int argc, char *argv[]) {
 
   //  double QspPre = 0.43; // prefactors for scaling
   //  double QsAPre = 0.43; // prefactors for scaling
-  double QspPre = 0.5; // prefactors for scaling
-  double QsAPre = 0.5; // prefactors for scaling
+  double QspPre = 0.6; // prefactors for scaling
+  double QsAPre = 0.6; // prefactors for scaling
 
 
   double inQsp;
@@ -997,10 +1000,16 @@ int main(int argc, char *argv[]) {
       data.by = b*sin(phib);
       
       cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
+
+      // fluctuate the proton Qs:
+      double QspFac = (exp(random->Gauss(0, 0.5))) /
+        std::exp(0.5 * 0.5 / 2.0);
+      
+      cout << "QspFac=" << QspFac << endl;
       
       // Do gluons:
 
-      data.Qsp = inQsp; // forward proton Saturation scale in GeV
+      data.Qsp = inQsp*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA; // forward Pb Saturation scale in GeV
 
       NDIM = 6;
@@ -1022,7 +1031,7 @@ int main(int argc, char *argv[]) {
 
       // Gluons done, her comes J/Psi
       
-      data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
+      data.Qsp = inQsp_fwd*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
       
       NDIM = 10;
@@ -1037,7 +1046,7 @@ int main(int argc, char *argv[]) {
       JPsi2error = (double)error[0];
       printf("Forward JPsi: %.8e +- %.8e\t\n", JPsi2result, JPsi2error);   
       
-      data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
+      data.Qsp = inQsp_bck*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
       
       llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
