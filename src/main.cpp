@@ -1002,8 +1002,8 @@ int main(int argc, char *argv[]) {
       cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
 
       // fluctuate the proton Qs:
-      double QspFac = sqrt((exp(random->Gauss(0, 2.))) /
-                           std::exp(2. * 2. / 2.0)); //
+      double QspFac = sqrt((exp(random->Gauss(0, 0.5))) /
+                           std::exp(0.5 * 0.5 / 2.0)); //
       
       cout << "QspFac=" << QspFac << endl;
       
