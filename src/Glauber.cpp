@@ -273,10 +273,10 @@ void Glauber::makeNuclei(Random *random, double Bp)
   //           }
   //       } 
   
-  generateNucleusTA(&Target, Bp); 
+  generateNucleusTA(&Target, random, Bp); 
 }
 
-void Glauber::generateNucleusTA(Nucleus *nuc, double Bp){
+void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp){
   // Bp is in GeV^-2
   double hbarc = 0.1973269804;
   
@@ -286,6 +286,14 @@ void Glauber::generateNucleusTA(Nucleus *nuc, double Bp){
   // filename = strfilename.str();
   // fstream fout(filename.c_str(), ios::out);
 
+  double gauss[nuc->nucleonList.size()];
+
+  // width=0.5 for now
+  for (unsigned int i = 0; i < nuc->nucleonList.size(); i++) {
+    gauss[i] = (exp(random->Gauss(0, 0.5))) /
+      std::exp(0.5 * 0.5 / 2.0);
+  }
+
   for(int ix=0; ix<200; ix++){
     double x = (double(ix)/200.*20.-10.);
     for(int iy=0; iy<200; iy++){
@@ -294,7 +302,7 @@ void Glauber::generateNucleusTA(Nucleus *nuc, double Bp){
       for(unsigned int i=0; i<nuc->nucleonList.size(); i++){
         double xpos = nuc->nucleonList.at(i).x; 
         double ypos = nuc->nucleonList.at(i).y; 
-        TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))/hbarc/hbarc/2./Bp);
+        TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))/hbarc/hbarc/2./Bp)*gauss[i];
       }
       //      fout << x << " " << y << " " << TAgrid2D[ix][iy] << endl;
     }

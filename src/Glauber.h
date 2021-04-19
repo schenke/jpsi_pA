@@ -69,7 +69,7 @@ class Glauber{
   Quark sampleQuark(Random *random);
   double ExponentialDistribution(double a, double r);
   void makeNuclei(Random *random, double Bp);
-  void generateNucleusTA(Nucleus *nuc, double Bp);
+  void generateNucleusTA(Nucleus *nuc, Random *random, double Bp);
   double returnNucleusTA(double x, double y);
 
   Nucleus getTarget(){return Target;}
