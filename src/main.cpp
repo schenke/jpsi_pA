@@ -751,7 +751,7 @@ int main(int argc, char *argv[]) {
   messenger.flush("info");
   
   long int seed = time(NULL)+rank*100000;
-  //long int seed = 3;
+  //long int seed = 7;
  
   Parameters *Glauber_param;
   Glauber_param = new Parameters();
@@ -999,6 +999,10 @@ int main(int argc, char *argv[]) {
       cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
       
       // Do gluons:
+
+      data.Qsp = inQsp; // forward proton Saturation scale in GeV
+      data.QsA = inQsA; // forward Pb Saturation scale in GeV
+
       NDIM = 6;
       llVegas(NDIM, NCOMP, FullIntegrandFluc, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
