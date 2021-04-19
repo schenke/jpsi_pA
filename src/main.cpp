@@ -1025,7 +1025,7 @@ int main(int argc, char *argv[]) {
       printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
       
       if(gresult<1.){
-        cout << "Gluon number < 0.1, skipping event" << endl;
+        cout << "Gluon number < 1, skipping event" << endl;
         continue;
       }
 
