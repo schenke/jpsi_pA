@@ -696,7 +696,7 @@ double QsA(double pT, double roots, double y){
 int main(int argc, char *argv[]) {
   // MPI things
   int rank=0;
-  int size;
+  int size=1;
   
   // Options
   int readTable = 0;
@@ -838,8 +838,8 @@ int main(int argc, char *argv[]) {
 
   //  double QspPre = 0.43; // prefactors for scaling
   //  double QsAPre = 0.43; // prefactors for scaling
-  double QspPre = 0.7; // prefactors for scaling
-  double QsAPre = 0.7; // prefactors for scaling
+  double QspPre = 0.5; // prefactors for scaling
+  double QsAPre = 0.5; // prefactors for scaling
 
 
   double inQsp;
