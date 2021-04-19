@@ -280,11 +280,11 @@ void Glauber::generateNucleusTA(Nucleus *nuc, double Bp){
   // Bp is in GeV^-2
   double hbarc = 0.1973269804;
   
-  stringstream strfilename;
-  strfilename << "TA.dat";
-  string filename;
-  filename = strfilename.str();
-  fstream fout(filename.c_str(), ios::out);
+  // stringstream strfilename;
+  // strfilename << "TA.dat";
+  // string filename;
+  // filename = strfilename.str();
+  // fstream fout(filename.c_str(), ios::out);
 
   for(int ix=0; ix<200; ix++){
     double x = (double(ix)/200.*20.-10.);
@@ -296,10 +296,10 @@ void Glauber::generateNucleusTA(Nucleus *nuc, double Bp){
         double ypos = nuc->nucleonList.at(i).y; 
         TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))/hbarc/hbarc/2./Bp);
       }
-      fout << x << " " << y << " " << TAgrid2D[ix][iy] << endl;
+      //      fout << x << " " << y << " " << TAgrid2D[ix][iy] << endl;
     }
   }
-  fout.close();
+  //  fout.close();
 }
 
 //takes x and y in GeV^-1
