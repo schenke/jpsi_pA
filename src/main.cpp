@@ -851,8 +851,8 @@ int main(int argc, char *argv[]) {
 
   //  double QspPre = 0.43; // prefactors for scaling
   //  double QsAPre = 0.43; // prefactors for scaling
-  double QspPre = 0.5; // prefactors for scaling
-  double QsAPre = 0.5; // prefactors for scaling
+  double QspPre = 0.6; // prefactors for scaling
+  double QsAPre = 0.6; // prefactors for scaling
 
 
   double inQsp;
@@ -879,7 +879,7 @@ int main(int argc, char *argv[]) {
   data.mv = mv; // MV class
   data.TAclass = TAclass; // TA class
   data.glauberClass = glauber; // Glauber class
-  data.protonSizeFactor = 1.; // allows to make proton larger at small x and smaller at large x
+  data.protonSizeFactor = 1.; // allows to make proton larger at small x and smaller at large x (not used, leave at one)
  
   cout << "Qsp(y=0) = " << inQsp << endl;
   cout << "QsA(y=0) = " << inQsA << endl;
@@ -1022,7 +1022,6 @@ int main(int argc, char *argv[]) {
 
       data.Qsp = inQsp*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA; // forward Pb Saturation scale in GeV
-      data.protonSizeFactor = 1.; // allows to make proton larger at small x and smaller at large x
 
       NDIM = 6;
       llVegas(NDIM, NCOMP, FullIntegrandFluc, &data, NVEC,
@@ -1045,7 +1044,6 @@ int main(int argc, char *argv[]) {
       
       data.Qsp = inQsp_fwd*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
-      data.protonSizeFactor = 0.25; // allows to make proton larger at small x and smaller at large x
       
       NDIM = 10;
       llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
@@ -1061,7 +1059,6 @@ int main(int argc, char *argv[]) {
       
       data.Qsp = inQsp_bck*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
-      data.protonSizeFactor = 4.; // allows to make proton larger at small x and smaller at large x
       
       llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
