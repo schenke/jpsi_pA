@@ -80,9 +80,9 @@ void MV::computePhip(){
 }
 
 
-double MV::Phip(double k, double R, double Qs){
+double MV::Phip(double k, double R, double Qs, double sizeFactor){
 
-  double A = constants::CA/4./constants::CF*exp(-R*R/2./constants::Bp)*Qs*Qs;
+  double A = constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*Qs*Qs;
   
   int iA = int(A/deltaA); 
   int ik = int((k+0.0001)/deltak);
