@@ -705,8 +705,8 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 
 double Qsp(double pT, double roots, double y){
   //return pow((0.0003*roots/pT/exp(-y)),0.288/2.);
-  //  return pow((0.000041*roots/pT/exp(-y)),0.277/2.);
-  return pow((0.00008*roots/pT/exp(-y)),0.9/2.);
+  return pow((0.000041*roots/pT/exp(-y)),0.277/2.);
+  //return pow((0.00008*roots/pT/exp(-y)),0.9/2.);
   //return 0.5;
 }
 
