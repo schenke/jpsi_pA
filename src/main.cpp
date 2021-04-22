@@ -1033,7 +1033,7 @@ int main(int argc, char *argv[]) {
       // fluctuate the proton Qs:
       // it is included when using quarks in the proton
       double QspFac = 1.;
-      //      QspFac = sqrt((exp(random->Gauss(0, 0.5))) /
+      //    QspFac = sqrt((exp(random->Gauss(0, 0.5))) /
       //              std::exp(0.5 * 0.5 / 2.0)); //
       
       cout << "QspFac=" << QspFac << endl;

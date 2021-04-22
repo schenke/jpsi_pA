@@ -324,13 +324,14 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp){
   // Bp is in GeV^-2
   double hbarc = 0.1973269804;
   double Bq = 0.4;
-
+  int useQuarks = 0;
+  
   // stringstream strfilename;
   // strfilename << "TA.dat";
   // string filename;
   // filename = strfilename.str();
   // fstream fout(filename.c_str(), ios::out);
-
+  
   double gauss[nuc->nucleonList.size()][3];
   double xq[nuc->nucleonList.size()][3];
   double yq[nuc->nucleonList.size()][3];
@@ -342,23 +343,24 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp){
     }
   }
   
-  for (unsigned int i = 0; i < nuc->nucleonList.size(); i++) {
-    double avgxq = 0.;
-    double avgyq = 0.;
-    for (int iq = 0; iq < 3; iq++) {
-      xq[i][iq] = sqrt(Bp * hbarc * hbarc) * random->Gauss();
-      yq[i][iq] = sqrt(Bp * hbarc * hbarc) * random->Gauss();
-    }
-    for (int iq = 0; iq < 3; iq++) {
-      avgxq += xq[i][iq];
-      avgyq += yq[i][iq];
-    }
-    for (int iq = 0; iq < 3; iq++) {
-      xq[i][iq] -= avgxq / 3.;
-      yq[i][iq] -= avgyq / 3.;
+  if (useQuarks == 1){
+    for (unsigned int i = 0; i < nuc->nucleonList.size(); i++) {
+      double avgxq = 0.;
+      double avgyq = 0.;
+      for (int iq = 0; iq < 3; iq++) {
+        xq[i][iq] = sqrt(Bp * hbarc * hbarc) * random->Gauss();
+        yq[i][iq] = sqrt(Bp * hbarc * hbarc) * random->Gauss();
+      }
+      for (int iq = 0; iq < 3; iq++) {
+        avgxq += xq[i][iq];
+        avgyq += yq[i][iq];
+      }
+      for (int iq = 0; iq < 3; iq++) {
+        xq[i][iq] -= avgxq / 3.;
+        yq[i][iq] -= avgyq / 3.;
+      }
     }
   }
-
   // //  double gauss[nuc->nucleonList.size()];
 
   // // width=0.5 for now
@@ -375,13 +377,18 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp){
       double y = (double(iy)/200.*20.-10.);
       TAgrid2D[ix][iy] = 0.;
       for(unsigned int i=0; i<nuc->nucleonList.size(); i++){
-        for (int iq = 0; iq < 3; iq++) {
-          double xpos = nuc->nucleonList.at(i).x+xq[i][iq]; 
-          double ypos = nuc->nucleonList.at(i).y+yq[i][iq]; 
-          //          TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))/hbarc/hbarc/2./Bp)*gauss[i];
-          TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))
-                                  /hbarc/hbarc/2./Bq)*gauss[i][iq]/ (2. * Bq)/3. * (2. * Bp) ; //Pi's cancel. I want to normalize to 1 at zero.
-        
+        if(useQuarks == 1){
+          for (int iq = 0; iq < 3; iq++) {
+            double xpos = nuc->nucleonList.at(i).x+xq[i][iq]; 
+            double ypos = nuc->nucleonList.at(i).y+yq[i][iq]; 
+            TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))
+                                    /hbarc/hbarc/2./Bq)*gauss[i][iq]/ (2. * Bq)/3. * (2. * Bp) ; //Pi's cancel. I want to normalize to 1 at zero.
+          }
+        }
+        else{
+          double xpos = nuc->nucleonList.at(i).x; 
+          double ypos = nuc->nucleonList.at(i).y; 
+          TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))/hbarc/hbarc/2./Bp)*gauss[i][0];
         }
       }
       //fout << x << " " << y << " " << TAgrid2D[ix][iy] << endl;
