@@ -898,9 +898,10 @@ int main(int argc, char *argv[]) {
   data.glauberClass = glauber; // Glauber class
   data.protonSizeFactor = 1.; // allows to make proton larger at small x and smaller at large x (not used, leave at one)
  
+  if (rank==0){
   cout << "Qsp(y=0) = " << inQsp << endl;
   cout << "QsA(y=0) = " << inQsA << endl;
-
+  }
 
   double inQsp_fwd;
   double inQsA_fwd;
@@ -916,8 +917,10 @@ int main(int argc, char *argv[]) {
     inQsA_fwd = QsAPre*QsA(3.,8160.,3.);
   }
 
+  if (rank==0){
   cout << "Qsp(y=3) = " << inQsp_fwd << endl;
   cout << "QsA(y=3) = " << inQsA_fwd << endl;
+  }
 
   double inQsp_bck;
   double inQsA_bck;
@@ -933,9 +936,10 @@ int main(int argc, char *argv[]) {
     inQsA_bck = QsAPre*QsA(2.7,8160.,-3.8);
   }
 
+  if (rank==0){
   cout << "Qsp(y=-3.8) = " << inQsp_bck << endl;
   cout << "QsA(y=-3.8) = " << inQsA_bck << endl;
-
+  }
   // // test the interpolation routine
   // for(int i=0;i<100;i++){
   //   double myR = double(i)/10./constants::hbarc;
@@ -1039,7 +1043,7 @@ int main(int argc, char *argv[]) {
       //    QspFac = sqrt((exp(random->Gauss(0, 0.5))) /
       //              std::exp(0.5 * 0.5 / 2.0)); //
       
-      cout << "QspFac=" << QspFac << endl;
+      //      cout << "QspFac=" << QspFac << endl;
       
       // Do gluons:
 

@@ -184,7 +184,7 @@ void Parameters::setParameters()
     convert.str(""); convert.clear(); } 
 
 
-  int rank = 0;//MPI::COMM_WORLD.Get_rank(); //number of current processor
+  int rank = MPI::COMM_WORLD.Get_rank(); //number of current processor
   if(rank==0)
     {
   // output parameter info
