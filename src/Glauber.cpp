@@ -324,7 +324,7 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp){
   // Bp is in GeV^-2
   double hbarc = 0.1973269804;
   double Bq = 0.4;
-  int useQuarks = 0;
+  int useQuarks = 1;
   
   // stringstream strfilename;
   // strfilename << "TA.dat";
