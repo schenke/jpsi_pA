@@ -274,7 +274,51 @@ void Glauber::makeNuclei(Random *random, double Bp)
   //       } 
   
   generateNucleusTA(&Target, random, Bp); 
+  generateProtonTp(&Target, random, Bp); 
+
 }
+
+void Glauber::generateProtonTp(Nucleus *nuc, Random *random, double Bp){
+  // Bp, Bq are in GeV^-2
+  double hbarc = 0.1973269804;
+  double Bq = 0.4;
+  
+  double gauss[3];
+  double xq[3];
+  double yq[3];
+
+  for (unsigned int i = 0; i < 3; i++) {
+    gauss[i] = (exp(random->Gauss(0, 0.5))) /
+      std::exp(0.5 * 0.5 / 2.0);
+  }
+  double avgxq = 0.;
+  double avgyq = 0.;
+  for (int iq = 0; iq < 3; iq++) {
+    xq[iq] = sqrt(Bp * hbarc * hbarc) * random->Gauss();
+    yq[iq] = sqrt(Bp * hbarc * hbarc) * random->Gauss();
+  }
+  for (int iq = 0; iq < 3; iq++) {
+    avgxq += xq[iq];
+    avgyq += yq[iq];
+  }
+  for (int iq = 0; iq < 3; iq++) {
+    xq[iq] -= avgxq / 3.;
+    yq[iq] -= avgyq / 3.;
+  }
+  
+  for(int ix=0; ix<40; ix++){
+    double x = (double(ix)/40.*4.-2.);
+    for(int iy=0; iy<40; iy++){
+      double y = (double(iy)/40.*4.-2.);
+      Tpgrid2D[ix][iy] = 0.;
+      for(unsigned int i=0; i<3; i++){
+        Tpgrid2D[ix][iy] += exp(-((x-xq[i])*(x-xq[i])+(y-yq[i])*(y-yq[i]))/hbarc/hbarc/2./Bq)*gauss[i]/ (2. * Bq)/3. * (2. * Bp) ; //Pi's cancel. I want to normalize to 1 at zero.
+      }
+    }
+  }
+}
+
+
 
 void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp){
   // Bp is in GeV^-2
@@ -290,9 +334,13 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp){
 
   // width=0.5 for now
   for (unsigned int i = 0; i < nuc->nucleonList.size(); i++) {
+    //   gauss[i] = (exp(random->Gauss(0, 0.5))) /
+    //  std::exp(0.5 * 0.5 / 2.0);
     gauss[i] = (exp(random->Gauss(0, 0.5))) /
       std::exp(0.5 * 0.5 / 2.0);
   }
+
+
 
   for(int ix=0; ix<200; ix++){
     double x = (double(ix)/200.*20.-10.);
@@ -342,6 +390,40 @@ double Glauber::returnNucleusTA(double x, double y){
   double TA = (double(iy+1)-(y*hbarc+10.)*200./20.)*TAx1 + ((y*hbarc+10.)*200./20.-double(iy))*TAx2;
 
   return TA;
+}
+
+//takes x and y in GeV^-1
+double Glauber::returnProtonTp(double x, double y){
+  double hbarc = 0.1973269804;
+  // simple linear interpolation
+  
+  if (x*hbarc<-1.9 || x*hbarc>1.9){
+    return 0.;
+  }      
+  if (y*hbarc<-1.9 || y*hbarc>1.9){
+    return 0.;
+  }      
+ 
+  int ix = int((x*hbarc+2.)*40./4.);
+  int iy = int((y*hbarc+2.)*40./4.);
+
+  if (ix<0 || ix>38){
+    cout << " x out of range: " << endl;
+    cout << "x = " << x*hbarc << endl;
+    cout << "ix = " << ix << endl;
+  }
+  if (iy<0 || iy>38){
+    cout << " y out of range: " << endl;
+    cout << "y = " << y*hbarc << endl;
+    cout << "iy = " << iy << endl;
+    return 0.;
+  }
+
+  double Tpx1 = (double(ix+1)-(x*hbarc+2.)*40./4.)*Tpgrid2D[ix][iy] + ((x*hbarc+2.)*40./4.-double(ix))*Tpgrid2D[ix+1][iy];
+  double Tpx2 = (double(ix+1)-(x*hbarc+2.)*40./4.)*Tpgrid2D[ix][iy+1] + ((x*hbarc+2.)*40./4.-double(ix))*Tpgrid2D[ix+1][iy+1];
+  double Tp = (double(iy+1)-(y*hbarc+2.)*40./4.)*Tpx1 + ((y*hbarc+2.)*40./4.-double(iy))*Tpx2;
+
+  return Tp;
 }
 
 

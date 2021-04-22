@@ -33,6 +33,7 @@ using namespace std;
 void display_logo();
 
 // Constants to be used
+// MV.cpp has constants too, make sure they are the same... needs to be improved
 namespace constants {
   const double PI = 3.14159265358979323846;
   const int Nc = 3;
@@ -128,6 +129,10 @@ double returnTA2D(double x, double y, Glauber *glauberClass){
   return glauberClass->returnNucleusTA(x, y);
 }
 
+double returnTp2D(double x, double y, Glauber *glauberClass){
+  return glauberClass->returnProtonTp(x, y);
+}
+
 double returnTA(double R, TAInt *TAclass){
 return TAclass->returnTA(R);
 }
@@ -139,8 +144,9 @@ double PhipGBW(double k, double R, double Qs){
 }
 
 // choose between MV and GBW - should make this choice a parameter of course
-double Phip(double k, double R, double Qs, double sizeFactor, MV *mv){
-  return mv->Phip(k, R, Qs, sizeFactor);
+double Phip(double k, double RorTp, double Qs, double sizeFactor, MV *mv){
+  return mv->PhipFluc(k, RorTp, Qs, sizeFactor);
+  //  return mv->Phip(k, RorTp, Qs, sizeFactor);
   //return PhipGBW(k, R, Qs);
 }
 
@@ -415,10 +421,12 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   //double TA = returnTA(sqrt((Rx-bx)*(Rx-bx)+(Ry-by)*(Ry-by)),TAclass);
   
   double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
 
+  // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor, mv)/(k1*k1)*H*J
+    *Phip(k1, Tp, Qsp, sizeFactor, mv)/(k1*k1)*H*J
     *(StF(pplusqminusk1minusk,TA,QsA,mv)*StF(k,TA,QsA,mv))
     *Rscale*Rscale
     //  *bscale*bscale
@@ -657,7 +665,7 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 
   double kscale = 30.;
   double pscale = 30.;
-  double Rscale = 8./constants::hbarc;
+  double Rscale = 4./constants::hbarc;
   double bscale = 24./constants::hbarc;
   //double Rscale = 1./constants::hbarc;
   //double bscale = 4./constants::hbarc;
@@ -680,11 +688,13 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 
   double R = sqrt(Rx*Rx+Ry*Ry);
   double b = sqrt(bx*bx+by*by);
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
   //double TA = returnTA(sqrt((Rx-bx)*(Rx-bx)+(Ry-by)*(Ry-by)),TAclass);
- 
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
+
+  // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
   f = constants::alphas/constants::CF/(fgp*pscale+lambda)/(fgp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-    *Phip(fgk*kscale, R, Qsp, sizeFactor, mv)*Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv)
+    *Phip(fgk*kscale, Tp, Qsp, sizeFactor, mv)*Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv)
     *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
     *Rscale*Rscale  //dRxdRy
     //    *bscale*bscale  //bdxdby
@@ -696,10 +706,12 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 double Qsp(double pT, double roots, double y){
   //return pow((0.0003*roots/pT/exp(-y)),0.288/2.);
   return pow((0.000041*roots/pT/exp(-y)),0.277/2.);
+  //return 0.5;
 }
 
 double QsA(double pT, double roots, double y){
-  return sqrt(0.4*pow(208.,(1./3.))*pow(Qsp(pT,roots,y),2.));
+  //  return sqrt(0.4*pow(208.,(1./3.))*pow(Qsp(pT,roots,y),2.));
+  return pow((0.000041*roots/pT/exp(-y)),0.277/2.);
 }
 
 // Main program
@@ -815,7 +827,7 @@ int main(int argc, char *argv[]) {
   
   /// put the large number back in !!! 
   //const long long int MAXEVAL = 5000000000;
-  const long long int MAXEVAL = 100000000;
+  const long long int MAXEVAL = 5000000;
   int KEY = 0;
   
   //vegas
@@ -851,8 +863,8 @@ int main(int argc, char *argv[]) {
 
   //  double QspPre = 0.43; // prefactors for scaling
   //  double QsAPre = 0.43; // prefactors for scaling
-  double QspPre = 0.6; // prefactors for scaling
-  double QsAPre = 0.6; // prefactors for scaling
+  double QspPre = 0.5; // prefactors for scaling
+  double QsAPre = 0.5; // prefactors for scaling
 
 
   double inQsp;
@@ -863,8 +875,10 @@ int main(int argc, char *argv[]) {
     inQsA = QsAPre*QsA(0.8,8160.,0.);
   }
   else{
+    //    inQsp = QspPre*Qsp(0.8,8160.,0.);
+    //inQsA = QsAPre*Qsp(0.8,8160.,0.);
     inQsp = QspPre*Qsp(0.8,8160.,0.);
-    inQsA = QsAPre*Qsp(0.8,8160.,0.);
+    inQsA = QsAPre*QsA(0.8,8160.,0.);
   }
 
   data.PT = 0.; // dummy for now
@@ -893,8 +907,10 @@ int main(int argc, char *argv[]) {
     inQsA_fwd = QsAPre*QsA(3,8160.,3.);
   }
   else{
-    inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
-    inQsA_fwd = QsAPre*Qsp(3,8160.,3.);
+    //    inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
+    //inQsA_fwd = QsAPre*Qsp(3,8160.,3.);
+    inQsp_fwd = QspPre*Qsp(3.,8160.,-3.);
+    inQsA_fwd = QsAPre*QsA(3.,8160.,3.);
   }
 
   cout << "Qsp(y=3) = " << inQsp_fwd << endl;
@@ -908,8 +924,10 @@ int main(int argc, char *argv[]) {
     inQsA_bck = QsAPre*QsA(2.7,8160.,-3.8);
   }
   else{
+    //   inQsp_bck = QspPre*Qsp(2.7,8160.,3.8);
+    //inQsA_bck = QsAPre*Qsp(2.7,8160.,-3.8);
     inQsp_bck = QspPre*Qsp(2.7,8160.,3.8);
-    inQsA_bck = QsAPre*Qsp(2.7,8160.,-3.8);
+    inQsA_bck = QsAPre*QsA(2.7,8160.,-3.8);
   }
 
   cout << "Qsp(y=-3.8) = " << inQsp_bck << endl;
@@ -1013,8 +1031,10 @@ int main(int argc, char *argv[]) {
       cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
 
       // fluctuate the proton Qs:
-      double QspFac = sqrt((exp(random->Gauss(0, 0.5))) /
-                           std::exp(0.5 * 0.5 / 2.0)); //
+      // it is included when using quarks in the proton
+      double QspFac = 1.;
+      //      QspFac = sqrt((exp(random->Gauss(0, 0.5))) /
+      //              std::exp(0.5 * 0.5 / 2.0)); //
       
       cout << "QspFac=" << QspFac << endl;
       

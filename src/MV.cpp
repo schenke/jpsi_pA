@@ -17,7 +17,7 @@ double MV::MVintegrandForList(double z, void * params) {
   double CA = constants::CA;
   double CF = constants::CF;
   double Bp = constants::Bp;
-  double lambda = 0.2; // IR regulator in GeV
+  double lambda = 0.3; // IR regulator in GeV
   double A = ((double *)params)[0];
   double k = ((double *)params)[1];
   double f = 2.*constants::PI*pow(2.718281828+(1./lambda/lambda)/z/z,-A*z*z)*z*gsl_sf_bessel_J0(z*k);
@@ -80,6 +80,32 @@ void MV::computePhip(){
 }
 
 
+double MV::PhipFluc(double k, double Tp, double Qs, double sizeFactor){
+
+  double A = constants::CA/4./constants::CF*Tp*Qs*Qs;
+  
+  int iA = int(A/deltaA); 
+  int ik = int((k+0.0001)/deltak);
+  //  cout << iA << " " << ik << endl;
+  
+  if (iA>=sizeA){
+    cerr << "MV::Phip: A out of range." << endl;
+    return 0.;
+  }
+  if (ik>=sizek){
+    cerr << "MV::Phip: k out of range." << endl;
+    return 0.;
+  }
+
+  //  cout << iA << endl;
+
+  double Phip1 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik] + (A/deltaA-double(iA))*Phip_array[iA+1][ik];
+  double Phip2 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik+1] + (A/deltaA-double(iA))*Phip_array[iA+1][ik+1];
+  double result = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  //cout << "Phip=" << result << endl;
+  return k*k*constants::Nc/4./constants::alphas*result;
+}
+
 double MV::Phip(double k, double R, double Qs, double sizeFactor){
 
   double A = constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*Qs*Qs;
@@ -105,6 +131,8 @@ double MV::Phip(double k, double R, double Qs, double sizeFactor){
   //cout << "Phip=" << result << endl;
   return k*k*constants::Nc/4./constants::alphas*result;
 }
+
+
 
 double MV::Phit(double k, double TA, double Qs){
 

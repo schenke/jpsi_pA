@@ -41,6 +41,7 @@ class MV{
   
   void computePhip();
   double Phip(double k, double R, double Qs, double sizeFactor);
+  double PhipFluc(double k, double Tp, double Qs, double sizeFactor);
   double Phit(double k, double TA, double Qs);
   double StF(double k, double TA, double Qs);
   int writeTable();
