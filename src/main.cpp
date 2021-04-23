@@ -870,19 +870,21 @@ int main(int argc, char *argv[]) {
   double QspPre = 0.8; // prefactors for scaling
   double QsAPre = 0.8; // prefactors for scaling
 
-
   double inQsp;
   double inQsA;
 
+  double Y_g = 5.;
+  data.Y = Y_g;
+
   if(useFluc ==0){
-    inQsp = QspPre*Qsp(0.8,8160.,0.);
-    inQsA = QsAPre*QsA(0.8,8160.,0.);
+    inQsp = QspPre*Qsp(0.8,8160.,-Y_g);
+    inQsA = QsAPre*QsA(0.8,8160.,Y_g);
   }
   else{
     //    inQsp = QspPre*Qsp(0.8,8160.,0.);
     //inQsA = QsAPre*Qsp(0.8,8160.,0.);
-    inQsp = QspPre*Qsp(0.8,8160.,0.);
-    inQsA = QsAPre*QsA(0.8,8160.,0.);
+    inQsp = QspPre*Qsp(0.8,8160.,-Y_g);
+    inQsA = QsAPre*QsA(0.8,8160.,Y_g);
   }
 
   data.PT = 0.; // dummy for now
@@ -891,7 +893,6 @@ int main(int argc, char *argv[]) {
   data.m = 0.;
   data.Qs = 0.; // Saturation scale in GeV - not used anymore
   data.lambda = 0.05; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
-  data.Y = 0.;
   data.Qsp = inQsp; // midrapidity proton Saturation scale in GeV
   data.QsA = inQsA; // midrapidity Pb Saturation scale in GeV
   data.mv = mv; // MV class
@@ -909,8 +910,8 @@ int main(int argc, char *argv[]) {
   double inQsA_fwd;
 
   if(useFluc == 0){
-    inQsp_fwd = QspPre*Qsp(3,8160.,-Yfwd);
-    inQsA_fwd = QsAPre*QsA(3,8160.,Yfwd);
+    inQsp_fwd = QspPre*Qsp(3,8160.,-Y_fwd);
+    inQsA_fwd = QsAPre*QsA(3,8160.,Y_fwd);
   }
   else{
     //    inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
@@ -1054,7 +1055,7 @@ int main(int argc, char *argv[]) {
 
       data.Qsp = inQsp*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA; // forward Pb Saturation scale in GeV
-      data.Y = 0.;
+      data.Y = Y_g;
 
       NDIM = 6;
       llVegas(NDIM, NCOMP, FullIntegrandFluc, &data, NVEC,
