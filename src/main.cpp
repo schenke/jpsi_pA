@@ -440,7 +440,7 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   // scaled momenta above (in PT)
   // last rows are scaling of integration measures:
   // dRxdRy
-  // dbxdby
+  //// dbxdby
   // d2PT
   // dM
   // dqtilde
@@ -802,6 +802,7 @@ int main(int argc, char *argv[]) {
   if (readTable == 0){
     mv->computePhip();
     mv->writeTable();
+    //    mv->writeTableText();
   }
   else if (readTable == 1){
     mv->readTable();
@@ -903,6 +904,7 @@ int main(int argc, char *argv[]) {
   cout << "QsA(y=0) = " << inQsA << endl;
   }
 
+  double Y_fwd = 3;
   double inQsp_fwd;
   double inQsA_fwd;
 
@@ -913,8 +915,8 @@ int main(int argc, char *argv[]) {
   else{
     //    inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
     //inQsA_fwd = QsAPre*Qsp(3,8160.,3.);
-    inQsp_fwd = QspPre*Qsp(3.,8160.,-3.);
-    inQsA_fwd = QsAPre*QsA(3.,8160.,3.);
+    inQsp_fwd = QspPre*Qsp(3.,8160.,-Y_fwd);
+    inQsA_fwd = QsAPre*QsA(3.,8160.,Y_fwd);
   }
 
   if (rank==0){
@@ -922,6 +924,7 @@ int main(int argc, char *argv[]) {
   cout << "QsA(y=3) = " << inQsA_fwd << endl;
   }
 
+  double Y_bck=-3.8; //use minus sign
   double inQsp_bck;
   double inQsA_bck;
 
@@ -932,8 +935,8 @@ int main(int argc, char *argv[]) {
   else{
     //   inQsp_bck = QspPre*Qsp(2.7,8160.,3.8);
     //inQsA_bck = QsAPre*Qsp(2.7,8160.,-3.8);
-    inQsp_bck = QspPre*Qsp(2.7,8160.,3.8);
-    inQsA_bck = QsAPre*QsA(2.7,8160.,-3.8);
+    inQsp_bck = QspPre*Qsp(2.7,8160.,-Y_bck);
+    inQsA_bck = QsAPre*QsA(2.7,8160.,Y_bck);
   }
 
   if (rank==0){
@@ -1049,6 +1052,7 @@ int main(int argc, char *argv[]) {
 
       data.Qsp = inQsp*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA; // forward Pb Saturation scale in GeV
+      data.Y = 0.;
 
       NDIM = 6;
       llVegas(NDIM, NCOMP, FullIntegrandFluc, &data, NVEC,
@@ -1071,7 +1075,8 @@ int main(int argc, char *argv[]) {
       
       data.Qsp = inQsp_fwd*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
-      
+      data.Y = Y_fwd;
+
       NDIM = 10;
       llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
@@ -1086,6 +1091,7 @@ int main(int argc, char *argv[]) {
       
       data.Qsp = inQsp_bck*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
+      data.Y = Y_bck;
       
       llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,

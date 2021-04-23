@@ -45,6 +45,7 @@ class MV{
   double Phit(double k, double TA, double Qs);
   double StF(double k, double TA, double Qs);
   int writeTable();
+  int writeTableText();
   int readTable();
 
 };

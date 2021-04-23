@@ -14,13 +14,11 @@ namespace constants {
 
 // MV r integrand
 double MV::MVintegrandForList(double z, void * params) {
-  double CA = constants::CA;
-  double CF = constants::CF;
-  double Bp = constants::Bp;
   double lambda = 0.2; // IR regulator in GeV
   double A = ((double *)params)[0];
   double k = ((double *)params)[1];
   double f = 2.*constants::PI*pow(2.718281828+(1./lambda/lambda)/z/z,-A*z*z)*z*gsl_sf_bessel_J0(z*k);
+  //  double f = 2.*constants::PI*pow(2.718281828+(1./lambda/z),-A*z*z)*z*gsl_sf_bessel_J0(z*k);
   //double f = 2.*constants::PI*exp(-A*z*z)*z*gsl_sf_bessel_J0(z*k); //GBW for testing the numerics only
   return f;
 }
@@ -156,10 +154,6 @@ double MV::Phit(double k, double TA, double Qs){
   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik] + (A/deltaA-double(iA))*Phip_array[iA+1][ik];
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik+1] + (A/deltaA-double(iA))*Phip_array[iA+1][ik+1];
   double result = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
-  //double Phip1 = (double(iA+1)-(log(A+1.)*150.))*Phip_array[iA][ik] + (log(A+1.)*150.-double(iA))*Phip_array[iA+1][ik];
-  //double Phip2 = (double(iA+1)-(log(A+1.)*150.))*Phip_array[iA][ik+1] + (log(A+1.)*150.-double(iA))*Phip_array[iA+1][ik+1];
-  //double result = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
-  //cout << "Phip=" << result << endl;
   return k*k*constants::Nc/4./constants::alphas*result;
 }
 
@@ -185,11 +179,6 @@ double MV::StF(double k, double TA, double Qs){
   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik] + (A/deltaA-double(iA))*Phip_array[iA+1][ik];
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik+1] + (A/deltaA-double(iA))*Phip_array[iA+1][ik+1];
   double result = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
-
-  // double Phip1 = (double(iA+1)-(log(A+1.)*150.))*Phip_array[iA][ik] + (log(A+1.)*150.-double(iA))*Phip_array[iA+1][ik];
-  // double Phip2 = (double(iA+1)-(log(A+1.)*150.))*Phip_array[iA][ik+1] + (log(A+1.)*150.-double(iA))*Phip_array[iA+1][ik+1];
-  // double result = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
-  //cout << "Phip=" << result << endl;
   return result;
 }
 
@@ -203,11 +192,6 @@ int MV::writeTable(){
   
   ofstream Outfile1;
   Outfile1.open(MVTableName.c_str(), ios::out | ios::binary);
-
-  // sizeA = 800;
-  // sizek = 600;
-  // deltaA = 1./80.;
-  // deltak = 1./10.;
   
   // print header ------------- //
   Outfile1.write((char *)&sizeA, sizeof(int));
@@ -240,6 +224,38 @@ int MV::writeTable(){
        << endl;
   return 1;
 }
+
+int MV::writeTableText(){
+  
+  stringstream name;
+  name << "MVTableTest.dat";
+  string MVTableName;
+  MVTableName = name.str();
+  
+  ofstream Outfile1;
+  Outfile1.open(MVTableName.c_str(), ios::out);
+  
+  // print header ------------- //
+  Outfile1 << (sizeA) << " ";
+  Outfile1 << (sizek) << " ";
+  Outfile1 << deltaA << " ";
+  Outfile1 << deltak << endl;
+  
+  for (int iA=0; iA<sizeA; iA++){
+    double A=iA*deltaA;
+    for (int ik=0; ik<sizek; ik++){
+      double k=ik*deltak+0.0001;
+      Outfile1 << Phip_array[iA][ik] << endl;
+    }
+  }
+  
+  Outfile1.close();
+
+  cout << "Wrote " << MVTableName
+       << endl;
+  return 1;
+}
+
 
 
 int MV::readTable(){
