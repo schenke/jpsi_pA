@@ -17,7 +17,7 @@ double MV::MVintegrandForList(double z, void * params) {
   double CA = constants::CA;
   double CF = constants::CF;
   double Bp = constants::Bp;
-  double lambda = 0.3; // IR regulator in GeV
+  double lambda = 0.2; // IR regulator in GeV
   double A = ((double *)params)[0];
   double k = ((double *)params)[1];
   double f = 2.*constants::PI*pow(2.718281828+(1./lambda/lambda)/z/z,-A*z*z)*z*gsl_sf_bessel_J0(z*k);
