@@ -904,13 +904,13 @@ int main(int argc, char *argv[]) {
   cout << "QsA(y=0) = " << inQsA << endl;
   }
 
-  double Y_fwd = 3;
+  double Y_fwd = 5;
   double inQsp_fwd;
   double inQsA_fwd;
 
   if(useFluc == 0){
-    inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
-    inQsA_fwd = QsAPre*QsA(3,8160.,3.);
+    inQsp_fwd = QspPre*Qsp(3,8160.,-Yfwd);
+    inQsA_fwd = QsAPre*QsA(3,8160.,Yfwd);
   }
   else{
     //    inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
@@ -920,17 +920,17 @@ int main(int argc, char *argv[]) {
   }
 
   if (rank==0){
-  cout << "Qsp(y=3) = " << inQsp_fwd << endl;
-  cout << "QsA(y=3) = " << inQsA_fwd << endl;
+    cout << "Qsp(y=" << Y_fwd << ") = " << inQsp_fwd << endl;
+    cout << "QsA(y="<< Y_fwd << ") = " << inQsA_fwd << endl;
   }
 
-  double Y_bck=-3.8; //use minus sign
+  double Y_bck=-5; //use minus sign
   double inQsp_bck;
   double inQsA_bck;
 
   if(useFluc == 0){
-    inQsp_bck = QspPre*Qsp(2.7,8160.,3.8);
-    inQsA_bck = QsAPre*QsA(2.7,8160.,-3.8);
+    inQsp_bck = QspPre*Qsp(2.7,8160.,-Y_bck);
+    inQsA_bck = QsAPre*QsA(2.7,8160.,Y_bck);
   }
   else{
     //   inQsp_bck = QspPre*Qsp(2.7,8160.,3.8);
@@ -940,8 +940,8 @@ int main(int argc, char *argv[]) {
   }
 
   if (rank==0){
-  cout << "Qsp(y=-3.8) = " << inQsp_bck << endl;
-  cout << "QsA(y=-3.8) = " << inQsA_bck << endl;
+  cout << "Qsp(y=" << Y_bck << ") = " << inQsp_bck << endl;
+  cout << "QsA(y=" << Y_bck << ") = " << inQsA_bck << endl;
   }
   // // test the interpolation routine
   // for(int i=0;i<100;i++){
