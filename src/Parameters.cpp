@@ -93,11 +93,6 @@ void Parameters::setParameters()
   if(readParameter("useQuarks")){ convert<<temp; convert >> intParameter; setUseQuarks(intParameter); convert.str(""); 
     convert.clear(); } 
 
-
-  cout << "1" << endl;
-
-
-
   
   setOutputNumberOfTransverseCells(200);  
   if(readParameter("outputNumberOfTransverseCells")){ convert<<temp; convert >> intParameter; setOutputNumberOfTransverseCells(intParameter); convert.str(""); 
