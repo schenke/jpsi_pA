@@ -19,7 +19,7 @@ class MV{
  private:
   static double MVintegrandForList(double z, void * params);
   double ** Phip_array;
-  int sizeA=1600;
+  int sizeA=3200;
   int sizek=1000;
   double deltaA=1./80.;
   double deltak=1./10.;

@@ -811,7 +811,7 @@ int main(int argc, char *argv[]) {
     exit(0);
   }
 
-  messenger.flush("info");
+  //  messenger.flush("info");
 
   //  cout << "Phip=" << mv->Phip(0.1,1.,1.) << endl;
 
