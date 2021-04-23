@@ -867,8 +867,8 @@ int main(int argc, char *argv[]) {
 
   //  double QspPre = 0.43; // prefactors for scaling
   //  double QsAPre = 0.43; // prefactors for scaling
-  double QspPre = 0.5; // prefactors for scaling
-  double QsAPre = 0.5; // prefactors for scaling
+  double QspPre = 0.8; // prefactors for scaling
+  double QsAPre = 0.8; // prefactors for scaling
 
 
   double inQsp;
@@ -978,7 +978,8 @@ int main(int argc, char *argv[]) {
 
     data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
     data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
-
+    data.Y = Y_fwd;
+    
     // JPsi cross section
     NDIM = 12;
     llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
@@ -994,7 +995,8 @@ int main(int argc, char *argv[]) {
 
     data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
     data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
-
+    data.Y = Y_bck;
+    
     NDIM = 12;
     llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
             EPSREL, EPSABS, VERBOSE, SEED,
