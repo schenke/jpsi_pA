@@ -867,13 +867,13 @@ int main(int argc, char *argv[]) {
 
   //  double QspPre = 0.43; // prefactors for scaling
   //  double QsAPre = 0.43; // prefactors for scaling
-  double QspPre = 0.8; // prefactors for scaling
-  double QsAPre = 0.8; // prefactors for scaling
+  double QspPre = 0.7; // prefactors for scaling
+  double QsAPre = 0.7; // prefactors for scaling
 
   double inQsp;
   double inQsA;
 
-  double Y_g = 5.;
+  double Y_g = 0.;
   data.Y = Y_g;
 
   if(useFluc ==0){
@@ -905,7 +905,7 @@ int main(int argc, char *argv[]) {
   cout << "QsA(y=0) = " << inQsA << endl;
   }
 
-  double Y_fwd = 5;
+  double Y_fwd = 3.;
   double inQsp_fwd;
   double inQsA_fwd;
 
@@ -925,7 +925,7 @@ int main(int argc, char *argv[]) {
     cout << "QsA(y="<< Y_fwd << ") = " << inQsA_fwd << endl;
   }
 
-  double Y_bck=-5; //use minus sign
+  double Y_bck=-3.8; //use minus sign
   double inQsp_bck;
   double inQsA_bck;
 

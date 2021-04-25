@@ -17,11 +17,10 @@ namespace Hard{
     double cosk1k2 = cos(phik1-phik2);
     double cosk2q = cos(phik2-phiq);
     
-    //check sqrt(2)
-    double pplus = sqrt(m*m+p*p)*exp(yp/2.)/sqrt(2.);
-    double pminus = sqrt(m*m+p*p)*exp(-yp/2.)/sqrt(2.);
-    double qplus = sqrt(m*m+q*q)*exp(yq/2.)/sqrt(2.);
-    double qminus = sqrt(m*m+q*q)*exp(-yq/2.)/sqrt(2.);
+    double pplus = sqrt(m*m+p*p)*exp(yp)/sqrt(2.);
+    double pminus = sqrt(m*m+p*p)*exp(-yp)/sqrt(2.);
+    double qplus = sqrt(m*m+q*q)*exp(yq)/sqrt(2.);
+    double qminus = sqrt(m*m+q*q)*exp(-yq)/sqrt(2.);
 
     // a_T = q_T-k_T (2D vectors)
     double at2 = q*q + k*k - 2*q*k*cosqk;
@@ -44,9 +43,13 @@ namespace Hard{
     double Cq = (Cplus*qminus + Cminus*qplus) - k2*q*cosk2q + k1*q*cosqk1;
     double pq = (pplus*qminus + pminus*qplus) - p*q*cos(phip-phiq);
     double C2 = 2.*Cplus*Cminus - ( k2*k2+k1*k1-2.*k1*k2*cosk1k2 );
-    return (32.*pplus*qplus*(m*m+at2)*(m*m+bt2)/pow((2.*pplus*(m*m+at2)+2.*qplus*(m*m+bt2)),2.))
+    return (32.*pplus*qplus*(m*m+at2)*(m*m+bt2)
+            /pow((2.*pplus*(m*m+at2)+2.*qplus*(m*m+bt2)),2.))
       + (4./((m*m+pq)*(pplus*(m*m+at2)+qplus*(m*m+bt2)))*
-         ((m*m+adotb)*(qplus*Cp+pplus*Cq-Cplus*(m*m+pq))+Cplus*((m*m+bdotq)*(m*m-adotp)-(m*m+adotq)*(m*m-bdotp))+pplus*(adotC*(m*m+bdotq)-bdotC*(m*m+adotq))+qplus*(adotC*(m*m-bdotp)-bdotC*(m*m-adotp))))
+         ((m*m+adotb)*(qplus*Cp+pplus*Cq-Cplus*(m*m+pq))
+          +Cplus*((m*m+bdotq)*(m*m-adotp)-(m*m+adotq)*(m*m-bdotp))
+          +pplus*(adotC*(m*m+bdotq)-bdotC*(m*m+adotq))
+          +qplus*(adotC*(m*m-bdotp)-bdotC*(m*m-adotp))))
       +((2.*Cp*Cq - (m*m+pq)*C2)/pow((m*m+pq),2.));
   }
 
@@ -54,10 +57,10 @@ namespace Hard{
               const double k1, const double phik1, const double k2, const double phik2, 
               const double k, const double phik, const double yp, const double yq, const double m) {
     
-    double pplus = sqrt(m*m+p*p)*exp(yp/2.)/sqrt(2.);
-    double pminus = sqrt(m*m+p*p)*exp(-yp/2.)/sqrt(2.);
-    double qplus = sqrt(m*m+q*q)*exp(yq/2.)/sqrt(2.);
-    double qminus = sqrt(m*m+q*q)*exp(-yq/2.)/sqrt(2.);
+    double pplus = sqrt(m*m+p*p)*exp(yp)/sqrt(2.);
+    double pminus = sqrt(m*m+p*p)*exp(-yp)/sqrt(2.);
+    double qplus = sqrt(m*m+q*q)*exp(yq)/sqrt(2.);
+    double qminus = sqrt(m*m+q*q)*exp(-yq)/sqrt(2.);
 
     // a_T = q_T-k_T (2D vectors)
     double at2 = q*q + k*k - 2*q*k*cos(phiq-phik);
@@ -74,8 +77,8 @@ namespace Hard{
             const double k, const double phik, const double yp, const double yq, const double m){ 
   // a_T = q_T-k_T (2D vectors)
     double at2 = q*q + k*k - 2*q*k*cos(phiq-phik);
-    double pplus = sqrt(m*m+p*p)*exp(yp/2.);
-    double qplus = sqrt(m*m+q*q)*exp(yq/2.);
+    double pplus = sqrt(m*m+p*p)*exp(yp);
+    double qplus = sqrt(m*m+q*q)*exp(yq);
 
     double prefactor = 8.*pplus*qplus/(pow(pplus+qplus,2)*(pow(at2+m*m,2)));
     double brackets = m*m+(pplus*pplus+qplus*qplus)*at2/pow(pplus+qplus,2);
@@ -86,10 +89,10 @@ namespace Hard{
              const double k1, const double phik1, const double k2, const double phik2, 
              const double k, const double phik, const double yp, const double yq, const double m) {
     
-    double pplus = sqrt(m*m+p*p)*exp(yp/2.)/sqrt(2.);
-    double pminus = sqrt(m*m+p*p)*exp(-yp/2.)/sqrt(2.);
-    double qplus = sqrt(m*m+q*q)*exp(yq/2.)/sqrt(2.);
-    double qminus = sqrt(m*m+q*q)*exp(-yq/2.)/sqrt(2.);
+    double pplus = sqrt(m*m+p*p)*exp(yp)/sqrt(2.);
+    double pminus = sqrt(m*m+p*p)*exp(-yp)/sqrt(2.);
+    double qplus = sqrt(m*m+q*q)*exp(yq)/sqrt(2.);
+    double qminus = sqrt(m*m+q*q)*exp(-yq)/sqrt(2.);
 
     // a_T = q_T-k_T (2D vectors)
     double at2 = q*q + k*k - 2*q*k*cos(phiq-phik);
@@ -120,10 +123,10 @@ namespace Hard{
             const double k1, const double phik1, const double k2, const double phik2, 
             const double k, const double phik, const double yp, const double yq, const double m){
 
-    double pplus = sqrt(m*m+p*p)*exp(yp/2.)/sqrt(2.);
-    double pminus = sqrt(m*m+p*p)*exp(-yp/2.)/sqrt(2.);
-    double qplus = sqrt(m*m+q*q)*exp(yq/2.)/sqrt(2.);
-    double qminus = sqrt(m*m+q*q)*exp(-yq/2.)/sqrt(2.);
+    double pplus = sqrt(m*m+p*p)*exp(yp)/sqrt(2.);
+    double pminus = sqrt(m*m+p*p)*exp(-yp)/sqrt(2.);
+    double qplus = sqrt(m*m+q*q)*exp(yq)/sqrt(2.);
+    double qminus = sqrt(m*m+q*q)*exp(-yq)/sqrt(2.);
 
     double Cplus = pplus + qplus - k1*k1/(pminus+qminus);
     double Cminus = k2*k2/(pplus+qplus) - pminus - qminus;
