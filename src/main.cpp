@@ -62,6 +62,8 @@ struct params {
   double PT;
   double bx;
   double by;
+  double yq;
+  double yp;
   TAInt *TAclass;
   MV *mv;
   Glauber *glauberClass; 
@@ -490,14 +492,16 @@ static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
 
   // scale the integration variables 
   double q = fqqq*pscale; // cbar transverse momentum
-  double qphi = fqqqphi*2.*constants::PI // and its angle
+  double phiq = fqqqphi*2.*constants::PI; // and its angle
   double p = fqqp*pscale; // c transverse momentum
-  double pphi = fqqpphi*2.*constants::PI // and its angle
-  double k = fqq4k*kscale // exchaged k momentum
+  double phip = fqqpphi*2.*constants::PI; // and its angle
+  double k = fqq4k*kscale; // exchaged k momentum
   double phik = fqq4phik*2.*constants::PI;// and its angle
-  double k1 = fqq4k1*kscale // exchaged k1 momentum
+  double k1 = fqq4k1*kscale; // exchaged k1 momentum
   double phik1 = fqq4phik1*2.*constants::PI;
-  
+  double Rx = fqqRx*Rscale-Rscale/2.;
+  double Ry = fqqRy*Rscale-Rscale/2.;
+
   double yq = static_cast<params*>(userdata)->yq; // c bar rapidity
   double yp = static_cast<params*>(userdata)->yp; // c rapidity
 
@@ -546,7 +550,7 @@ static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
     *k*kscale*2.*constants::PI // d2k
     *k1*kscale*2.*constants::PI // d2k1
     *p*pscale*2.*constants::PI // d2p
-    *q*qscale*2.*constants::PI // d2q
+    *q*pscale*2.*constants::PI // d2q
     *2.; // for p and q direction
  
 
