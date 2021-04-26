@@ -45,9 +45,12 @@ namespace constants {
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
   const double mJPsi = 3.096916;
-  const double x0 = 0.000041;
-  const double lambdaSpeed = 0.277;
+  //const double x0 = 0.000041;
+  //const double lambdaSpeed = 0.277;
+  const double x0 = 0.00005;
+  const double lambdaSpeed = 0.4;
   const double prefactor = 0.7;
+  const double roots = 8160.;
 }
 
 // Parameters that need to be passed to the integrand
@@ -334,8 +337,8 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   // double bscale = 24./constants::hbarc; 
   // Qs will be made rapidity dependent
-  // double Qsp = static_cast<params*>(userdata)->Qsp;
-  //double QsA = static_cast<params*>(userdata)->QsA;
+  double Qsp = static_cast<params*>(userdata)->Qsp;
+  double QsA = static_cast<params*>(userdata)->QsA;
   double Y = static_cast<params*>(userdata)->Y;
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
@@ -384,11 +387,11 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double yp = out.yp;
   double yq = out.yq;
 
-  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/8160.;
-  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/8160.;
+  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
+  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
 
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeed/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeed/2.);
+  //double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeed/2.);
+  //double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeed/2.);
 
   // get sums of vectors
   double px = p*cos(phip); 
@@ -419,12 +422,13 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   // double Rminusby = Ry-by;
   // double Rminusb = sqrt(Rminusbx*Rminusbx+Rminusby*Rminusby);
   // double phi_Rminusb = atan2(Rminusby,Rminusbx);
-
+  
   double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
   // get Jacobian
   double betax = PT/sqrt(M*M+PT*PT);
   double gammax = 1./sqrt(1.-betax*betax);
+  
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
 
   //double R = sqrt(Rx*Rx+Ry*Ry);
@@ -505,8 +509,8 @@ static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double yq = static_cast<params*>(userdata)->yq; // c bar rapidity
   double yp = static_cast<params*>(userdata)->yp; // c rapidity
 
-  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/8160.;
-  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/8160.;
+  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
+  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
 
   double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeed/2.);
   double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeed/2.);
@@ -922,9 +926,6 @@ int main(int argc, char *argv[]) {
 
   ////double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
  
-  cout << Hard::all(1, 1, 0.5, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1.2) << endl;
-  cout << Hard::all(1, 1, 0.5, 1, 1, 1, 1, 1, 1, 1, -3.8, -3.8, 1.2) << endl;
-
   // Cuba's parameters for integration
   int NDIM = 9;
   int NCOMP = 1;
@@ -940,7 +941,7 @@ int main(int argc, char *argv[]) {
   
   /// put the large number back in !!! 
   //const long long int MAXEVAL = 5000000000;
-  const long long int MAXEVAL = 500000000;
+  const long long int MAXEVAL =   5000000;
   int KEY = 0;
   
   //vegas
@@ -989,14 +990,14 @@ int main(int argc, char *argv[]) {
   data.Y = Y_g;
 
   if(useFluc ==0){
-    inQsp = QspPre*Qsp(0.8,8160.,-Y_g);
-    inQsA = QsAPre*QsA(0.8,8160.,Y_g);
+    inQsp = QspPre*Qsp(0.8,constants::roots,-Y_g);
+    inQsA = QsAPre*QsA(0.8,constants::roots,Y_g);
   }
   else{
-    //    inQsp = QspPre*Qsp(0.8,8160.,0.);
-    //inQsA = QsAPre*Qsp(0.8,8160.,0.);
-    inQsp = QspPre*Qsp(0.8,8160.,-Y_g);
-    inQsA = QsAPre*QsA(0.8,8160.,Y_g);
+    //    inQsp = QspPre*Qsp(0.8,constants::roots,0.);
+    //inQsA = QsAPre*Qsp(0.8,constants::roots,0.);
+    inQsp = QspPre*Qsp(0.8,constants::roots,-Y_g);
+    inQsA = QsAPre*QsA(0.8,constants::roots,Y_g);
   }
 
   data.PT = 0.; // dummy for now
@@ -1021,14 +1022,14 @@ int main(int argc, char *argv[]) {
   double inQsA_fwd;
 
   if(useFluc == 0){
-    inQsp_fwd = QspPre*Qsp(3,8160.,-Y_fwd);
-    inQsA_fwd = QsAPre*QsA(3,8160.,Y_fwd);
+    inQsp_fwd = QspPre*Qsp(3,constants::roots,-Y_fwd);
+    inQsA_fwd = QsAPre*QsA(3,constants::roots,Y_fwd);
   }
   else{
-    //    inQsp_fwd = QspPre*Qsp(3,8160.,-3.);
-    //inQsA_fwd = QsAPre*Qsp(3,8160.,3.);
-    inQsp_fwd = QspPre*Qsp(3.,8160.,-Y_fwd);
-    inQsA_fwd = QsAPre*QsA(3.,8160.,Y_fwd);
+    //    inQsp_fwd = QspPre*Qsp(3,constants::roots,-3.);
+    //inQsA_fwd = QsAPre*Qsp(3,constants::roots,3.);
+    inQsp_fwd = QspPre*Qsp(3.,constants::roots,-Y_fwd);
+    inQsA_fwd = QsAPre*QsA(3.,constants::roots,Y_fwd);
   }
 
   if (rank==0){
@@ -1040,14 +1041,14 @@ int main(int argc, char *argv[]) {
   double inQsA_bck;
 
   if(useFluc == 0){
-    inQsp_bck = QspPre*Qsp(2.7,8160.,-Y_bck);
-    inQsA_bck = QsAPre*QsA(2.7,8160.,Y_bck);
+    inQsp_bck = QspPre*Qsp(2.7,constants::roots,-Y_bck);
+    inQsA_bck = QsAPre*QsA(2.7,constants::roots,Y_bck);
   }
   else{
-    //   inQsp_bck = QspPre*Qsp(2.7,8160.,3.8);
-    //inQsA_bck = QsAPre*Qsp(2.7,8160.,-3.8);
-    inQsp_bck = QspPre*Qsp(2.7,8160.,-Y_bck);
-    inQsA_bck = QsAPre*QsA(2.7,8160.,Y_bck);
+    //   inQsp_bck = QspPre*Qsp(2.7,constants::roots,3.8);
+    //inQsA_bck = QsAPre*Qsp(2.7,constants::roots,-3.8);
+    inQsp_bck = QspPre*Qsp(2.7,constants::roots,-Y_bck);
+    inQsA_bck = QsAPre*QsA(2.7,constants::roots,Y_bck);
   }
 
   if (rank==0){
@@ -1178,7 +1179,7 @@ int main(int argc, char *argv[]) {
       gresult = (double)integral[0];
       gerror = (double)error[0];
       printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
-      
+        
       if(gresult<1.){
         cout << "Gluon number < 1, skipping event" << endl;
         continue;
