@@ -9,7 +9,6 @@ namespace Hard{
              const double k1, const double phik1, const double k2, const double phik2, 
              const double k, const double phik, const double yp, const double yq, const double m) {
     
-    
     double cosqk = cos(phiq-phik);
     double cosqk1 = cos(phiq-phik1);
     double coskk1 = cos(phik-phik1);

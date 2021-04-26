@@ -47,6 +47,7 @@ namespace constants {
   const double mJPsi = 3.096916;
   const double x0 = 0.000041;
   const double lambdaSpeed = 0.277;
+  const double prefactor = 0.7;
 }
 
 // Parameters that need to be passed to the integrand
@@ -386,10 +387,9 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/8160.;
   double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/8160.;
 
-  double Qsp = 0.7*pow(constants::x0/xp,constants::lambdaSpeed/2.);
-  double QsA = 0.7*pow(constants::x0/xA,constants::lambdaSpeed/2.);
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeed/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeed/2.);
 
-  
   // get sums of vectors
   double px = p*cos(phip); 
   double py = p*sin(phip);
@@ -419,15 +419,15 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   // double Rminusby = Ry-by;
   // double Rminusb = sqrt(Rminusbx*Rminusbx+Rminusby*Rminusby);
   // double phi_Rminusb = atan2(Rminusby,Rminusbx);
-  
+
   double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
   // get Jacobian
   double betax = PT/sqrt(M*M+PT*PT);
   double gammax = 1./sqrt(1.-betax*betax);
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
- 
-  double R = sqrt(Rx*Rx+Ry*Ry);
+
+  //double R = sqrt(Rx*Rx+Ry*Ry);
   //double b = sqrt(bx*bx+by*by);
   //double TA = returnTA(sqrt((Rx-bx)*(Rx-bx)+(Ry-by)*(Ry-by)),TAclass);
   
@@ -508,9 +508,8 @@ static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/8160.;
   double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/8160.;
 
-  double Qsp = 0.7*pow(constants::x0/xp,constants::lambdaSpeed/2.);
-  double QsA = 0.7*pow(constants::x0/xA,constants::lambdaSpeed/2.);
-
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeed/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeed/2.);
   
   // get sums of vectors
   double px = p*cos(phip); 
@@ -532,9 +531,10 @@ static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
   double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
  
-  
   double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
-
+  // double H = Hard::qqqq(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m)
+  //  +Hard::qqg(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m)
+  //  +Hard::gg(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
  
   double R = sqrt(Rx*Rx+Ry*Ry);
   
@@ -920,6 +920,11 @@ int main(int argc, char *argv[]) {
 
   //  cout << "Phip=" << mv->Phip(0.1,1.,1.) << endl;
 
+  ////double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
+ 
+  cout << Hard::all(1, 1, 0.5, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1.2) << endl;
+  cout << Hard::all(1, 1, 0.5, 1, 1, 1, 1, 1, 1, 1, -3.8, -3.8, 1.2) << endl;
+
   // Cuba's parameters for integration
   int NDIM = 9;
   int NCOMP = 1;
@@ -935,7 +940,7 @@ int main(int argc, char *argv[]) {
   
   /// put the large number back in !!! 
   //const long long int MAXEVAL = 5000000000;
-  const long long int MAXEVAL = 5000000;
+  const long long int MAXEVAL = 500000000;
   int KEY = 0;
   
   //vegas
@@ -971,13 +976,16 @@ int main(int argc, char *argv[]) {
 
   //  double QspPre = 0.43; // prefactors for scaling
   //  double QsAPre = 0.43; // prefactors for scaling
-  double QspPre = 0.7; // prefactors for scaling
-  double QsAPre = 0.7; // prefactors for scaling
+  double QspPre = constants::prefactor; // prefactors for scaling
+  double QsAPre = constants::prefactor; // prefactors for scaling
 
   double inQsp;
   double inQsA;
 
   double Y_g = 0.;
+  double Y_fwd = 3.;
+  double Y_bck=-3.8; //use minus sign
+ 
   data.Y = Y_g;
 
   if(useFluc ==0){
@@ -1009,7 +1017,6 @@ int main(int argc, char *argv[]) {
   cout << "QsA(y=0) = " << inQsA << endl;
   }
 
-  double Y_fwd = 3.;
   double inQsp_fwd;
   double inQsA_fwd;
 
@@ -1029,7 +1036,6 @@ int main(int argc, char *argv[]) {
     cout << "QsA(y="<< Y_fwd << ") = " << inQsA_fwd << endl;
   }
 
-  double Y_bck=-3.8; //use minus sign
   double inQsp_bck;
   double inQsA_bck;
 
