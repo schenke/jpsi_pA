@@ -45,10 +45,10 @@ namespace constants {
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
   const double mJPsi = 3.096916;
-  //const double x0 = 0.000041;
-  //const double lambdaSpeed = 0.277;
-  const double x0 = 0.00005;
-  const double lambdaSpeed = 0.4;
+  const double x0 = 0.000041;
+  const double lambdaSpeed = 0.277;
+  //const double x0 = 0.00005;
+  //const double lambdaSpeed = 0.4;
   const double prefactor = 0.7;
   const double roots = 8160.;
 }
