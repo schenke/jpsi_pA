@@ -460,7 +460,98 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   return 0;
 }  
 
+// Integrand for the combined ccbar integral (no b integral) for fluctuations
+static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
 
+#define fqqRx xx[0]
+#define fqqRy xx[1]
+#define fqqq xx[2]
+#define fqqqphi xx[3]
+#define fqqp xx[4]
+#define fqqpphi xx[5]
+#define fqq4k xx[6]
+#define fqq4phik xx[7]
+#define fqq4k1 xx[8]
+#define fqq4phik1 xx[9]
+
+  double kscale = 30.;
+  double pscale = 30.;
+  double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
+  double by=static_cast<params*>(userdata)->by/constants::hbarc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+  Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
+ 
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables 
+  double q = fqqq*pscale; // cbar transverse momentum
+  double qphi = fqqqphi*2.*constants::PI // and its angle
+  double p = fqqp*pscale; // c transverse momentum
+  double pphi = fqqpphi*2.*constants::PI // and its angle
+  double k = fqq4k*kscale // exchaged k momentum
+  double phik = fqq4phik*2.*constants::PI;// and its angle
+  double k1 = fqq4k1*kscale // exchaged k1 momentum
+  double phik1 = fqq4phik1*2.*constants::PI;
+  
+  double yq = static_cast<params*>(userdata)->yq; // c bar rapidity
+  double yp = static_cast<params*>(userdata)->yp; // c rapidity
+
+  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/8160.;
+  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/8160.;
+
+  double Qsp = 0.7*pow(constants::x0/xp,constants::lambdaSpeed/2.);
+  double QsA = 0.7*pow(constants::x0/xA,constants::lambdaSpeed/2.);
+
+  
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double qx = q*cos(phiq); 
+  double qy = q*sin(phiq);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double pplusqminusk1minuskx = px+qx-kx-k1x;
+  double pplusqminusk1minusky = py+qy-ky-k1y;
+  double pplusqminusk1minusk = sqrt(pplusqminusk1minuskx*pplusqminusk1minuskx
+                                    +pplusqminusk1minusky*pplusqminusk1minusky);
+  double phi_pplusqminusk1minusk = atan2(pplusqminusk1minusky,pplusqminusk1minuskx);
+
+  double pplusqminusk1x = px+qx-k1x;
+  double pplusqminusk1y = py+qy-k1y;
+  double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
+  double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
+ 
+  
+  double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
+
+ 
+  double R = sqrt(Rx*Rx+Ry*Ry);
+  
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
+
+  // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
+  f = constants::alphas*double(constants::Nc)*double(constants::Nc)
+    /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, Tp, Qsp, sizeFactor, mv)/(k1*k1)*H
+    *(StF(pplusqminusk1minusk,TA,QsA,mv)*StF(k,TA,QsA,mv))
+    *Rscale*Rscale // dRx dRy
+    *k*kscale*2.*constants::PI // d2k
+    *k1*kscale*2.*constants::PI // d2k1
+    *p*pscale*2.*constants::PI // d2p
+    *q*qscale*2.*constants::PI // d2q
+    *2.; // for p and q direction
+ 
+
+  return 0;
+}  
 // Integrand for the combined J/Psi integral
 static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
