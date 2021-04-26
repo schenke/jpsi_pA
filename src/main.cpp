@@ -45,6 +45,8 @@ namespace constants {
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
   const double mJPsi = 3.096916;
+  const double x0 = 0.000041;
+  const double lambdaSpeed = 0.277;
 }
 
 // Parameters that need to be passed to the integrand
@@ -329,8 +331,8 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   // double bscale = 24./constants::hbarc; 
   // Qs will be made rapidity dependent
-  double Qsp = static_cast<params*>(userdata)->Qsp;
-  double QsA = static_cast<params*>(userdata)->QsA;
+  // double Qsp = static_cast<params*>(userdata)->Qsp;
+  //double QsA = static_cast<params*>(userdata)->QsA;
   double Y = static_cast<params*>(userdata)->Y;
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
@@ -378,6 +380,13 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double phiq = out.phiq;
   double yp = out.yp;
   double yq = out.yq;
+
+  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/8160.;
+  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/8160.;
+
+  double Qsp = 0.7*pow(constants::x0/xp,constants::lambdaSpeed/2.);
+  double QsA = 0.7*pow(constants::x0/xA,constants::lambdaSpeed/2.);
+
   
   // get sums of vectors
   double px = p*cos(phip); 
@@ -705,14 +714,14 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 
 double Qsp(double pT, double roots, double y){
   //return pow((0.0003*roots/pT/exp(-y)),0.288/2.);
-  return pow((0.000041*roots/pT/exp(-y)),0.277/2.);
+  return pow((constants::x0*roots/pT/exp(-y)),constants::lambdaSpeed/2.);
   //return pow((0.00008*roots/pT/exp(-y)),0.9/2.);
   //return 0.5;
 }
 
 double QsA(double pT, double roots, double y){
   //  return sqrt(0.4*pow(208.,(1./3.))*pow(Qsp(pT,roots,y),2.));
-  return pow((0.000041*roots/pT/exp(-y)),0.277/2.);
+  return pow((constants::x0*roots/pT/exp(-y)),constants::lambdaSpeed/2.);
 }
 
 // Main program
