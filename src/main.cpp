@@ -104,9 +104,9 @@ kinqq convert(kinPair input) {
   double phi = input.phi;
   double m = input.m;
   
-  double betax = -PT/sqrt(M*M+PT*PT);
+  double betax = PT/sqrt(M*M+PT*PT);
   double gammax = 1./sqrt(1.-betax*betax);
-  double betaz = -tanh(Y);
+  double betaz = tanh(Y);
   double gammaz = 1./sqrt(1.-betaz*betaz);
 
   double pE = gammaz*(gammax*(M/2.-betax*qtilde*cos(phi))
