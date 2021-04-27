@@ -441,7 +441,7 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, Tp, Qsp, sizeFactor, mv)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,TA,QsA,mv)*StF(k,TA,QsA,mv))
+    *(StF(pplusqminusk1minusk,TA,QsA,mv)*StF(k,TA,QsA,mv))*pow((1.-xp),4.)*pow((1.-xA),4.)*pow((1.-xA),4.)
     *Rscale*Rscale
     //  *bscale*bscale
     *PT*pscale*2.*constants::PI
