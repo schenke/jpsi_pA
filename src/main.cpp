@@ -389,6 +389,15 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
   double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
 
+  double factorxp = pow(1.-xp,4.);
+  if (xp>1.){
+    factorxp = 0.;
+  }
+  double factorxA = pow(1.-xA,4.);
+  if (xA>1.){
+    factorxA = 0.;
+  }
+
   double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeed/2.);
   double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeed/2.);
 
@@ -440,8 +449,8 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, Tp, Qsp, sizeFactor, mv)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,TA,QsA,mv)*StF(k,TA,QsA,mv))*pow((1.-xp),4.)*pow((1.-xA),4.)*pow((1.-xA),4.)
+    *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H*J
+    *(StF(pplusqminusk1minusk,TA,QsA,mv)*factorxA*StF(k,TA,QsA,mv))*factorxA
     *Rscale*Rscale
     //  *bscale*bscale
     *PT*pscale*2.*constants::PI
@@ -983,8 +992,8 @@ int main(int argc, char *argv[]) {
   double inQsA;
 
   double Y_g = 0.;
-  double Y_fwd = 3.;
-  double Y_bck=-3.8; //use minus sign
+  double Y_fwd = 6.;
+  double Y_bck=-6.; //use minus sign
  
   data.Y = Y_g;
 
