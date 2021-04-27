@@ -104,9 +104,9 @@ kinqq convert(kinPair input) {
   double phi = input.phi;
   double m = input.m;
   
-  double betax = PT/sqrt(M*M+PT*PT);
+  double betax = -PT/sqrt(M*M+PT*PT);
   double gammax = 1./sqrt(1.-betax*betax);
-  double betaz = tanh(Y);
+  double betaz = -tanh(Y);
   double gammaz = 1./sqrt(1.-betaz*betaz);
 
   double pE = gammaz*(gammax*(M/2.-betax*qtilde*cos(phi))
@@ -129,7 +129,7 @@ kinqq convert(kinPair input) {
   output.phiq = atan2(qy,qx);
   output.yp = 0.5*log((pE+pz)/(pE-pz));
   output.yq = 0.5*log((qE+qz)/(qE-qz));
-
+  
   return output;
 }
   
@@ -336,9 +336,8 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double pscale = 30.;
   double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   // double bscale = 24./constants::hbarc; 
-  // Qs will be made rapidity dependent
-  double Qsp = static_cast<params*>(userdata)->Qsp;
-  double QsA = static_cast<params*>(userdata)->QsA;
+  // double Qsp = static_cast<params*>(userdata)->Qsp;
+  // double QsA = static_cast<params*>(userdata)->QsA;
   double Y = static_cast<params*>(userdata)->Y;
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
@@ -390,8 +389,8 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
   double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
 
-  //double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeed/2.);
-  //double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeed/2.);
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeed/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeed/2.);
 
   // get sums of vectors
   double px = p*cos(phip); 
@@ -883,8 +882,8 @@ int main(int argc, char *argv[]) {
     messenger.flush("info");
   }
   
-  long int seed = time(NULL)+rank*100000;
-  //long int seed = 7;
+  //long int seed = time(NULL)+rank*100000;
+  long int seed = 1;
  
   Parameters *Glauber_param;
   Glauber_param = new Parameters();
@@ -941,7 +940,7 @@ int main(int argc, char *argv[]) {
   
   /// put the large number back in !!! 
   //const long long int MAXEVAL = 5000000000;
-  const long long int MAXEVAL =   5000000;
+  const long long int MAXEVAL =   50000000;
   int KEY = 0;
   
   //vegas
