@@ -882,8 +882,8 @@ int main(int argc, char *argv[]) {
     messenger.flush("info");
   }
   
-  //long int seed = time(NULL)+rank*100000;
-  long int seed = 1;
+  long int seed = time(NULL)+rank*100000;
+  //long int seed = 1;
  
   Parameters *Glauber_param;
   Glauber_param = new Parameters();
