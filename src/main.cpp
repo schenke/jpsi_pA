@@ -794,12 +794,14 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
-  double Qsp = static_cast<params*>(userdata)->Qsp;
-  double QsA = static_cast<params*>(userdata)->QsA;
+  //double Qsp = static_cast<params*>(userdata)->Qsp;
+  //double QsA = static_cast<params*>(userdata)->QsA;
   double lambda = static_cast<params*>(userdata)->lambda;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
   double Y = static_cast<params*>(userdata)->Y;
- 
+  double Qsp=0.;
+  double QsA=0.;
+
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -823,8 +825,8 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   }
   else{
     
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = constants::alphas/constants::CF/(fgp*pscale+lambda)/(fgp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
