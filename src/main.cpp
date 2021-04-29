@@ -812,8 +812,8 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
   double Tp = returnTp2D(Rx,Ry,glauberClass);
 
-  double xp = fgp*pscale*exp(Y)/constants::roots;
-  double xA = fgp*pscale*exp(-Y)/constants::roots;
+  double xp = (fgp*pscale+lambda)*exp(Y)/constants::roots;
+  double xA = (fgp*pscale+lambda)*exp(-Y)/constants::roots;
   
   double factorxA = pow(1.-xA,4.);
   double factorxp = pow(1.-xp,4.);
@@ -970,7 +970,7 @@ int main(int argc, char *argv[]) {
   
   /// put the large number back in !!! 
   //const long long int MAXEVAL = 5000000000;
-  const long long int MAXEVAL =   5000000;
+  const long long int MAXEVAL =   50000000;
   int KEY = 0;
   
   //vegas
