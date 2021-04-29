@@ -48,8 +48,9 @@ namespace constants {
   const double x0 = 0.000041;
   //const double lambdaSpeed = 0.277;
   //const double x0 = 0.00005;
-  const double lambdaSpeed = 0.6;
-  const double prefactor = 1.3;
+  const double lambdaSpeedp = 0.6;
+  const double lambdaSpeedA = 0.3;
+  const double prefactor = 0.8;
   //const double prefactor = 0.7;
   const double roots = 8160.;
 }
@@ -399,8 +400,8 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
     factorxA = 0.;
   }
 
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeed/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeed/2.);
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
   // get sums of vectors
   double px = p*cos(phip); 
@@ -521,8 +522,8 @@ static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
   double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
 
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeed/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeed/2.);
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   
   // get sums of vectors
   double px = p*cos(phip); 
@@ -822,14 +823,14 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 
 double Qsp(double pT, double roots, double y){
   //return pow((0.0003*roots/pT/exp(-y)),0.288/2.);
-  return pow((constants::x0*roots/pT/exp(-y)),constants::lambdaSpeed/2.);
+  return pow((constants::x0*roots/pT/exp(-y)),constants::lambdaSpeedp/2.);
   //return pow((0.00008*roots/pT/exp(-y)),0.9/2.);
   //return 0.5;
 }
 
 double QsA(double pT, double roots, double y){
   //  return sqrt(0.4*pow(208.,(1./3.))*pow(Qsp(pT,roots,y),2.));
-  return pow((constants::x0*roots/pT/exp(-y)),constants::lambdaSpeed/2.);
+  return pow((constants::x0*roots/pT/exp(-y)),constants::lambdaSpeedA/2.);
 }
 
 // Main program
@@ -950,7 +951,7 @@ int main(int argc, char *argv[]) {
   
   /// put the large number back in !!! 
   //const long long int MAXEVAL = 5000000000;
-  const long long int MAXEVAL =   50000000;
+  const long long int MAXEVAL =   500000000;
   int KEY = 0;
   
   //vegas

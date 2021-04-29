@@ -90,6 +90,7 @@ class Glauber{
   gsl_rng * gslRan;
 
   int numberOfQuarks;
+  double width;
   double TAgrid2D[200][200]; 
   double Tpgrid2D[40][40]; 
   

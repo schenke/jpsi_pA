@@ -8,6 +8,7 @@ Glauber::Glauber(Parameters *inParam)
   param = inParam; 
   gslRan = gsl_rng_alloc (gsl_rng_taus);
   numberOfQuarks = 3;
+  width = 0.;
 }
 
 // destructor
@@ -288,8 +289,8 @@ void Glauber::generateProtonTp(Nucleus *nuc, Random *random, double Bp){
   double yq[3];
 
   for (unsigned int i = 0; i < 3; i++) {
-    gauss[i] = (exp(random->Gauss(0, 0.5))) /
-      std::exp(0.5 * 0.5 / 2.0);
+    gauss[i] = (exp(random->Gauss(0, width))) /
+      std::exp(width * width / 2.0);
   }
   double avgxq = 0.;
   double avgyq = 0.;
@@ -338,8 +339,8 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp){
 
   for (unsigned int i = 0; i < nuc->nucleonList.size(); i++) {
     for (unsigned int iq = 0; iq < 3; iq++) {
-      gauss[i][iq] = (exp(random->Gauss(0, 0.5))) /
-        std::exp(0.5 * 0.5 / 2.0);
+      gauss[i][iq] = (exp(random->Gauss(0, width))) /
+        std::exp(width * width / 2.0);
     }
   }
   
