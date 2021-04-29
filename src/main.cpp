@@ -48,9 +48,9 @@ namespace constants {
   const double x0 = 0.000041;
   //const double lambdaSpeed = 0.277;
   //const double x0 = 0.00005;
-  const double lambdaSpeedp = 0.6;
-  const double lambdaSpeedA = 0.3;
-  const double prefactor = 0.8;
+  const double lambdaSpeedp = 0.277;
+  const double lambdaSpeedA = 0.277;
+  const double prefactor = 0.7;
   //const double prefactor = 0.7;
   const double roots = 8160.;
 }
@@ -792,14 +792,14 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   //double bx = fgbx*bscale-bscale/2.;
   //double by = fgby*bscale-bscale/2.;
 
-
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
-  double Qsp = static_cast<params*>(userdata)->Qsp;
-  double QsA = static_cast<params*>(userdata)->QsA;
+  //  double Qsp = static_cast<params*>(userdata)->Qsp;
+  //  double QsA = static_cast<params*>(userdata)->QsA;
   double lambda = static_cast<params*>(userdata)->lambda;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
-
+  double Y = static_cast<params*>(userdata)->Y;
+ 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -810,9 +810,24 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
   double Tp = returnTp2D(Rx,Ry,glauberClass);
 
+  double xp = fgp*pscale*exp(Y)/constants::roots;
+  double xA = fgp*pscale*exp(-Y)/constants::roots;
+
+  double factorxp = pow(1.-xp,4.);
+  if (xp>1.){
+    factorxp = 0.;
+  }
+  double factorxA = pow(1.-xA,4.);
+  if (xA>1.){
+    factorxA = 0.;
+  }
+
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+
   // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
   f = constants::alphas/constants::CF/(fgp*pscale+lambda)/(fgp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-    *Phip(fgk*kscale, Tp, Qsp, sizeFactor, mv)*Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv)
+    *Phip(fgk*kscale, Tp, Qsp, sizeFactor, mv)*factorxp*Phit(sqrt((fgp*pscale+lambda)*factorxA*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv)
     *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
     *Rscale*Rscale  //dRxdRy
     //    *bscale*bscale  //bdxdby
