@@ -824,7 +824,7 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 
   double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
   double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
-
+  
   // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
   f = constants::alphas/constants::CF/(fgp*pscale+lambda)/(fgp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
     *Phip(fgk*kscale, Tp, Qsp, sizeFactor, mv)*factorxp*Phit(sqrt((fgp*pscale+lambda)*factorxA*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv)
@@ -966,7 +966,7 @@ int main(int argc, char *argv[]) {
   
   /// put the large number back in !!! 
   //const long long int MAXEVAL = 5000000000;
-  const long long int MAXEVAL =   500000000;
+  const long long int MAXEVAL =   50000000;
   int KEY = 0;
   
   //vegas
@@ -1189,8 +1189,8 @@ int main(int argc, char *argv[]) {
       
       // Do gluons:
 
-      data.Qsp = inQsp*QspFac; // forward proton Saturation scale in GeV
-      data.QsA = inQsA; // forward Pb Saturation scale in GeV
+      // data.Qsp = inQsp*QspFac; // forward proton Saturation scale in GeV
+      // data.QsA = inQsA; // forward Pb Saturation scale in GeV
       data.Y = Y_g;
 
       NDIM = 6;
@@ -1212,8 +1212,8 @@ int main(int argc, char *argv[]) {
 
       // Gluons done, her comes J/Psi
       
-      data.Qsp = inQsp_fwd*QspFac; // forward proton Saturation scale in GeV
-      data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
+      //data.Qsp = inQsp_fwd*QspFac; // forward proton Saturation scale in GeV
+      //data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
       data.Y = Y_fwd;
 
       NDIM = 10;
@@ -1228,8 +1228,8 @@ int main(int argc, char *argv[]) {
       JPsi2error = (double)error[0];
       printf("Forward JPsi: %.8e +- %.8e\t\n", JPsi2result, JPsi2error);   
       
-      data.Qsp = inQsp_bck*QspFac; // forward proton Saturation scale in GeV
-      data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
+      //data.Qsp = inQsp_bck*QspFac; // forward proton Saturation scale in GeV
+      //data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
       data.Y = Y_bck;
       
       llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
