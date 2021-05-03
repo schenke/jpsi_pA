@@ -50,7 +50,7 @@ namespace constants {
   //const double x0 = 0.00005;
   const double lambdaSpeedp = 0.277;
   const double lambdaSpeedA = 0.277;
-  const double prefactor = 0.7;
+  const double prefactor = 0.5;
   //const double prefactor = 0.7;
   const double roots = 8160.;
 }
@@ -883,7 +883,7 @@ static int HadronIntegrand(const int *ndim, const cubareal xx[],
   double pg = p/z;
   
   double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
-  double Dh = 6.05*pow(z, -0.714)*pow(1.-z,2.92); //KKP NLO 
+  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))/((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
@@ -898,8 +898,8 @@ static int HadronIntegrand(const int *ndim, const cubareal xx[],
   else if (xA>1.){
     f = 0.;
   }
-  else if (sqrt(pg*pg + fgk*fgk*kscale*kscale - 2.*pg*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI))>99.){
-    f=0.;
+  else if (pg>30.){
+    f = 0.;
   }    
   else{
     
