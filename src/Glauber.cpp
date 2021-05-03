@@ -8,7 +8,7 @@ Glauber::Glauber(Parameters *inParam)
   param = inParam; 
   gslRan = gsl_rng_alloc (gsl_rng_taus);
   numberOfQuarks = 3;
-  width = 0.;
+  width = 0.5;
 }
 
 // destructor

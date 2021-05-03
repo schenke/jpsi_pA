@@ -1355,7 +1355,7 @@ int main(int argc, char *argv[]) {
            << " " << TA << endl;
       
       stringstream strfilename;
-      strfilename << "output_" << rank << ".dat";
+      strfilename << "output_g_" << rank << ".dat";
       string filename;
       filename = strfilename.str();
       fstream fout(filename.c_str(), ios::app);
