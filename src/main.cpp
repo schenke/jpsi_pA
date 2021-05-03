@@ -729,7 +729,6 @@ static int Integrand(const int *ndim, const cubareal xx[],
   return 0;
 }
 
-// Integrand for the full 8D integral
 static int FullIntegrand(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
@@ -767,7 +766,6 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   return 1;
 }
 
-// Integrand for the full 8D integral
 static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
@@ -775,11 +773,8 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 #define fgphik xx[1]
 #define fgRx xx[2]
 #define fgRy xx[3]
-  //#define fgbx xx[4]
-  //#define fgby xx[5]
 #define fgphi xx[4]
 #define fgp xx[5]
-
 
   double kscale = 30.;
   double pscale = 30.;
@@ -835,6 +830,90 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
       *Rscale*Rscale  //dRxdRy
       //    *bscale*bscale  //bdxdby
       *2.*constants::PI*pscale*(fgp*pscale+lambda); //pdpdphip
+  }
+  
+  return 1;
+}
+
+
+// Integrand for the full 9D integral
+static int HadronIntegrand(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define z xx[6]
+
+  double Kch = 1.; //irrelevant for the ratio
+  double sigmainel = 1.; //irrelevant for the ratio
+  double mh = 0.3; //GeV
+
+  double kscale = 30.;
+  double pscale = 30.;
+  double Rscale = 4./constants::hbarc;
+  double bscale = 24./constants::hbarc;
+  //double Rscale = 1./constants::hbarc;
+  //double bscale = 4./constants::hbarc;
+  double Rx = fgRx*Rscale-Rscale/2.;
+  double Ry = fgRy*Rscale-Rscale/2.;
+  //double bx = fgbx*bscale-bscale/2.;
+  //double by = fgby*bscale-bscale/2.;
+
+  double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
+  double by=static_cast<params*>(userdata)->by/constants::hbarc;
+  //double Qsp = static_cast<params*>(userdata)->Qsp;
+  //double QsA = static_cast<params*>(userdata)->QsA;
+  double lambda = static_cast<params*>(userdata)->lambda;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+  double Y = static_cast<params*>(userdata)->Y;
+  double eta = Y;
+  double Qsp=0.;
+  double QsA=0.;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double R = sqrt(Rx*Rx+Ry*Ry);
+  double b = sqrt(bx*bx+by*by);
+  //double TA = returnTA(sqrt((Rx-bx)*(Rx-bx)+(Ry-by)*(Ry-by)),TAclass);
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
+  
+  double p = (fgp*pscale+lambda);
+  
+  double pg = p/z;
+  
+  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double Dh = 6.05*pow(z, -0.714)*pow(1.-z,2.92); //KKP NLO 
+  
+  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))/((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+  
+  double xp = pg*exp(yg)/constants::roots;
+  double xA = pg*exp(-yg)/constants::roots;
+  
+  double factorxA = pow(1.-xA,4.);
+  double factorxp = pow(1.-xp,4.);
+  if (xp>1.){
+    f = 0.;
+  }
+  else if (xA>1.){
+    f = 0.;
+  }
+  else if (sqrt(pg*pg + fgk*fgk*kscale*kscale - 2.*pg*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI))>99.){
+    f=0.;
+  }    
+  else{
+    
+    Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    
+    // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
+    f = Dh/z/z*J* 
+      constants::alphas/constants::CF/(pg)/(pg)/pow((2*constants::PI*constants::PI),3.)
+      *Phip(fgk*kscale, Tp, Qsp, sizeFactor, mv)*factorxp*Phit(sqrt(pg*pg + fgk*fgk*kscale*kscale - 2.*pg*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv)*factorxA
+      *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
+      *Rscale*Rscale  //dRxdRy
+      //    *bscale*bscale  //bdxdby
+      *2.*constants::PI*pscale*p; //pdpdphip
   }
   
   return 1;
@@ -1095,6 +1174,9 @@ int main(int argc, char *argv[]) {
   double gresult;
   double gerror;
 
+  double hresult;
+  double herror;
+
   double JPsi2result;
   double JPsi2error;
 
@@ -1208,13 +1290,31 @@ int main(int argc, char *argv[]) {
       gresult = (double)integral[0];
       gerror = (double)error[0];
       printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
-        
+            
       if(gresult<1.){
         cout << "Gluon number < 1, skipping event" << endl;
         continue;
       }
 
-      // Gluons done, her comes J/Psi
+      // do hadrons next (one more (z) integral)
+      NDIM = 7;
+      llVegas(NDIM, NCOMP, HadronIntegrand, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+      
+      // Print the result
+      hresult = (double)integral[0];
+      herror = (double)error[0];
+      printf("Hadrons (fluc): %.8f +- %.8f\t\n", hresult, herror);
+            
+      if(gresult<1.){
+        cout << "Gluon number < 1, skipping event" << endl;
+        continue;
+      }
+
+      // Gluons and hadrons done, her comes J/Psi
       
       data.Qsp = inQsp_fwd*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
@@ -1265,6 +1365,17 @@ int main(int argc, char *argv[]) {
            << sqrt(data.bx*data.bx+data.by*data.by) 
            << " " << TA << endl;
       fout.close();
+
+      stringstream strfilenameh;
+      strfilenameh << "output_h_" << rank << ".dat";
+      string filenameh;
+      filenameh = strfilenameh.str();
+      fstream fouth(filenameh.c_str(), ios::app);
+      
+      fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << JPsi2result 
+            << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
+      fouth.close();
+
     }
   }
   
