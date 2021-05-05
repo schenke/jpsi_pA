@@ -290,7 +290,7 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   return 0;
 } 
 
-// Integrand for the combined J/Psi integral in the color singlet channel
+// Integrand for the combined J/Psi integral in the color singlet channel with fluctuations
 static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
@@ -361,8 +361,6 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
   double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
                                     +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
-
-  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
   
   double H_cs = constants::ldme_singlet*NRQCD::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
  
@@ -552,7 +550,6 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
                                     +pminuskminusk1y*pminuskminusk1y);
 
-  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
   
   double H_co = constants::ldme_octet_s10*NRQCD::octet_s10(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_s13*NRQCD::octet_s13(p, phip, k1, phik1, k, phik,m)
