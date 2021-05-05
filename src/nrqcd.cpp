@@ -23,8 +23,7 @@ double singlet(const double p, const double phip, const double k1, const double 
 }
 
 double octet_s10(const double p, const double phip, const double k1, const double phik1,
-               const double kprime, const double phikprime, const double k, const double phik, 
-               const double m){
+               const double k, const double phik, const double m){
 
     double cosk1k = cos(phik1 - phik);
     double cospk = cos(phip - phik);
@@ -47,8 +46,7 @@ double octet_s10(const double p, const double phip, const double k1, const doubl
  } 
 
  double octet_s13(const double p, const double phip, const double k1, const double phik1,
-               const double kprime, const double phikprime, const double k, const double phik, 
-               const double m){
+               const double k, const double phik, const double m){
 
     double cosk1k = cos(phik1 - phik);
     double cospk = cos(phip - phik);
@@ -75,8 +73,7 @@ double octet_s10(const double p, const double phip, const double k1, const doubl
  } 
 
   double octet_p3j(const double p, const double phip, const double k1, const double phik1,
-               const double kprime, const double phikprime, const double k, const double phik, 
-               const double m){
+               const double k, const double phik, const double m){
 
     double cosk1k = cos(phik1 - phik);
     double cospk = cos(phip - phik);
