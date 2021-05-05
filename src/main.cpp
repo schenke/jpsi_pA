@@ -25,6 +25,7 @@
 #include "TAInt.h"
 #include "MV.h"
 #include "Glauber.h"
+#include "nrqcd.h"
 
 #define _SECURE_SCL 0
 #define _HAS_ITERATOR_DEBUGGING 0
@@ -53,6 +54,10 @@ namespace constants {
   const double prefactor = 0.5;
   //const double prefactor = 0.7;
   const double roots = 8160.;
+  const double ldme_singlet = 1.16/double(Nc); // GeV^3
+  const double ldme_octet_s10 = 0.089; // +- 0.0098 GeV^3
+  const double ldme_octet_s13 = 0.0030; // +- 0.00012 GeV^3
+  const double ldme_octet_p3j = 0.0056; // +- 0.0021 GeV^3 
 }
 
 // Parameters that need to be passed to the integrand
@@ -181,6 +186,109 @@ double StF(double k, double TA, double Qs, MV *mv){
 return mv->StF(k, TA, Qs);
 //return StFGBW(k, TA, Qs);
 }
+
+// Integrand for the combined J/Psi integral in the color singlet channel
+static int JPsiIntegrandNRQCD_cs(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define qqR xx[0]
+#define qqphiR xx[1]
+#define qqb xx[2]
+#define qqphib xx[3]
+#define qq4k xx[4]
+#define qq4phik xx[5]
+#define qq4k1 xx[6]
+#define qq4phik1 xx[7]
+#define qq4kprime xx[8]
+#define qq4phikprime xx[9]
+#define qq4p xx[10]
+#define qq4phip xx[11]
+#define f ff[0]
+
+  double kscale = 15.;
+  double pscale = 15.;
+  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 12./constants::hbarc; 
+
+  double Y = static_cast<params*>(userdata)->Y;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables  
+  double R = qqR*Rscale;
+  double b = qqb*bscale;
+  double p = qq4p*pscale;
+  double phip = qq4phip*2.*constants::PI;
+  double k = qq4k*kscale;
+  double phik = qq4phik*2.*constants::PI;
+  double k1 = qq4k1*kscale;
+  double phik1 = qq4phik1*2.*constants::PI;
+  double kprime = qq4kprime*kscale;
+  double phikprime = qq4phikprime*2.*constants::PI;
+  double phiR = qqphiR*2*constants::PI;
+  double phib = qqphib*2*constants::PI;
+  
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  
+  double factorxp = pow(1-xp,4);
+  double factorxA = pow(1-xA,4);
+  if (xp>1.){
+    f = 0;
+  }
+
+  else if (xA>1.){
+    f= 0;
+  }
+  else {
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double kprimex = kprime*cos(phikprime);
+  double kprimey = kprime*sin(phikprime);
+  double pminuskminusk1minuskprimex = px-kx-k1x-kprimex;
+  double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
+  double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
+                                    +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
+  double phi_pminuskminusk1minuskprime = atan2(pminuskminusk1minuskprimey,pminuskminusk1minuskprimex);
+
+  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
+  
+  double H_cs = constants::ldme_singlet*NRQCD::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
+ 
+  double myTA = returnTA(Rminusb,TAclass);
+  
+  f = constants::alphas/(2.*pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, R, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_cs
+    *(StF(k,myTA,QsA,mv)*factorxA*StF(kprime,myTA,QsA,mv)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv)*factorxA)
+    *R*Rscale*2.*constants::PI
+    *b*bscale*2.*constants::PI
+    *p*pscale*2.*constants::PI
+    *k*kscale*2.*constants::PI
+    *k1*kscale*2.*constants::PI
+    *kprime*kscale*2.*constants::PI; 
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // d2R
+  // d2b
+  // d2p
+  // d2k
+  // d2k1
+  // d2kprime
+   
+  }
+  return 0;
+} 
 
 // Integrand for the combined J/Psi integral
 static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
