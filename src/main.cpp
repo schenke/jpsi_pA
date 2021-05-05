@@ -304,7 +304,6 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
 #define fcs4phikprime xx[7]
 #define fcs4p xx[8]
 #define fcs4phip xx[9]
-#define f ff[0]
 
   double kscale = 15.;
   double pscale = 15.;
@@ -400,7 +399,6 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
 #define co4phik1 xx[7]
 #define co4p xx[8]
 #define co4phip xx[9]
-#define f ff[0]
 
   double kscale = 15.;
   double pscale = 15.;
@@ -495,7 +493,6 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
 #define fco4phik1 xx[5]
 #define fco4p xx[6]
 #define fco4phip xx[7]
-#define f ff[0]
 
   double kscale = 15.;
   double pscale = 15.;
@@ -592,7 +589,6 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
 #define qq4phik xx[9]
 #define qq4k1 xx[10]
 #define qq4phik1 xx[11]
-#define f ff[0]
 
   // double kscale = 10.;
   // double pscale = 10.;
@@ -603,9 +599,9 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 12./constants::hbarc; 
   // Qs will be made rapidity dependent
+  double Y = static_cast<params*>(userdata)->Y;
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
-  double Y = static_cast<params*>(userdata)->Y;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
@@ -1591,7 +1587,7 @@ int main(int argc, char *argv[]) {
     // Print the result
     //gresult = (double)integral[0];
     //gerror = (double)error[0];
-    //printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
+    printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
 
     //data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
     //data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
