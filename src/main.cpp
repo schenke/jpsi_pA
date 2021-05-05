@@ -890,8 +890,6 @@ static int HadronIntegrand(const int *ndim, const cubareal xx[],
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
   
-  double factorxA = pow(1.-xA,4.);
-  double factorxp = pow(1.-xp,4.);
   if (xp>1.){
     f = 0.;
   }
@@ -902,6 +900,8 @@ static int HadronIntegrand(const int *ndim, const cubareal xx[],
     f = 0.;
   }    
   else{
+    double factorxA = pow(1.-xA,4.);
+    double factorxp = pow(1.-xp,4.);
     
     Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
     QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
