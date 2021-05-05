@@ -1585,8 +1585,8 @@ int main(int argc, char *argv[]) {
             &neval, &fail, integral, error, prob);
     
     // Print the result
-    //gresult = (double)integral[0];
-    //gerror = (double)error[0];
+    gresult = (double)integral[0];
+    gerror = (double)error[0];
     printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
 
     //data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
@@ -1595,7 +1595,7 @@ int main(int argc, char *argv[]) {
     
     // JPsi cross section
     NDIM = 12;
-    llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCo, &data, NVEC,
+    llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
             EPSREL, EPSABS, VERBOSE, SEED,
             MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
             GRIDNO, NULL, NULL,
