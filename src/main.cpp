@@ -188,7 +188,7 @@ return mv->StF(k, TA, Qs);
 }
 
 // Integrand for the combined J/Psi integral in the color singlet channel
-static int JPsiIntegrandNRQCD_cs(const int *ndim, const cubareal xx[],
+static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define qqR xx[0]
@@ -290,8 +290,106 @@ static int JPsiIntegrandNRQCD_cs(const int *ndim, const cubareal xx[],
   return 0;
 } 
 
+// Integrand for the combined J/Psi integral in the color singlet channel
+static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define fqqRx xx[0]
+#define fqqRy xx[1]
+#define fqq4k xx[2]
+#define fqq4phik xx[3]
+#define fqq4k1 xx[4]
+#define fqq4phik1 xx[5]
+#define fqq4kprime xx[6]
+#define fqq4phikprime xx[7]
+#define fqq4p xx[8]
+#define fqq4phip xx[9]
+#define f ff[0]
+
+  double kscale = 15.;
+  double pscale = 15.;
+  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+
+  double Y = static_cast<params*>(userdata)->Y;
+  double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
+  double by=static_cast<params*>(userdata)->by/constants::hbarc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+  Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
+
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables  
+  double Rx = fqqRx*Rscale-Rscale/2.;
+  double Ry = fqqRy*Rscale-Rscale/2.;
+  double p = fqq4p*pscale;
+  double phip = fqq4phip*2.*constants::PI;
+  double k = fqq4k*kscale;
+  double phik = fqq4phik*2.*constants::PI;
+  double k1 = fqq4k1*kscale;
+  double phik1 = fqq4phik1*2.*constants::PI;
+  double kprime = fqq4kprime*kscale;
+  double phikprime = fqq4phikprime*2.*constants::PI;
+  
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  
+  double factorxp = pow(1.-xp,4);
+  double factorxA = pow(1.-xA,4);
+  if (xp>1.){
+    f = 0;
+  }
+
+  else if (xA>1.){
+    f= 0;
+  }
+  else {
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double kprimex = kprime*cos(phikprime);
+  double kprimey = kprime*sin(phikprime);
+  double pminuskminusk1minuskprimex = px-kx-k1x-kprimex;
+  double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
+  double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
+                                    +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
+
+  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
+  
+  double H_cs = constants::ldme_singlet*NRQCD::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
+ 
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
+  
+  f = constants::alphas/(2.*pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_cs
+    *(StF(k,TA,QsA,mv)*factorxA*StF(kprime,TA,QsA,mv)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv)*factorxA)
+    *Rscale*Rscale
+    *p*pscale*2.*constants::PI
+    *k*kscale*2.*constants::PI
+    *k1*kscale*2.*constants::PI
+    *kprime*kscale*2.*constants::PI; 
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // dRxdRy
+  // d2p
+  // d2k
+  // d2k1
+  // d2kprime
+   
+  }
+  return 0;
+} 
 // Integrand for the combined J/Psi integral in the color octet channel
-static int JPsiIntegrandNRQCD_co(const int *ndim, const cubareal xx[],
+static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define qqR xx[0]
@@ -386,6 +484,100 @@ static int JPsiIntegrandNRQCD_co(const int *ndim, const cubareal xx[],
   }
   return 0;
 } 
+
+// Integrand for the combined J/Psi integral in the color octet channel for fluctuations
+static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define fqqRx xx[0]
+#define fqqRy xx[1]
+#define fqq4k xx[2]
+#define fqq4phik xx[3]
+#define fqq4k1 xx[4]
+#define fqq4phik1 xx[5]
+#define fqq4p xx[6]
+#define fqq4phip xx[7]
+#define f ff[0]
+
+  double kscale = 15.;
+  double pscale = 15.;
+  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+
+  double Y = static_cast<params*>(userdata)->Y;
+  double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
+  double by=static_cast<params*>(userdata)->by/constants::hbarc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+  Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
+
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables  
+  double Rx = fqqRx*Rscale-Rscale/2.;
+  double Ry = fqqRy*Rscale-Rscale/2.;
+  double p = fqq4p*pscale;
+  double phip = fqq4phip*2.*constants::PI;
+  double k = fqq4k*kscale;
+  double phik = fqq4phik*2.*constants::PI;
+  double k1 = fqq4k1*kscale;
+  double phik1 = fqq4phik1*2.*constants::PI;
+  
+  
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  
+  double factorxp = pow(1.-xp,4);
+  double factorxA = pow(1.-xA,4);
+  if (xp>1.){
+    f = 0;
+  }
+
+  else if (xA>1.){
+    f= 0;
+  }
+  else {
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double pminuskminusk1x = px-kx-k1x;
+  double pminuskminusk1y = py-ky-k1y;
+  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
+                                    +pminuskminusk1y*pminuskminusk1y);
+
+  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
+  
+  double H_co = constants::ldme_octet_s10*NRQCD::octet_s10(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_s13*NRQCD::octet_s13(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_p3j*NRQCD::octet_p3j(p, phip, k1, phik1, k, phik,m);
+ 
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
+  
+  f = constants::alphas/(2.*pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_co
+    *(StF(k,TA,QsA,mv)*factorxA*StF(pminuskminusk1,TA,QsA,mv)*factorxA)
+    *Rscale*Rscale
+    *p*pscale*2.*constants::PI
+    *k*kscale*2.*constants::PI
+    *k1*kscale*2.*constants::PI; 
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // dRxdRy
+  // d2p
+  // d2k
+  // d2k1
+   
+  }
+  return 0;
+}
 
 // Integrand for the combined J/Psi integral
 static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
