@@ -191,18 +191,18 @@ return mv->StF(k, TA, Qs);
 static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-#define qqR xx[0]
-#define qqphiR xx[1]
-#define qqb xx[2]
-#define qqphib xx[3]
-#define qq4k xx[4]
-#define qq4phik xx[5]
-#define qq4k1 xx[6]
-#define qq4phik1 xx[7]
-#define qq4kprime xx[8]
-#define qq4phikprime xx[9]
-#define qq4p xx[10]
-#define qq4phip xx[11]
+#define csR xx[0]
+#define csphiR xx[1]
+#define csb xx[2]
+#define csphib xx[3]
+#define cs4k xx[4]
+#define cs4phik xx[5]
+#define cs4k1 xx[6]
+#define cs4phik1 xx[7]
+#define cs4kprime xx[8]
+#define cs4phikprime xx[9]
+#define cs4p xx[10]
+#define cs4phip xx[11]
 #define f ff[0]
 
   double kscale = 15.;
@@ -219,18 +219,18 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   double m = constants::mc;//static_cast<params*>(userdata)->m;
 
   // scale the integration variables  
-  double R = qqR*Rscale;
-  double b = qqb*bscale;
-  double p = qq4p*pscale;
-  double phip = qq4phip*2.*constants::PI;
-  double k = qq4k*kscale;
-  double phik = qq4phik*2.*constants::PI;
-  double k1 = qq4k1*kscale;
-  double phik1 = qq4phik1*2.*constants::PI;
-  double kprime = qq4kprime*kscale;
-  double phikprime = qq4phikprime*2.*constants::PI;
-  double phiR = qqphiR*2*constants::PI;
-  double phib = qqphib*2*constants::PI;
+  double R = csR*Rscale;
+  double b = csb*bscale;
+  double p = cs4p*pscale;
+  double phip = cs4phip*2.*constants::PI;
+  double k = cs4k*kscale;
+  double phik = cs4phik*2.*constants::PI;
+  double k1 = cs4k1*kscale;
+  double phik1 = cs4phik1*2.*constants::PI;
+  double kprime = cs4kprime*kscale;
+  double phikprime = cs4phikprime*2.*constants::PI;
+  double phiR = csphiR*2*constants::PI;
+  double phib = csphib*2*constants::PI;
   
   double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
   double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
@@ -264,7 +264,7 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
 
   double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
   
-  double H_cs = constants::ldme_singlet*NRQCD::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
+  double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
  
   double myTA = returnTA(Rminusb,TAclass);
   
@@ -294,16 +294,16 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
 static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-#define fqqRx xx[0]
-#define fqqRy xx[1]
-#define fqq4k xx[2]
-#define fqq4phik xx[3]
-#define fqq4k1 xx[4]
-#define fqq4phik1 xx[5]
-#define fqq4kprime xx[6]
-#define fqq4phikprime xx[7]
-#define fqq4p xx[8]
-#define fqq4phip xx[9]
+#define fcsRx xx[0]
+#define fcsRy xx[1]
+#define fcs4k xx[2]
+#define fcs4phik xx[3]
+#define fcs4k1 xx[4]
+#define fcs4phik1 xx[5]
+#define fcs4kprime xx[6]
+#define fcs4phikprime xx[7]
+#define fcs4p xx[8]
+#define fcs4phip xx[9]
 #define f ff[0]
 
   double kscale = 15.;
@@ -322,16 +322,16 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   double m = constants::mc;//static_cast<params*>(userdata)->m;
 
   // scale the integration variables  
-  double Rx = fqqRx*Rscale-Rscale/2.;
-  double Ry = fqqRy*Rscale-Rscale/2.;
-  double p = fqq4p*pscale;
-  double phip = fqq4phip*2.*constants::PI;
-  double k = fqq4k*kscale;
-  double phik = fqq4phik*2.*constants::PI;
-  double k1 = fqq4k1*kscale;
-  double phik1 = fqq4phik1*2.*constants::PI;
-  double kprime = fqq4kprime*kscale;
-  double phikprime = fqq4phikprime*2.*constants::PI;
+  double Rx = fcsRx*Rscale-Rscale/2.;
+  double Ry = fcsRy*Rscale-Rscale/2.;
+  double p = fcs4p*pscale;
+  double phip = fcs4phip*2.*constants::PI;
+  double k = fcs4k*kscale;
+  double phik = fcs4phik*2.*constants::PI;
+  double k1 = fcs4k1*kscale;
+  double phik1 = fcs4phik1*2.*constants::PI;
+  double kprime = fcs4kprime*kscale;
+  double phikprime = fcs4phikprime*2.*constants::PI;
   
   double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
   double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
@@ -362,7 +362,7 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
                                     +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
   
-  double H_cs = constants::ldme_singlet*NRQCD::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
+  double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
  
   double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
   double Tp = returnTp2D(Rx,Ry,glauberClass);
@@ -390,16 +390,16 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
 static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-#define qqR xx[0]
-#define qqphiR xx[1]
-#define qqb xx[2]
-#define qqphib xx[3]
-#define qq4k xx[4]
-#define qq4phik xx[5]
-#define qq4k1 xx[6]
-#define qq4phik1 xx[7]
-#define qq4p xx[8]
-#define qq4phip xx[9]
+#define coR xx[0]
+#define cophiR xx[1]
+#define cob xx[2]
+#define cophib xx[3]
+#define co4k xx[4]
+#define co4phik xx[5]
+#define co4k1 xx[6]
+#define co4phik1 xx[7]
+#define co4p xx[8]
+#define co4phip xx[9]
 #define f ff[0]
 
   double kscale = 15.;
@@ -416,16 +416,16 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   double m = constants::mc;//static_cast<params*>(userdata)->m;
 
   // scale the integration variables  
-  double R = qqR*Rscale;
-  double b = qqb*bscale;
-  double p = qq4p*pscale;
-  double phip = qq4phip*2.*constants::PI;
-  double k = qq4k*kscale;
-  double phik = qq4phik*2.*constants::PI;
-  double k1 = qq4k1*kscale;
-  double phik1 = qq4phik1*2.*constants::PI;
-  double phiR = qqphiR*2*constants::PI;
-  double phib = qqphib*2*constants::PI;
+  double R = coR*Rscale;
+  double b = cob*bscale;
+  double p = co4p*pscale;
+  double phip = co4phip*2.*constants::PI;
+  double k = co4k*kscale;
+  double phik = co4phik*2.*constants::PI;
+  double k1 = co4k1*kscale;
+  double phik1 = co4phik1*2.*constants::PI;
+  double phiR = cophiR*2*constants::PI;
+  double phib = cophib*2*constants::PI;
   
   double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
   double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
@@ -457,9 +457,9 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
 
   double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
   
-  double H_co = constants::ldme_octet_s10*NRQCD::octet_s10(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_s13*NRQCD::octet_s13(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_p3j*NRQCD::octet_p3j(p, phip, k1, phik1, k, phik,m);
+  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
  
   double myTA = returnTA(Rminusb,TAclass);
   
@@ -487,14 +487,14 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
 static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-#define fqqRx xx[0]
-#define fqqRy xx[1]
-#define fqq4k xx[2]
-#define fqq4phik xx[3]
-#define fqq4k1 xx[4]
-#define fqq4phik1 xx[5]
-#define fqq4p xx[6]
-#define fqq4phip xx[7]
+#define fcoRx xx[0]
+#define fcoRy xx[1]
+#define fco4k xx[2]
+#define fco4phik xx[3]
+#define fco4k1 xx[4]
+#define fco4phik1 xx[5]
+#define fco4p xx[6]
+#define fco4phip xx[7]
 #define f ff[0]
 
   double kscale = 15.;
@@ -513,14 +513,14 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   double m = constants::mc;//static_cast<params*>(userdata)->m;
 
   // scale the integration variables  
-  double Rx = fqqRx*Rscale-Rscale/2.;
-  double Ry = fqqRy*Rscale-Rscale/2.;
-  double p = fqq4p*pscale;
-  double phip = fqq4phip*2.*constants::PI;
-  double k = fqq4k*kscale;
-  double phik = fqq4phik*2.*constants::PI;
-  double k1 = fqq4k1*kscale;
-  double phik1 = fqq4phik1*2.*constants::PI;
+  double Rx = fcoRx*Rscale-Rscale/2.;
+  double Ry = fcoRy*Rscale-Rscale/2.;
+  double p = fco4p*pscale;
+  double phip = fco4phip*2.*constants::PI;
+  double k = fco4k*kscale;
+  double phik = fco4phik*2.*constants::PI;
+  double k1 = fco4k1*kscale;
+  double phik1 = fco4phik1*2.*constants::PI;
   
   
   double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
@@ -551,9 +551,9 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
                                     +pminuskminusk1y*pminuskminusk1y);
 
   
-  double H_co = constants::ldme_octet_s10*NRQCD::octet_s10(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_s13*NRQCD::octet_s13(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_p3j*NRQCD::octet_p3j(p, phip, k1, phik1, k, phik,m);
+  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
  
   double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
   double Tp = returnTp2D(Rx,Ry,glauberClass);
@@ -874,16 +874,16 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
 static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-#define fqqRx xx[0]
-#define fqqRy xx[1]
-#define fqqq xx[2]
-#define fqqqphi xx[3]
-#define fqqp xx[4]
-#define fqqpphi xx[5]
-#define fqq4k xx[6]
-#define fqq4phik xx[7]
-#define fqq4k1 xx[8]
-#define fqq4phik1 xx[9]
+#define fccRx xx[0]
+#define fccRy xx[1]
+#define fccq xx[2]
+#define fccqphi xx[3]
+#define fccp xx[4]
+#define fccpphi xx[5]
+#define fcc4k xx[6]
+#define fcc4phik xx[7]
+#define fcc4k1 xx[8]
+#define fcc4phik1 xx[9]
 
   double kscale = 30.;
   double pscale = 30.;
@@ -899,16 +899,16 @@ static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double m = constants::mc;//static_cast<params*>(userdata)->m;
 
   // scale the integration variables 
-  double q = fqqq*pscale; // cbar transverse momentum
-  double phiq = fqqqphi*2.*constants::PI; // and its angle
-  double p = fqqp*pscale; // c transverse momentum
-  double phip = fqqpphi*2.*constants::PI; // and its angle
-  double k = fqq4k*kscale; // exchaged k momentum
-  double phik = fqq4phik*2.*constants::PI;// and its angle
-  double k1 = fqq4k1*kscale; // exchaged k1 momentum
-  double phik1 = fqq4phik1*2.*constants::PI;
-  double Rx = fqqRx*Rscale-Rscale/2.;
-  double Ry = fqqRy*Rscale-Rscale/2.;
+  double q = fccq*pscale; // cbar transverse momentum
+  double phiq = fccqphi*2.*constants::PI; // and its angle
+  double p = fccp*pscale; // c transverse momentum
+  double phip = fccpphi*2.*constants::PI; // and its angle
+  double k = fcc4k*kscale; // exchaged k momentum
+  double phik = fcc4phik*2.*constants::PI;// and its angle
+  double k1 = fcc4k1*kscale; // exchaged k1 momentum
+  double phik1 = fcc4phik1*2.*constants::PI;
+  double Rx = fccRx*Rscale-Rscale/2.;
+  double Ry = fccRy*Rscale-Rscale/2.;
 
   double yq = static_cast<params*>(userdata)->yq; // c bar rapidity
   double yp = static_cast<params*>(userdata)->yp; // c rapidity
@@ -1589,17 +1589,17 @@ int main(int argc, char *argv[]) {
             &neval, &fail, integral, error, prob);
     
     // Print the result
-    gresult = (double)integral[0];
-    gerror = (double)error[0];
-    printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
+    //gresult = (double)integral[0];
+    //gerror = (double)error[0];
+    //printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
 
-    data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
-    data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
+    //data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
+    //data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
     data.Y = Y_fwd;
     
     // JPsi cross section
     NDIM = 12;
-    llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
+    llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCo, &data, NVEC,
             EPSREL, EPSABS, VERBOSE, SEED,
             MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
             GRIDNO, NULL, NULL,
@@ -1610,21 +1610,21 @@ int main(int argc, char *argv[]) {
     JPsi2error = (double)error[0];
     printf("Forward JPsi: %.8e +- %.8e\t\n", JPsi2result, JPsi2error);
 
-    data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
-    data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
-    data.Y = Y_bck;
+    //data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
+    //data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
+    //data.Y = Y_bck;
     
-    NDIM = 12;
-    llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
-            EPSREL, EPSABS, VERBOSE, SEED,
-            MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-            GRIDNO, NULL, NULL,
-            &neval, &fail, integral, error, prob);
+   // NDIM = 12;
+   // llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
+   //         EPSREL, EPSABS, VERBOSE, SEED,
+   //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+   //         GRIDNO, NULL, NULL,
+   //         &neval, &fail, integral, error, prob);
     
     // Print the result
-    JPsi2result2 = (double)integral[0];
-    JPsi2error2 = (double)error[0];
-    printf("Backward JPsi: %.8e +- %.8e\t\n", JPsi2result2, JPsi2error2);
+   // JPsi2result2 = (double)integral[0];
+   // JPsi2error2 = (double)error[0];
+   // printf("Backward JPsi: %.8e +- %.8e\t\n", JPsi2result2, JPsi2error2);
 
     cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
     
