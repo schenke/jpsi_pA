@@ -305,9 +305,9 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
 #define fcs4p xx[8]
 #define fcs4phip xx[9]
 
-  double kscale = 15.;
-  double pscale = 15.;
-  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double kscale = 30.;
+  double pscale = 30.;
+  double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
 
   double Y = static_cast<params*>(userdata)->Y;
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
@@ -332,11 +332,11 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   double kprime = fcs4kprime*kscale;
   double phikprime = fcs4phikprime*2.*constants::PI;
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
   
-  double factorxp = pow(1.-xp,4);
-  double factorxA = pow(1.-xA,4);
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
   if (xp>1.){
     f = 0;
   }
@@ -362,18 +362,23 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
                                     +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
   
   double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
- 
+  
   double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
   double Tp = returnTp2D(Rx,Ry,glauberClass);
   
-  f = constants::alphas/(2.*pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_cs
-    *(StF(k,TA,QsA,mv)*factorxA*StF(kprime,TA,QsA,mv)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv)*factorxA)
-    *Rscale*Rscale
-    *p*pscale*2.*constants::PI
-    *k*kscale*2.*constants::PI
-    *k1*kscale*2.*constants::PI
-    *kprime*kscale*2.*constants::PI; 
+  if(pminuskminusk1minuskprime>30.){
+    f=0.;
+  }
+  else
+    {
+      f = constants::alphas/(2.*pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+        *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_cs
+        *(StF(k,TA,QsA,mv)*factorxA*StF(kprime,TA,QsA,mv)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv)*factorxA)
+        *Rscale*Rscale
+        *p*pscale*2.*constants::PI
+        *k*kscale*2.*constants::PI
+        *k1*kscale*2.*constants::PI
+        *kprime*kscale*2.*constants::PI; 
   // scaled momenta above (in PT)
   // last rows are scaling of integration measures:
   // dRxdRy
@@ -381,7 +386,7 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   // d2k
   // d2k1
   // d2kprime
-   
+    }
   }
   return 0;
 } 
@@ -494,9 +499,9 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
 #define fco4p xx[6]
 #define fco4phip xx[7]
 
-  double kscale = 15.;
-  double pscale = 15.;
-  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double kscale = 30.;
+  double pscale = 30.;
+  double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
 
   double Y = static_cast<params*>(userdata)->Y;
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
@@ -520,11 +525,11 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   double phik1 = fco4phik1*2.*constants::PI;
   
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
   
-  double factorxp = pow(1.-xp,4);
-  double factorxA = pow(1.-xA,4);
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
   if (xp>1.){
     f = 0;
   }
@@ -547,28 +552,32 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
                                     +pminuskminusk1y*pminuskminusk1y);
 
-  
   double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
  
   double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
   double Tp = returnTp2D(Rx,Ry,glauberClass);
-  
-  f = constants::alphas/(2.*pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_co
-    *(StF(k,TA,QsA,mv)*factorxA*StF(pminuskminusk1,TA,QsA,mv)*factorxA)
-    *Rscale*Rscale
-    *p*pscale*2.*constants::PI
-    *k*kscale*2.*constants::PI
-    *k1*kscale*2.*constants::PI; 
-  // scaled momenta above (in PT)
+ 
+  if(pminuskminusk1>30.){
+    f=0.;
+  }
+  else
+    {
+      f = constants::alphas/(2.*pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+        *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_co
+        *(StF(k,TA,QsA,mv)*factorxA*StF(pminuskminusk1,TA,QsA,mv)*factorxA)
+        *Rscale*Rscale
+        *p*pscale*2.*constants::PI
+        *k*kscale*2.*constants::PI
+        *k1*kscale*2.*constants::PI; 
+      // scaled momenta above (in PT)
   // last rows are scaling of integration measures:
   // dRxdRy
   // d2p
   // d2k
   // d2k1
-   
+    }
   }
   return 0;
 }
@@ -1331,7 +1340,7 @@ int main(int argc, char *argv[]) {
   int readTable = 0;
   int useFluc = 0;
   int Nevents = 1;
-
+  int NRQCD = 1;
 
   std::vector <std::string> sources;
   std::string destination;
@@ -1594,33 +1603,77 @@ int main(int argc, char *argv[]) {
     data.Y = Y_fwd;
     
     // JPsi cross section
-    NDIM = 12;
-    llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
-            EPSREL, EPSABS, VERBOSE, SEED,
-            MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-            GRIDNO, NULL, NULL,
-            &neval, &fail, integral, error, prob);
-    
+    if(NRQCD==1){
+      NDIM = 12;
+      llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCs, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+
+      JPsi2result = (double)integral[0];
+      JPsi2error = (double)error[0];
+
+      NDIM = 10;
+      llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCo, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+
+      JPsi2result += (double)integral[0];
+      JPsi2error += (double)error[0];
+    }
+    else{
+      NDIM = 12;
+      llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+      JPsi2result = (double)integral[0];
+      JPsi2error = (double)error[0];
+    }
     // Print the result
-    JPsi2result = (double)integral[0];
-    JPsi2error = (double)error[0];
     printf("Forward JPsi: %.8e +- %.8e\t\n", JPsi2result, JPsi2error);
 
-    //data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
-    //data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
-    //data.Y = Y_bck;
+    data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
+    data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
+    data.Y = Y_bck;
     
-   // NDIM = 12;
-   // llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
-   //         EPSREL, EPSABS, VERBOSE, SEED,
-   //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-   //         GRIDNO, NULL, NULL,
-   //         &neval, &fail, integral, error, prob);
-    
-    // Print the result
-   // JPsi2result2 = (double)integral[0];
-   // JPsi2error2 = (double)error[0];
-   // printf("Backward JPsi: %.8e +- %.8e\t\n", JPsi2result2, JPsi2error2);
+    if(NRQCD==1){
+      NDIM = 12;
+      llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCs, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+
+      JPsi2result2 = (double)integral[0];
+      JPsi2error2 = (double)error[0];
+
+      NDIM = 10;
+      llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCo, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+
+      JPsi2result2 += (double)integral[0];
+      JPsi2error2 += (double)error[0];
+    }
+    else{
+      NDIM = 12;
+      llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+      JPsi2result2 = (double)integral[0];
+      JPsi2error2 = (double)error[0];
+    }
+
+    printf("Backward JPsi: %.8e +- %.8e\t\n", JPsi2result2, JPsi2error2);
 
     cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
     
@@ -1710,28 +1763,73 @@ int main(int argc, char *argv[]) {
       data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
       data.Y = Y_fwd;
 
-      NDIM = 10;
-      llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
-      
+      if(NRQCD==1){
+        NDIM = 10;
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        
+        JPsi2result = (double)integral[0];
+        JPsi2error = (double)error[0];
+
+        NDIM = 8;
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        
+        JPsi2result += (double)integral[0];
+        JPsi2error += (double)error[0]; //should add in quadrature
+      }
+      else{
+        NDIM = 10;
+        llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        JPsi2result = (double)integral[0];
+        JPsi2error = (double)error[0];
+      }
       // Print the result
-      JPsi2result = (double)integral[0];
-      JPsi2error = (double)error[0];
       printf("Forward JPsi: %.8e +- %.8e\t\n", JPsi2result, JPsi2error);   
       
       data.Qsp = inQsp_bck*QspFac; // forward proton Saturation scale in GeV
       data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
       data.Y = Y_bck;
-      
-      llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
-      
+   
+      if(NRQCD==1){
+        NDIM = 10;   
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        
+        JPsi2result = (double)integral[0];
+        JPsi2error = (double)error[0];
+
+        NDIM = 8;
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        
+        JPsi2result += (double)integral[0];
+        JPsi2error += (double)error[0]; //should add in quadrature
+      }
+      else{
+        NDIM = 10;
+        llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+      }
       // Print the result
       JPsi2result2 = (double)integral[0];
       JPsi2error2 = (double)error[0];

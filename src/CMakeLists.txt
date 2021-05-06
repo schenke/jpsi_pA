@@ -6,6 +6,7 @@ set (SOURCES
     Random.cpp
     Parameters.cpp
     MV.cpp
+    nrqcd.cpp
 )
 
 set(CompileFlags "")
