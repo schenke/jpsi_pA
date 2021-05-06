@@ -1808,8 +1808,8 @@ int main(int argc, char *argv[]) {
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
         
-        JPsi2result = (double)integral[0];
-        JPsi2error = (double)error[0];
+        JPsi2result2 = (double)integral[0];
+        JPsi2error2 = (double)error[0];
 
         NDIM = 8;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
@@ -1818,8 +1818,8 @@ int main(int argc, char *argv[]) {
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
         
-        JPsi2result += (double)integral[0];
-        JPsi2error += (double)error[0]; //should add in quadrature
+        JPsi2result2 += (double)integral[0];
+        JPsi2error2 += (double)error[0]; //should add in quadrature
       }
       else{
         NDIM = 10;
@@ -1828,10 +1828,10 @@ int main(int argc, char *argv[]) {
                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
+        JPsi2result2 = (double)integral[0];
+        JPsi2error2 = (double)error[0];
       }
       // Print the result
-      JPsi2result2 = (double)integral[0];
-      JPsi2error2 = (double)error[0];
       printf("Backward JPsi: %.8e +- %.8e\t\n", JPsi2result2, JPsi2error2);   
 
       double TA = returnTA2D(-data.bx,-data.by,glauber);
