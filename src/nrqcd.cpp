@@ -36,7 +36,7 @@ double octets10(const double p, const double phip, const double k1, const double
     double k1dotl = k1*k*cosk1k - k1*p*cospk1/2. + k1*k1/2.;
     double pdotl = p*k*cospk - p*p/2. + p*k1*cospk1/2.;
 
-    return  2.*(k1*k1*lt2-kdotl*kdotl)/(m*pow(lt2+kappa2/4.,2.));
+    return  2.*(k1*k1*lt2-k1dotl*k1dotl)/(m*pow(lt2+kappa2/4.,2.)); // changed to k1 dot l according to (B18f) in https://arxiv.org/pdf/1309.7337.pdf
 
  
  } 

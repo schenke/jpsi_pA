@@ -524,7 +524,6 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   double k1 = fco4k1*kscale;
   double phik1 = fco4phik1*2.*constants::PI;
   
-  
   double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
   double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
   
@@ -571,7 +570,7 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
         *p*pscale*2.*constants::PI
         *k*kscale*2.*constants::PI
         *k1*kscale*2.*constants::PI; 
-      // scaled momenta above (in PT)
+  // scaled momenta above (in PT)
   // last rows are scaling of integration measures:
   // dRxdRy
   // d2p
@@ -1492,7 +1491,7 @@ int main(int argc, char *argv[]) {
 
   double Y_g = 0.;
   double Y_fwd = 3.;
-  double Y_bck=-3.8; //use minus sign
+  double Y_bck= -3.8; //use minus sign
  
   data.Y = Y_g;
 
