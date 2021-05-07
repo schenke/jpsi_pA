@@ -51,10 +51,10 @@ namespace constants {
   //const double x0 = 0.00005;
   const double lambdaSpeedp = 0.277;
   const double lambdaSpeedA = 0.277;
-  const double prefactor = 0.5;
+  const double prefactor = 0.56;
   //const double prefactor = 0.7;
   const double roots = 8160.;
-  const double ldme_singlet = 1.16/double(Nc); // GeV^3
+  const double ldme_singlet = 1.16/2./double(Nc); // GeV^3
   const double ldme_octet_s10 = 0.089; // +- 0.0098 GeV^3
   const double ldme_octet_s13 = 0.0030; // +- 0.00012 GeV^3
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
@@ -1414,9 +1414,11 @@ int main(int argc, char *argv[]) {
   mv = new MV();
 
   if (readTable == 0){
-    mv->computePhip();
-    mv->writeTable();
+    //    mv->computePhip();
+    //mv->writeTable();
     //    mv->writeTableText();
+    mv->computePhipBK();
+    mv->writeTableBK();
   }
   else if (readTable == 1){
     mv->readTable();
