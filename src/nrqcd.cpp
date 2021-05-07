@@ -12,7 +12,7 @@ double singlet(const double p, const double phip, const double k1, const double 
     double cospk1 = cos(phip - phik1);
     double cospkprime = cos(phip - phikprime);
     double cosk1kprime = cos(phik1 - phikprime);
-    double kappa2 = k*k + 4.*m*m;
+    double kappa2 = k1*k1 + 4.*m*m;
     // l_T = k_T - p_T/2 + k_1T /2
     double lt2 = k*k + p*p/4. + k1*k1/4. - k*p*cospk + k*k1*cosk1k - p*k1*cospk1/2.;
     // l'_T = k'_T - p_T/2 + k_1T/2
@@ -28,7 +28,7 @@ double octets10(const double p, const double phip, const double k1, const double
     double cosk1k = cos(phik1 - phik);
     double cospk = cos(phip - phik);
     double cospk1 = cos(phip - phik1);
-    double kappa2 = k*k + 4*m*m;
+    double kappa2 = k1*k1 + 4*m*m;
     // l_T = k_T - p_T/2 + k_1T /2
     double lt2 = k*k + p*p/4. + k1*k1/4. - k*p*cospk + k*k1*cosk1k - p*k1*cospk1/2.;
     double kdotl = k*k - k*p*cospk/2. + k*k1*cosk1k/2.;
@@ -47,7 +47,7 @@ double octets10(const double p, const double phip, const double k1, const double
     double cosk1k = cos(phik1 - phik);
     double cospk = cos(phip - phik);
     double cospk1 = cos(phip - phik1);
-    double kappa2 = k*k + 4*m*m;
+    double kappa2 = k1*k1 + 4*m*m;
     // l_T = k_T - p_T/2 + k_1T /2
     double lt2 = k*k + p*p/4. + k1*k1/4. - k*p*cospk + k*k1*cosk1k - p*k1*cospk1/2.;
     double kdotl = k*k - k*p*cospk/2. + k*k1*cosk1k/2.;
@@ -70,7 +70,7 @@ double octets10(const double p, const double phip, const double k1, const double
     double cosk1k = cos(phik1 - phik);
     double cospk = cos(phip - phik);
     double cospk1 = cos(phip - phik1);
-    double kappa2 = k*k + 4*m*m;
+    double kappa2 = k1*k1 + 4*m*m;
     // l_T = k_T - p_T/2 + k_1T /2
     double lt2 = k*k + p*p/4. + k1*k1/4. - k*p*cospk + k*k1*cosk1k - p*k1*cospk1/2.;
     double kdotl = k*k - k*p*cospk/2. + k*k1*cosk1k/2.;

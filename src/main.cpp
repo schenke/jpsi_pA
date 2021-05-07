@@ -57,7 +57,7 @@ namespace constants {
   const double ldme_singlet = 1.16/double(Nc); // GeV^3
   const double ldme_octet_s10 = 0.089; // +- 0.0098 GeV^3
   const double ldme_octet_s13 = 0.0030; // +- 0.00012 GeV^3
-  const double ldme_octet_p3j = 0.0056; // +- 0.0021 GeV^3 
+  const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
 }
 
 // Parameters that need to be passed to the integrand
@@ -268,7 +268,7 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
  
   double myTA = returnTA(Rminusb,TAclass);
   
-  f = constants::alphas/(2.*pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+  f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_cs
     *(StF(k,myTA,QsA,mv)*factorxA*StF(kprime,myTA,QsA,mv)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv)*factorxA)
     *R*Rscale*2.*constants::PI
@@ -371,7 +371,7 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   }
   else
     {
-      f = constants::alphas/(2.*pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+      f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
         *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_cs
         *(StF(k,TA,QsA,mv)*factorxA*StF(kprime,TA,QsA,mv)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv)*factorxA)
         *Rscale*Rscale
@@ -466,7 +466,7 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
  
   double myTA = returnTA(Rminusb,TAclass);
   
-  f = constants::alphas/(2.*pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+  f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_co
     *(StF(k,myTA,QsA,mv)*factorxA*StF(pminuskminusk1,myTA,QsA,mv)*factorxA)
     *R*Rscale*2.*constants::PI
@@ -563,7 +563,7 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   }
   else
     {
-      f = constants::alphas/(2.*pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+      f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
         *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_co
         *(StF(k,TA,QsA,mv)*factorxA*StF(pminuskminusk1,TA,QsA,mv)*factorxA)
         *Rscale*Rscale
