@@ -79,6 +79,7 @@ struct params {
   MV *mv;
   Glauber *glauberClass; 
   double protonSizeFactor;
+  int BK;
 };
 
 struct kinqq {
@@ -159,8 +160,13 @@ double PhipGBW(double k, double R, double Qs){
 }
 
 // choose between MV and GBW - should make this choice a parameter of course
-double Phip(double k, double RorTp, double Qs, double sizeFactor, MV *mv){
-  return mv->PhipFluc(k, RorTp, Qs, sizeFactor);
+double Phip(double k, double RorTp, double Qs, double sizeFactor, MV *mv, int BK, double x){
+  if(BK){
+    return mv->PhipBKFluc(k, RorTp, Qs, x);
+  }
+  else{
+    return mv->PhipFluc(k, RorTp, Qs, sizeFactor);
+  }
   //  return mv->Phip(k, RorTp, Qs, sizeFactor);
   //return PhipGBW(k, R, Qs);
 }
@@ -171,8 +177,13 @@ double PhitGBW(double k, double TA, double Qs){
 }
 
 // choose between MV and GBW - should make this choice a parameter of course
-double Phit(double k, double TA, double Qs, MV *mv){
-  return mv->Phit(k, TA, Qs);
+double Phit(double k, double TA, double Qs, MV *mv, int BK, double x){
+  if(BK){
+    return mv->PhitBK(k, TA, Qs, x);
+  }
+  else{
+    return mv->Phit(k, TA, Qs);
+  }
   //return PhitGBW(k, TA, Qs);
 }
 
@@ -182,8 +193,13 @@ double StFGBW(double k, double TA, double Qs){
 } 
 
 // choose between MV and GBW - should make this choice a parameter of course
-double StF(double k, double TA, double Qs, MV *mv){
-return mv->StF(k, TA, Qs);
+double StF(double k, double TA, double Qs, MV *mv, int BK, double x){
+  if(BK){
+    return mv->StFBK(k, TA, Qs, x);
+  }
+  else{
+    return mv->StF(k, TA, Qs);
+  }
 //return StFGBW(k, TA, Qs);
 }
 
@@ -210,6 +226,7 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 12./constants::hbarc; 
 
+  double BK = static_cast<params*>(userdata)->BK;
   double Y = static_cast<params*>(userdata)->Y;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
@@ -269,8 +286,8 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   double myTA = returnTA(Rminusb,TAclass);
   
   f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_cs
-    *(StF(k,myTA,QsA,mv)*factorxA*StF(kprime,myTA,QsA,mv)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv)*factorxA)
+    *Phip(k1, R, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_cs
+    *(StF(k,myTA,QsA,mv,BK,xA)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA)*factorxA)
     *R*Rscale*2.*constants::PI
     *b*bscale*2.*constants::PI
     *p*pscale*2.*constants::PI
@@ -309,6 +326,7 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   double pscale = 30.;
   double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
 
+  double BK = static_cast<params*>(userdata)->BK;
   double Y = static_cast<params*>(userdata)->Y;
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
@@ -372,8 +390,8 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   else
     {
       f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-        *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_cs
-        *(StF(k,TA,QsA,mv)*factorxA*StF(kprime,TA,QsA,mv)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv)*factorxA)
+        *Phip(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_cs
+        *(StF(k,TA,QsA,mv, BK, xA)*factorxA*StF(kprime,TA,QsA,mv, BK, xA)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv, BK, xA)*factorxA)
         *Rscale*Rscale
         *p*pscale*2.*constants::PI
         *k*kscale*2.*constants::PI
@@ -410,6 +428,7 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 12./constants::hbarc; 
 
+  double BK = static_cast<params*>(userdata)->BK;
   double Y = static_cast<params*>(userdata)->Y;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
@@ -467,8 +486,8 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   double myTA = returnTA(Rminusb,TAclass);
   
   f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_co
-    *(StF(k,myTA,QsA,mv)*factorxA*StF(pminuskminusk1,myTA,QsA,mv)*factorxA)
+    *Phip(k1, R, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_co
+    *(StF(k,myTA,QsA,mv, BK, xA)*factorxA*StF(pminuskminusk1,myTA,QsA,mv, BK, xA)*factorxA)
     *R*Rscale*2.*constants::PI
     *b*bscale*2.*constants::PI
     *p*pscale*2.*constants::PI
@@ -503,6 +522,7 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   double pscale = 30.;
   double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
 
+  double BK = static_cast<params*>(userdata)->BK;
   double Y = static_cast<params*>(userdata)->Y;
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
@@ -564,8 +584,8 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   else
     {
       f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-        *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H_co
-        *(StF(k,TA,QsA,mv)*factorxA*StF(pminuskminusk1,TA,QsA,mv)*factorxA)
+        *Phip(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_co
+        *(StF(k,TA,QsA,mv, BK, xA)*factorxA*StF(pminuskminusk1,TA,QsA,mv, BK, xA)*factorxA)
         *Rscale*Rscale
         *p*pscale*2.*constants::PI
         *k*kscale*2.*constants::PI
@@ -607,6 +627,8 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 12./constants::hbarc; 
   // Qs will be made rapidity dependent
+  double BK = static_cast<params*>(userdata)->BK;
+  
   double Y = static_cast<params*>(userdata)->Y;
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
@@ -679,6 +701,9 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   // double Rminusb = sqrt(Rminusbx*Rminusbx+Rminusby*Rminusby);
   // double phi_Rminusb = atan2(Rminusby,Rminusbx);
   
+  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
+  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
+
   double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
   // get Jacobian
@@ -690,8 +715,8 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor, mv)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,myTA,QsA,mv)*StF(k,myTA,QsA,mv))
+    *Phip(k1, R, Qsp, sizeFactor, mv, BK, xp)/(k1*k1)*H*J
+    *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA)*StF(k,myTA,QsA,mv, BK, xA))
     *R*Rscale*2.*constants::PI
     *b*bscale*2.*constants::PI
     *PT*pscale*2.*constants::PI
@@ -738,6 +763,7 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   // double bscale = 24./constants::hbarc; 
   // double Qsp = static_cast<params*>(userdata)->Qsp;
   // double QsA = static_cast<params*>(userdata)->QsA;
+  double BK = static_cast<params*>(userdata)->BK;
   double Y = static_cast<params*>(userdata)->Y;
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
@@ -849,8 +875,8 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, Tp, Qsp, sizeFactor, mv)*factorxp/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,TA,QsA,mv)*factorxA*StF(k,TA,QsA,mv))*factorxA
+    *Phip(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H*J
+    *(StF(pplusqminusk1minusk,TA,QsA,mv, BK, xA)*factorxA*StF(k,TA,QsA,mv,BK,xA))*factorxA
     *Rscale*Rscale
     //  *bscale*bscale
     *PT*pscale*2.*constants::PI
@@ -901,7 +927,8 @@ static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
   Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
  
   double m = constants::mc;//static_cast<params*>(userdata)->m;
-
+  double BK = static_cast<params*>(userdata)->BK;
+ 
   // scale the integration variables 
   double q = fccq*pscale; // cbar transverse momentum
   double phiq = fccqphi*2.*constants::PI; // and its angle
@@ -956,8 +983,8 @@ static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
   // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, Tp, Qsp, sizeFactor, mv)/(k1*k1)*H
-    *(StF(pplusqminusk1minusk,TA,QsA,mv)*StF(k,TA,QsA,mv))
+    *Phip(k1, Tp, Qsp, sizeFactor, mv, BK, xp)/(k1*k1)*H
+    *(StF(pplusqminusk1minusk,TA,QsA,mv, BK, xA)*StF(k,TA,QsA,mv, BK, xA))
     *Rscale*Rscale // dRx dRy
     *k*kscale*2.*constants::PI // d2k
     *k1*kscale*2.*constants::PI // d2k1
@@ -997,7 +1024,8 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 
   TAInt* TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
-
+  double BK = static_cast<params*>(userdata)->BK;
+ 
 
   // scale the integration variables 
   double M = constants::mJPsi + nqqM*(2.*constants::mD-constants::mJPsi); 
@@ -1050,6 +1078,10 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
   double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
   double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
+
+  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
+  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
+
  
   // double Rx = R*cos(phiR);
   // double Ry = R*sin(phiR);
@@ -1071,8 +1103,8 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor, mv)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,myTA,QsA,mv)*StF(k,myTA,QsA,mv))
+    *Phip(k1, R, Qsp, sizeFactor, mv, BK, xp)/(k1*k1)*H*J
+    *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA)*StF(k,myTA,QsA,mv, BK, xA))
     *R*Rscale*2.*constants::PI
     *b*bscale*2.*constants::PI
     *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
@@ -1114,13 +1146,16 @@ static int Integrand(const int *ndim, const cubareal xx[],
   double Qsp = static_cast<params*>(userdata)->Qsp;
   double QsA = static_cast<params*>(userdata)->QsA;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
-
+  double BK = static_cast<params*>(userdata)->BK;
+ 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
   double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*Rscale*Rscale - 2.*gR*gb*Rscale*Rscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass);
 
+  // determine x values
+
   f = constants::alphas/constants::CF/(p)/(p)/pow((2*constants::PI*constants::PI),3.)
-    *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv)*Phit(sqrt(p*p + gk*gk*kscale*kscale - 2.*p*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv)
+    *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK, 0)*Phit(sqrt(p*p + gk*gk*kscale*kscale - 2.*p*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, 0)
     *2.*constants::PI*gk*kscale*kscale  //kdkdphik
     *2.*constants::PI*gR*Rscale*Rscale  //RdRdphiR
     *2.*constants::PI*gb*Rscale*Rscale;  //bdbdphib
@@ -1149,12 +1184,16 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
-
+  double BK = static_cast<params*>(userdata)->BK;
+  double Y = static_cast<params*>(userdata)->Y;
+ 
+  double xp = (gp*pscale+lambda)*exp(Y)/constants::roots;
+  double xA = (gp*pscale+lambda)*exp(-Y)/constants::roots;
 
   double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*bscale*bscale - 2.*gR*gb*Rscale*bscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass);
  
   f = constants::alphas/constants::CF/(gp*pscale+lambda)/(gp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-    *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv)
+    *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK, xp)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)
     *2.*constants::PI*gk*kscale*kscale  //kdkdphik
     *2.*constants::PI*gR*Rscale*Rscale  //RdRdphiR
     *2.*constants::PI*gb*bscale*bscale  //bdbdphib
@@ -1184,6 +1223,8 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   double Ry = fgRy*Rscale-Rscale/2.;
   //double bx = fgbx*bscale-bscale/2.;
   //double by = fgby*bscale-bscale/2.;
+
+  double BK = static_cast<params*>(userdata)->BK;
 
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
@@ -1223,7 +1264,7 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = constants::alphas/constants::CF/(fgp*pscale+lambda)/(fgp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-      *Phip(fgk*kscale, Tp, Qsp, sizeFactor, mv)*factorxp*Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv)*factorxA
+      *Phip(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp*Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)*factorxA
       *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
       *Rscale*Rscale  //dRxdRy
       //    *bscale*bscale  //bdxdby
@@ -1266,6 +1307,7 @@ static int HadronIntegrand(const int *ndim, const cubareal xx[],
   double Qsp=0.;
   double QsA=0.;
 
+  double BK = static_cast<params*>(userdata)->BK;
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -1307,7 +1349,7 @@ static int HadronIntegrand(const int *ndim, const cubareal xx[],
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh/z/z*J* 
       constants::alphas/constants::CF/(pg)/(pg)/pow((2*constants::PI*constants::PI),3.)
-      *Phip(fgk*kscale, Tp, Qsp, sizeFactor, mv)*factorxp*Phit(sqrt(pg*pg + fgk*fgk*kscale*kscale - 2.*pg*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv)*factorxA
+      *Phip(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp*Phit(sqrt(pg*pg + fgk*fgk*kscale*kscale - 2.*pg*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)*factorxA
       *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
       *Rscale*Rscale  //dRxdRy
       //    *bscale*bscale  //bdxdby
@@ -1430,7 +1472,7 @@ int main(int argc, char *argv[]) {
 
   // Make the MV table 
   MV *mv;
-  mv = new MV();
+  mv = new MV(BK);
 
   if (readTable == 0){
     if(BK==0){
@@ -1524,6 +1566,8 @@ int main(int argc, char *argv[]) {
   double Y_bck= -3.8; //use minus sign
  
   data.Y = Y_g;
+
+  data.BK = BK;
 
   if(useFluc ==0){
     inQsp = QspPre*Qsp(0.8,constants::roots,-Y_g);

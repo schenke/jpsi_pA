@@ -27,34 +27,47 @@ class MV{
   double deltaA=1./80.;
   double deltak=1./10.;
   double deltay=1.;
-  
+  //double deltaA=1./8.;
+  //double deltak=1./1.;
+  //double deltay=1.;
+  int BK=0;
+
  public:
-  MV(){  
-    Phip_array = new double*[sizeA];
-    for (int i = 0; i < sizeA; i++) {
-      Phip_array[i] = new double[sizek];
+  MV(int BKin){
+    BK=BKin;
+    if(BK==0){
+      Phip_array = new double*[sizeA];
+      for (int i = 0; i < sizeA; i++) {
+        Phip_array[i] = new double[sizek];
+      }
     }
-    Phip_arrayBK = new double**[sizeA];
-    for (int i = 0; i < sizeA; i++) {
-      Phip_arrayBK[i] = new double*[sizek];
-      for (int j = 0; j < sizek; j++) {
-        Phip_arrayBK[i][j] = new double[sizey];
+    else{
+      Phip_arrayBK = new double**[sizeA];
+      for (int i = 0; i < sizeA; i++) {
+        Phip_arrayBK[i] = new double*[sizek];
+        for (int j = 0; j < sizek; j++) {
+          Phip_arrayBK[i][j] = new double[sizey];
+        }
       }
     }
   };
 
   ~MV(){
-    for(int i = 0; i < sizeA; ++i) {
-      delete[] Phip_array[i];
-    }
-    delete[] Phip_array;
-    for (int i = 0; i < sizeA; i++) {
-      for (int j = 0; j < sizek; j++) {
-        delete [] Phip_arrayBK[i][j];
+    if(BK==0){
+      for(int i = 0; i < sizeA; ++i) {
+        delete[] Phip_array[i];
       }
-      delete [] Phip_arrayBK[i];
+      delete[] Phip_array;
     }
-    delete[] Phip_arrayBK;
+    else{
+      for (int i = 0; i < sizeA; i++) {
+        for (int j = 0; j < sizek; j++) {
+          delete [] Phip_arrayBK[i][j];
+        }
+        delete [] Phip_arrayBK[i];
+      }
+      delete[] Phip_arrayBK;
+    }
   }; 
   
   void computePhip();

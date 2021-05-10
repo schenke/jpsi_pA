@@ -175,42 +175,42 @@ double MV::PhipFluc(double k, double Tp, double Qs, double sizeFactor){
 }
 
 
-// double MV::PhipBKFluc(double k, double Tp, double Qs, double x){
+double MV::PhipBKFluc(double k, double Tp, double Qs, double x){
 
-//   double A = constants::CA/4./constants::CF*Tp;
+  double A = constants::CA/4./constants::CF*Tp;
   
-//   int iA = int(A/deltaA); 
-//   int ik = int((k+0.0001)/deltak);
-//   double y = -log(x);
-//   int iy = int(y);
+  int iA = int(A/deltaA); 
+  int ik = int((k+0.0001)/deltak);
+  double y = -log(x);
+  int iy = int(y);
   
   
-//   if (iA>=sizeA){
-//     cerr << "MV::PhipBK: A out of range." << endl;
-//     return 0.;
-//   }
-//   if (ik>=sizek){
-//     cerr << "MV::PhipBK: k out of range." << endl;
-//     return 0.;
-//   }
-//   if (iy>=sizey){
-//     cerr << "MV::PhipBK: x out of range." << endl;
-//     return 0.;
-//   }
+  if (iA>=sizeA){
+    cerr << "MV::PhipBK: A out of range." << endl;
+    return 0.;
+  }
+  if (ik>=sizek){
+    cerr << "MV::PhipBK: k out of range." << endl;
+    return 0.;
+  }
+  if (iy>=sizey){
+    cerr << "MV::PhipBK: x out of range." << endl;
+    return 0.;
+  }
 
-//   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy];
-//   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy];
-//   double result1 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy];
+  double Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy];
+  double result1 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
 
-//   Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy+1];
-//   Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy+1];
-//   double result2 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy+1];
+  Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy+1];
+  double result2 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
 
-//   double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
+  double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
 
-//   //cout << "Phip=" << result << endl;
-//   return k*k*constants::Nc/4./constants::alphas*result;
-// }
+  //cout << "Phip=" << result << endl;
+  return k*k*constants::Nc/4./constants::alphas*result;
+}
 
 
 
@@ -268,41 +268,41 @@ double MV::Phit(double k, double TA, double Qs){
 }
 
 
-// double MV::PhitBK(double k, double TA, double Qs, double x){
+double MV::PhitBK(double k, double TA, double Qs, double x){
 
-//   double A = constants::CA/4./constants::CF*TA;
+  double A = constants::CA/4./constants::CF*TA;
   
-//   int iA = int(A/deltaA); 
-//   int ik = int((k+0.0001)/deltak);
-//   double y = -log(x);
-//   int iy = int(y);
+  int iA = int(A/deltaA); 
+  int ik = int((k+0.0001)/deltak);
+  double y = -log(x);
+  int iy = int(y);
   
-//   if (iA>=sizeA){
-//     cerr << "MV::PhitBK: A out of range." << endl;
-//     return 0.;
-//   }
-//   if (ik>=sizek){
-//     cerr << "MV::PhitBK: k out of range." << endl;
-//     return 0.;
-//   }
-//   if (iy>=sizey){
-//     cerr << "MV::PhitBK: x out of range." << endl;
-//     return 0.;
-//   }
+  if (iA>=sizeA){
+    cerr << "MV::PhitBK: A out of range." << endl;
+    return 0.;
+  }
+  if (ik>=sizek){
+    cerr << "MV::PhitBK: k out of range." << endl;
+    return 0.;
+  }
+  if (iy>=sizey){
+    cerr << "MV::PhitBK: x out of range." << endl;
+    return 0.;
+  }
 
-//   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy];
-//   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy];
-//   double result1 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy];
+  double Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy];
+  double result1 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
 
-//   Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy+1];
-//   Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy+1];
-//   double result2 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy+1];
+  Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy+1];
+  double result2 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
 
-//   double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
+  double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
 
-//   //cout << "Phip=" << result << endl;
-//   return k*k*constants::Nc/4./constants::alphas*result;
-// }
+  //cout << "Phip=" << result << endl;
+  return k*k*constants::Nc/4./constants::alphas*result;
+}
 
 
 double MV::StF(double k, double TA, double Qs){
@@ -329,41 +329,41 @@ double MV::StF(double k, double TA, double Qs){
   return result;
 }
 
-// double MV::StFBK(double k, double TA, double Qs, double x){
+double MV::StFBK(double k, double TA, double Qs, double x){
 
-//   double A = 1./4.*TA;
+  double A = 1./4.*TA;
   
-//   int iA = int(A/deltaA); 
-//   int ik = int((k+0.0001)/deltak);
-//   double y = -log(x);
-//   int iy = int(y);
+  int iA = int(A/deltaA); 
+  int ik = int((k+0.0001)/deltak);
+  double y = -log(x);
+  int iy = int(y);
   
-//   if (iA>=sizeA){
-//     cerr << "MV::StFBK: A out of range." << endl;
-//     return 0.;
-//   }
-//   if (ik>=sizek){
-//     cerr << "MV::StFBK: k out of range." << endl;
-//     return 0.;
-//   }
-//   if (iy>=sizey){
-//     cerr << "MV::StFBK: x out of range." << endl;
-//     return 0.;
-//   }
+  if (iA>=sizeA){
+    cerr << "MV::StFBK: A out of range." << endl;
+    return 0.;
+  }
+  if (ik>=sizek){
+    cerr << "MV::StFBK: k out of range." << endl;
+    return 0.;
+  }
+  if (iy>=sizey){
+    cerr << "MV::StFBK: x out of range." << endl;
+    return 0.;
+  }
 
-//   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy];
-//   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy];
-//   double result1 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy];
+  double Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy];
+  double result1 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
 
-//   Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy+1];
-//   Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy+1];
-//   double result2 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy+1];
+  Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy+1];
+  double result2 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
 
-//   double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
+  double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
 
-//   //cout << "Phip=" << result << endl;
-//   return result;
-// }
+  //cout << "Phip=" << result << endl;
+  return result;
+}
 
 
 int MV::writeTable(){
