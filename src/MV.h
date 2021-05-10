@@ -21,9 +21,12 @@ class MV{
   static double BKintegrandForList(double z, void * params);
   double ** Phip_array;
   double *** Phip_arrayBK;
-  int sizeA=3200;
-  int sizek=1000;
-  int sizey=18;
+  //  int sizeA=3200;
+  //int sizek=1000;
+  //int sizey=18;
+  int sizeA=3;
+  int sizek=2;
+  int sizey=2;
   double deltaA=1./80.;
   double deltak=1./10.;
   double deltay=1.;

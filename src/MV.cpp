@@ -421,10 +421,10 @@ int MV::writeTableBK(){
   // print header ------------- //
   Outfile1.write((char *)&sizeA, sizeof(int));
   Outfile1.write((char *)&sizek, sizeof(int));
+  Outfile1.write((char *)&sizey, sizeof(int));
   Outfile1.write((char *)&deltaA, sizeof(double));
   Outfile1.write((char *)&deltak, sizeof(double));
-  Outfile1.write((char *)&sizey, sizeof(int));
-  Outfile1.write((char *)&deltay, sizeof(int));
+  Outfile1.write((char *)&deltay, sizeof(double));
   
   double *val1 = new double[1];
 

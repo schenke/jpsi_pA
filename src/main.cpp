@@ -1339,7 +1339,8 @@ int main(int argc, char *argv[]) {
   int readTable = 0;
   int useFluc = 0;
   int Nevents = 1;
-  int NRQCD = 1;
+  int NRQCD = 0;
+  int BK = 0;
 
   std::vector <std::string> sources;
   std::string destination;
@@ -1368,6 +1369,24 @@ int main(int argc, char *argv[]) {
         Nevents = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
       } else { // Uh-oh, there was no argument to the destination option.
         std::cerr << "--Nevents option requires one argument, an integer >=1." << std::endl;
+        return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "--NRQCD") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        NRQCD = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--NRQCD option requires one argument, 0 for ICEM or 1 for NRQCD." << std::endl;
+        return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "--BK") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        BK = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--BK option requires one argument, 0 for MV with Qs(x) or 1 for (at the moment fake) BK." << std::endl;
         return 1;
       }  
     }
@@ -1414,14 +1433,23 @@ int main(int argc, char *argv[]) {
   mv = new MV();
 
   if (readTable == 0){
-    //    mv->computePhip();
-    //mv->writeTable();
-    //    mv->writeTableText();
-    mv->computePhipBK();
-    mv->writeTableBK();
+    if(BK==0){
+      mv->computePhip();
+      mv->writeTable();
+      //mv->writeTableText();
+    }
+    else{
+      mv->computePhipBK();
+      mv->writeTableBK();
+    }
   }
   else if (readTable == 1){
-    mv->readTable();
+    if(BK==0){
+      mv->readTable();
+    }
+    else{
+      mv->readTableBK();
+    }
   }
   else{
     cerr << "Unknown option readTable = " << readTable << ". Options are 0 or 1." << endl;
