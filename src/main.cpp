@@ -162,7 +162,7 @@ double PhipGBW(double k, double R, double Qs){
 // choose between MV and GBW - should make this choice a parameter of course
 double Phip(double k, double RorTp, double Qs, double sizeFactor, MV *mv, int BK, double x){
   if(BK){
-    return mv->PhipBKFluc(k, RorTp, Qs, x);
+    return mv->PhipBKFluc(k, RorTp, x);
   }
   else{
     return mv->PhipFluc(k, RorTp, Qs, sizeFactor);
@@ -179,7 +179,7 @@ double PhitGBW(double k, double TA, double Qs){
 // choose between MV and GBW - should make this choice a parameter of course
 double Phit(double k, double TA, double Qs, MV *mv, int BK, double x){
   if(BK){
-    return mv->PhitBK(k, TA, Qs, x);
+    return mv->PhitBK(k, TA, x);
   }
   else{
     return mv->Phit(k, TA, Qs);
@@ -195,7 +195,7 @@ double StFGBW(double k, double TA, double Qs){
 // choose between MV and GBW - should make this choice a parameter of course
 double StF(double k, double TA, double Qs, MV *mv, int BK, double x){
   if(BK){
-    return mv->StFBK(k, TA, Qs, x);
+    return mv->StFBK(k, TA, x);
   }
   else{
     return mv->StF(k, TA, Qs);
@@ -1216,7 +1216,7 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   double kscale = 30.;
   double pscale = 30.;
   double Rscale = 4./constants::hbarc;
-  double bscale = 24./constants::hbarc;
+  //double bscale = 24./constants::hbarc;
   //double Rscale = 1./constants::hbarc;
   //double bscale = 4./constants::hbarc;
   double Rx = fgRx*Rscale-Rscale/2.;
