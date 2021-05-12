@@ -212,7 +212,7 @@ double MV::PhipBKFluc(double k, double Tp, double Qs, double x){
   return k*k*constants::Nc/4./constants::alphas*result;
 }
 
-double MV::PhipBK(double k, double R, double Qs, double sizeFactor){
+double MV::PhipBK(double k, double R, double Qs, double sizeFactor, double x){
 
   double A = constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*Qs*Qs;
   

@@ -171,9 +171,9 @@ double PhipFluc(double k, double RorTp, double Qs, double sizeFactor, MV *mv, in
   //return PhipGBW(k, R, Qs);
 }
 
-double Phip(double k, double RorTp, double Qs, double sizeFactor){
+double Phip(double k, double RorTp, double Qs, double sizeFactor, MV *mv, int BK, double x){
   if(BK){
-    return mv->PhipBK(k, RorTp, Qs, sizeFactor);
+    return mv->PhipBK(k, RorTp, Qs, sizeFactor,x);
   }
   else{
     return mv->Phip(k, RorTp, Qs, sizeFactor);
@@ -295,7 +295,7 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   double myTA = returnTA(Rminusb,TAclass);
   
   f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor)*factorxp/(k1*k1)*H_cs
+    *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp)*factorxp/(k1*k1)*H_cs
     *(StF(k,myTA,QsA,mv,BK,xA)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA)*factorxA)
     *R*Rscale*2.*constants::PI
     *b*bscale*2.*constants::PI
@@ -495,7 +495,7 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   double myTA = returnTA(Rminusb,TAclass);
   
   f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor)*factorxp/(k1*k1)*H_co
+    *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp)*factorxp/(k1*k1)*H_co
     *(StF(k,myTA,QsA,mv, BK, xA)*factorxA*StF(pminuskminusk1,myTA,QsA,mv, BK, xA)*factorxA)
     *R*Rscale*2.*constants::PI
     *b*bscale*2.*constants::PI
@@ -724,7 +724,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor, mv, BK, xp)/(k1*k1)*H*J
+    *Phip(k1, R, Qsp, sizeFactor, mv, BK,xp)/(k1*k1)*H*J
     *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA)*StF(k,myTA,QsA,mv, BK, xA))
     *R*Rscale*2.*constants::PI
     *b*bscale*2.*constants::PI
@@ -1112,7 +1112,7 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor, mv, BK, xp)/(k1*k1)*H*J
+    *Phip(k1, R, Qsp, sizeFactor, mv, BK,xp)/(k1*k1)*H*J
     *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA)*StF(k,myTA,QsA,mv, BK, xA))
     *R*Rscale*2.*constants::PI
     *b*bscale*2.*constants::PI
@@ -1164,7 +1164,7 @@ static int Integrand(const int *ndim, const cubareal xx[],
   // determine x values
 
   f = constants::alphas/constants::CF/(p)/(p)/pow((2*constants::PI*constants::PI),3.)
-    *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK, 0)*Phit(sqrt(p*p + gk*gk*kscale*kscale - 2.*p*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, 0)
+    *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK,0)*Phit(sqrt(p*p + gk*gk*kscale*kscale - 2.*p*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, 0)
     *2.*constants::PI*gk*kscale*kscale  //kdkdphik
     *2.*constants::PI*gR*Rscale*Rscale  //RdRdphiR
     *2.*constants::PI*gb*Rscale*Rscale;  //bdbdphib
@@ -1202,7 +1202,7 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
   double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*bscale*bscale - 2.*gR*gb*Rscale*bscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass);
  
   f = constants::alphas/constants::CF/(gp*pscale+lambda)/(gp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-    *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK, xp)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)
+    *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK,xp)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)
     *2.*constants::PI*gk*kscale*kscale  //kdkdphik
     *2.*constants::PI*gR*Rscale*Rscale  //RdRdphiR
     *2.*constants::PI*gb*bscale*bscale  //bdbdphib

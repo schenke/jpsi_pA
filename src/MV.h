@@ -74,6 +74,7 @@ class MV{
   void computePhipBK();
   double Phip(double k, double R, double Qs, double sizeFactor);
   double PhipFluc(double k, double Tp, double Qs, double sizeFactor);
+  double PhipBK(double k, double R, double Qs, double sizeFactor, double x);
   double PhipBKFluc(double k, double Tp, double Qs, double x);
   double Phit(double k, double TA, double Qs);
   double PhitBK(double k, double TA, double Qs,double x);
