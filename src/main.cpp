@@ -173,7 +173,7 @@ double PhipFluc(double k, double RorTp, double Qs, double sizeFactor, MV *mv, in
 
 double Phip(double k, double RorTp, double Qs, double sizeFactor, MV *mv, int BK, double x){
   if(BK){
-    return mv->PhipBK(k, RorTp, Qs, sizeFactor,x);
+    return mv->PhipBK(k, RorTp, sizeFactor,x);
   }
   else{
     return mv->Phip(k, RorTp, Qs, sizeFactor);
