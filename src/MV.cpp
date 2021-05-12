@@ -212,6 +212,42 @@ double MV::PhipBKFluc(double k, double Tp, double Qs, double x){
   return k*k*constants::Nc/4./constants::alphas*result;
 }
 
+double MV::PhipBK(double k, double R, double Qs, double sizeFactor){
+
+  double A = constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*Qs*Qs;
+  
+  int iA = int(A/deltaA); 
+  int ik = int((k+0.0001)/deltak);
+  double y = -log(x);
+  int iy = int(y);
+  
+  
+  if (iA>=sizeA){
+    cerr << "MV::PhipBK: A out of range." << endl;
+    return 0.;
+  }
+  if (ik>=sizek){
+    cerr << "MV::PhipBK: k out of range." << endl;
+    return 0.;
+  }
+  if (iy>=sizey){
+    cerr << "MV::PhipBK: x out of range." << endl;
+    return 0.;
+  }
+
+  double Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy];
+  double Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy];
+  double result1 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+
+  Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy+1];
+  Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy+1];
+  double result2 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+
+  double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
+
+  //cout << "Phip=" << result << endl;
+  return k*k*constants::Nc/4./constants::alphas*result;
+}
 
 
 double MV::Phip(double k, double R, double Qs, double sizeFactor){
