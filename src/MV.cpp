@@ -51,7 +51,7 @@ void MV::computePhip(){
     //double A=exp(double(iA/150.))-1.;
     cout << iA << endl;
     for (int ik=0; ik<sizek; ik++){
-      double k=ik*deltak+0.0001;
+      double k=ik*deltak+0.01;
       sum=0.;
       double params[] = { A, k };
       F.params = params;  
@@ -105,7 +105,7 @@ void MV::computePhipBK(){
     //double A=exp(double(iA/150.))-1.;
     cout << iA << endl;
     for (int ik=0; ik<sizek; ik++){
-      double k=ik*deltak+0.0001;
+      double k=ik*deltak+0.01;
       for (int iy=0; iy<sizey; iy++){
         double y = double(iy)*deltay;
         sum=0.;
@@ -153,7 +153,7 @@ double MV::PhipFluc(double k, double Tp, double Qs, double sizeFactor){
   double A = constants::CA/4./constants::CF*Tp*Qs*Qs;
   
   int iA = int(A/deltaA); 
-  int ik = int((k+0.0001)/deltak);
+  int ik = int((k+0.01)/deltak);
   //  cout << iA << " " << ik << endl;
   
   if (iA>=sizeA){
@@ -169,7 +169,7 @@ double MV::PhipFluc(double k, double Tp, double Qs, double sizeFactor){
 
   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik] + (A/deltaA-double(iA))*Phip_array[iA+1][ik];
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik+1] + (A/deltaA-double(iA))*Phip_array[iA+1][ik+1];
-  double result = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
   //cout << "Phip=" << result << endl;
   return k*k*constants::Nc/4./constants::alphas*result;
 }
@@ -180,7 +180,7 @@ double MV::PhipBKFluc(double k, double Tp, double x){
   double A = constants::CA/4./constants::CF*Tp*2.19; //2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0)
   
   int iA = int(A/deltaA); 
-  int ik = int((k+0.0001)/deltak);
+  int ik = int((k+0.01)/deltak);
   double y = -log(x);
   int iy = int(y);
   
@@ -200,11 +200,11 @@ double MV::PhipBKFluc(double k, double Tp, double x){
 
   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy];
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy];
-  double result1 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result1 = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
 
   Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy+1];
   Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy+1];
-  double result2 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result2 = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
 
   double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
 
@@ -217,7 +217,7 @@ double MV::PhipBK(double k, double R, double sizeFactor, double x){
   double A = constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*2.19; //2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0)
   
   int iA = int(A/deltaA); 
-  int ik = int((k+0.0001)/deltak);
+  int ik = int((k+0.01)/deltak);
   double y = -log(x);
   int iy = int(y);
   
@@ -236,11 +236,11 @@ double MV::PhipBK(double k, double R, double sizeFactor, double x){
 
   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy];
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy];
-  double result1 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result1 = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
 
   Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy+1];
   Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy+1];
-  double result2 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result2 = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
 
   double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
 
@@ -254,7 +254,7 @@ double MV::Phip(double k, double R, double Qs, double sizeFactor){
   double A = constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*Qs*Qs;
   
   int iA = int(A/deltaA); 
-  int ik = int((k+0.0001)/deltak);
+  int ik = int((k+0.01)/deltak);
   //  cout << iA << " " << ik << endl;
   
   if (iA>=sizeA){
@@ -270,7 +270,7 @@ double MV::Phip(double k, double R, double Qs, double sizeFactor){
 
   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik] + (A/deltaA-double(iA))*Phip_array[iA+1][ik];
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik+1] + (A/deltaA-double(iA))*Phip_array[iA+1][ik+1];
-  double result = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
   //cout << "Phip=" << result << endl;
   return k*k*constants::Nc/4./constants::alphas*result;
 }
@@ -282,7 +282,7 @@ double MV::Phit(double k, double TA, double Qs){
   double A = constants::CA/4./constants::CF*TA*Qs*Qs;
   
   int iA = int(A/deltaA); 
-  int ik = int((k+0.0001)/deltak);
+  int ik = int((k+0.01)/deltak);
   //  cout << iA << " " << ik << endl;
   
   if (iA>=sizeA){
@@ -298,7 +298,7 @@ double MV::Phit(double k, double TA, double Qs){
 
   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik] + (A/deltaA-double(iA))*Phip_array[iA+1][ik];
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik+1] + (A/deltaA-double(iA))*Phip_array[iA+1][ik+1];
-  double result = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
   return k*k*constants::Nc/4./constants::alphas*result;
 }
 
@@ -308,7 +308,7 @@ double MV::PhitBK(double k, double TA, double x){
   double A = constants::CA/4./constants::CF*TA*2.19; //2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0)
   
   int iA = int(A/deltaA); 
-  int ik = int((k+0.0001)/deltak);
+  int ik = int((k+0.01)/deltak);
   double y = -log(x);
   int iy = int(y);
   
@@ -327,11 +327,11 @@ double MV::PhitBK(double k, double TA, double x){
 
   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy];
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy];
-  double result1 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result1 = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
 
   Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy+1];
   Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy+1];
-  double result2 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result2 = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
 
   double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
 
@@ -345,7 +345,7 @@ double MV::StF(double k, double TA, double Qs){
   double A = Qs*Qs/4.*TA;
   
   int iA = int(A/deltaA);
-  int ik = int((k+0.0001)/deltak);
+  int ik = int((k+0.01)/deltak);
   //  cout << iA << " " << ik << endl;
   
   if (iA>=sizeA){
@@ -360,7 +360,7 @@ double MV::StF(double k, double TA, double Qs){
   //  cout << iA << endl;
   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik] + (A/deltaA-double(iA))*Phip_array[iA+1][ik];
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik+1] + (A/deltaA-double(iA))*Phip_array[iA+1][ik+1];
-  double result = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
   return result;
 }
 
@@ -372,7 +372,7 @@ double MV::StFBK(double k, double TA, double x){
   double A = 1./4.*TA*2.19;//2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0); 
   
   int iA = int(A/deltaA); 
-  int ik = int((k+0.0001)/deltak);
+  int ik = int((k+0.01)/deltak);
   double y = -log(x);
   int iy = int(y);
   
@@ -391,11 +391,11 @@ double MV::StFBK(double k, double TA, double x){
 
   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy];
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy];
-  double result1 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result1 = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
 
   Phip1 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik][iy+1];
   Phip2 = (double(iA+1)-(A/deltaA))*Phip_arrayBK[iA][ik+1][iy+1] + (A/deltaA-double(iA))*Phip_arrayBK[iA+1][ik+1][iy+1];
-  double result2 = (double(ik+1)-((k+0.0001)/deltak))*Phip1 + ((k+0.0001)/deltak-double(ik))*Phip2;
+  double result2 = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
 
   double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
 
@@ -425,7 +425,7 @@ int MV::writeTable(){
   for (int iA=0; iA<sizeA; iA++){
     double A=iA*deltaA;
     for (int ik=0; ik<sizek; ik++){
-      double k=ik*deltak+0.0001;
+      double k=ik*deltak+0.01;
       val1[0] = Phip_array[iA][ik];
       Outfile1.write((char *)val1, sizeof(double));
     }
@@ -469,7 +469,7 @@ int MV::writeTableBK(){
   for (int iA=0; iA<sizeA; iA++){
     //    double A=iA*deltaA;
     for (int ik=0; ik<sizek; ik++){
-      //double k=ik*deltak+0.0001;
+      //double k=ik*deltak+0.01;
       for (int iy=0; iy<sizey; iy++){
         //double y=iy*deltay;
         val1[0] = Phip_arrayBK[iA][ik][iy];
@@ -513,7 +513,7 @@ int MV::writeTableBK(){
 //   for (int iA=0; iA<sizeA; iA++){
 //     double A=iA*deltaA;
 //     for (int ik=0; ik<sizek; ik++){
-//       double k=ik*deltak+0.0001;
+//       double k=ik*deltak+0.01;
 //       Outfile1 << Phip_array[iA][ik] << endl;
 //     }
 //   }

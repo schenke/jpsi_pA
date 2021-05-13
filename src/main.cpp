@@ -1690,6 +1690,14 @@ int main(int argc, char *argv[]) {
   double JPsi2result2;
   double JPsi2error2;
 
+  //test StF
+  for (int ik=0; ik<1000; ik++){
+    double k = ik*0.01;
+    //double StF(double k, double TA, double Qs, MV *mv, int BK, double x)
+    cout << k << " " << StF(k, 1., 0.4949, mv, 0, 0.0001)  << endl;
+  }
+
+
   // Now compute midrapidity gluons
   if(useFluc == 0){
     cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl;

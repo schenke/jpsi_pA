@@ -27,8 +27,8 @@ class MV{
   double deltaA=1./80.;
   double deltak=1./10.;
   double deltay=1.;
-  //double deltaA=1./8.;
-  //double deltak=1./1.;
+  //  double deltaA=1./8.;
+  //double deltak=1./10.;
   //double deltay=1.;
   int BK=0;
 
