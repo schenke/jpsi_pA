@@ -177,7 +177,7 @@ double MV::PhipFluc(double k, double Tp, double Qs, double sizeFactor){
 
 double MV::PhipBKFluc(double k, double Tp, double x){
 
-  double A = constants::CA/4./constants::CF*Tp;
+  double A = constants::CA/4./constants::CF*Tp*2.19; //2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0)
   
   int iA = int(A/deltaA); 
   int ik = int((k+0.0001)/deltak);
@@ -214,13 +214,12 @@ double MV::PhipBKFluc(double k, double Tp, double x){
 
 double MV::PhipBK(double k, double R, double sizeFactor, double x){
 
-  double A = constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor));
+  double A = constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*2.19; //2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0)
   
   int iA = int(A/deltaA); 
   int ik = int((k+0.0001)/deltak);
   double y = -log(x);
   int iy = int(y);
-  
   
   if (iA>=sizeA){
     cerr << "MV::PhipBK: A out of range." << endl;
@@ -306,7 +305,7 @@ double MV::Phit(double k, double TA, double Qs){
 
 double MV::PhitBK(double k, double TA, double x){
 
-  double A = constants::CA/4./constants::CF*TA;
+  double A = constants::CA/4./constants::CF*TA*2.19; //2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0)
   
   int iA = int(A/deltaA); 
   int ik = int((k+0.0001)/deltak);
@@ -365,9 +364,12 @@ double MV::StF(double k, double TA, double Qs){
   return result;
 }
 
+
+
+
 double MV::StFBK(double k, double TA, double x){
 
-  double A = 1./4.*TA;
+  double A = 1./4.*TA*2.19;//2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0); 
   
   int iA = int(A/deltaA); 
   int ik = int((k+0.0001)/deltak);
