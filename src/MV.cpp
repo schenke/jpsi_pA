@@ -371,8 +371,10 @@ double MV::StF(double k, double TA, double Qs){
 
 
 double MV::StFBK(double k, double TA, double x){
-
-  double A = 1./4.*TA*2.19;//2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0); 
+  
+  //double bfactor = 2.19;//2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0); 
+  double bfactor = 1;
+  double A = 1./4.*TA*bfactor;
   
   int iA = int(A/deltaA); 
   int ik = int((k+0.01)/deltak);
