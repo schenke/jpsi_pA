@@ -261,8 +261,8 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
   double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
   
-  double factorxp = 1.;//pow(1.-xp,4.);
-  double factorxA = 1.;//pow(1.-xA,4.);
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
   if (xp>1.){
     f = 0;
   }
@@ -466,9 +466,9 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
   double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
   
-  //!!
-  double factorxp = 1.;//pow(1.-xp,4.);
-  double factorxA = 1.;//pow(1.-xA,4.);
+  
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
   if (xp>1.){
     f = 0;
   }
@@ -719,9 +719,9 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
   double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
 
-  //!!
-  double factorxp = 1.;//pow(1.-xp,4.);
-  double factorxA = 1.;//pow(1.-xA,4.);
+  
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
   if (xp>1.){
     f = 0;
   }
@@ -1216,19 +1216,29 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
  
   double xp = (gp*pscale+lambda)*exp(Y)/constants::roots;
   double xA = (gp*pscale+lambda)*exp(-Y)/constants::roots;
-  Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
-
-  double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*bscale*bscale - 2.*gR*gb*Rscale*bscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass);
- 
-  f = constants::alphas/constants::CF/(gp*pscale+lambda)/(gp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-    *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK,xp)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)
-    *2.*constants::PI*gk*kscale*kscale  //kdkdphik
-    *2.*constants::PI*gR*Rscale*Rscale  //RdRdphiR
-    *2.*constants::PI*gb*bscale*bscale  //bdbdphib
-    *2.*constants::PI*pscale*(gp*pscale+lambda); //pdpdphip
-  //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
-
+  double factorxA = pow(1.-xA,4.);
+  double factorxp = pow(1.-xp,4.);
+  if (xp>1.){
+    f = 0.;
+  }
+  else if (xA>1.){
+    f = 0.;
+  }
+  else{
+    
+    Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    
+    double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*bscale*bscale - 2.*gR*gb*Rscale*bscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass);
+    
+    f = constants::alphas/constants::CF/(gp*pscale+lambda)/(gp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
+      *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK,xp)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)
+      *2.*constants::PI*gk*kscale*kscale  //kdkdphik
+      *2.*constants::PI*gR*Rscale*Rscale  //RdRdphiR
+      *2.*constants::PI*gb*bscale*bscale  //bdbdphib
+      *2.*constants::PI*pscale*(gp*pscale+lambda); //pdpdphip
+    //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+  }
   return 1;
 }
 
@@ -1690,12 +1700,12 @@ int main(int argc, char *argv[]) {
   double JPsi2result2;
   double JPsi2error2;
 
-  //test StF
-  for (int ik=0; ik<1000; ik++){
-    double k = ik*0.01;
-    //double StF(double k, double TA, double Qs, MV *mv, int BK, double x)
-    cout << k << " " << StF(k, 1., 0.4949, mv, 0, 0.0001)  << endl;
-  }
+  // //test StF
+  // for (int ik=0; ik<1000; ik++){
+  //   double k = ik*0.01;
+  //   //double StF(double k, double TA, double Qs, MV *mv, int BK, double x)
+  //   cout << k << " " << StF(k, 1., 0.4949, mv, 1, 0.0001)  << endl;
+  // }
 
 
   // Now compute midrapidity gluons
