@@ -1472,6 +1472,7 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
 #define nobk xx[0]
 #define nobphik xx[1]
 #define nobp xx[2]
+#define nobphi xx[3]
 
 
   double kscale = 15.;
@@ -1493,7 +1494,7 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
   double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
  
   f = constants::alphas/constants::CF/(nobp*pscale+lambda)/(nobp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-    *Phip(nobk*kscale, 0, Qsp, sizeFactor, mv, BK, xp)*Phit(sqrt((nobp*pscale+lambda)*(nobp*pscale+lambda) + nobk*nobk*kscale*kscale - 2.*(nobp*pscale+lambda)*nobk*kscale*cos((nobphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)
+    *Phip(nobk*kscale, 0, Qsp, sizeFactor, mv, BK, xp)*Phit(sqrt((nobp*pscale+lambda)*(nobp*pscale+lambda) + nobk*nobk*kscale*kscale - 2.*(nobp*pscale+lambda)*nobk*kscale*cos((nobphi-nobphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)
     *2.*constants::PI*nobk*kscale*kscale  //kdkdphik
     *2.*constants::PI*constants::Bt  //R-integral
     *2.*constants::PI*constants::Bp  // b-integral
@@ -2058,7 +2059,7 @@ int main(int argc, char *argv[]) {
     //data.Y = Y_fwd;
     double ymax = 5;
     double ymin = -5;
-    int npoints = 1;
+    int npoints = 10;
     
     double step = (ymax-ymin)/npoints;
     stringstream strfilename;
@@ -2070,7 +2071,7 @@ int main(int argc, char *argv[]) {
     data.Y=ymin + nip*step;
 
      
-    NDIM = 3;
+    NDIM = 4;
     llVegas(NDIM, NCOMP, GluonsNoB, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
