@@ -42,7 +42,8 @@ namespace constants {
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3;
-  const double Bp = 4.;
+  const double Bp = 4.; // == R_p = 0.4 fm
+  const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
   const double mJPsi = 3.096916;
@@ -1155,6 +1156,43 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   return 0;
 }  
 
+static int GluonsNoB(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define nobk xx[0]
+#define nobphik xx[1]
+#define nobp xx[2]
+
+
+  double kscale = 15.;
+  double pscale = 15.;
+  
+  double Qsp;// = static_cast<params*>(userdata)->Qsp;
+  double QsA;// = static_cast<params*>(userdata)->QsA;
+  double lambda = static_cast<params*>(userdata)->lambda;
+  MV *mv = static_cast<params*>(userdata)->mv;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+  double BK = static_cast<params*>(userdata)->BK;
+  double Y = static_cast<params*>(userdata)->Y;
+ 
+  double xp = (nobp*pscale+lambda)*exp(Y)/constants::roots;
+  double xA = (nobp*pscale+lambda)*exp(-Y)/constants::roots;
+  Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+
+  double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
+ 
+  f = constants::alphas/constants::CF/(nobp*pscale+lambda)/(nobp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
+    *Phip(nobk*kscale, 0, Qsp, sizeFactor, mv, BK, xp)*Phit(sqrt((nobp*pscale+lambda)*(nobp*pscale+lambda) + nobk*nobk*kscale*kscale - 2.*(nobp*pscale+lambda)*nobk*kscale*cos((nobphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)
+    *2.*constants::PI*nobk*kscale*kscale  //kdkdphik
+    *2.*constants::PI*constants::Bt  //R-integral
+    *2.*constants::PI*constants::Bp  // b-integral
+    *2.*constants::PI*pscale*(nobp*pscale+lambda); //pdpdphip
+  //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+
+  return 1;
+}
+
 // Integrand for integral over everything but |p|
 static int Integrand(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
@@ -1231,6 +1269,7 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
 
   return 1;
 }
+
 
 static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
@@ -1691,11 +1730,11 @@ int main(int argc, char *argv[]) {
   double JPsi2error2;
 
   //test StF
-  for (int ik=0; ik<1000; ik++){
-    double k = ik*0.01;
+ // for (int ik=0; ik<1000; ik++){
+  //  double k = ik*0.01;
     //double StF(double k, double TA, double Qs, MV *mv, int BK, double x)
-    cout << k << " " << StF(k, 1., 0.4949, mv, 0, 0.0001)  << endl;
-  }
+  //  cout << k << " " << StF(k, 1., 0.4949, mv, 0, 0.0001)  << endl;
+ // }
 
 
   // Now compute midrapidity gluons
@@ -1709,28 +1748,30 @@ int main(int argc, char *argv[]) {
     //data.Y = Y_fwd;
     double ymax = 5;
     double ymin = -5;
-    int npoints = 10;
+    int npoints = 1;
     
     double step = (ymax-ymin)/npoints;
     stringstream strfilename;
-    strfilename << "djpsi_bk_nrqcd_output_bIntegrated.dat";
+    strfilename << "djpsi_gluons_bk_nrqcd_nob.dat";
     string filename;
     filename = strfilename.str();
     fstream fout(filename.c_str(), ios::app);
     for (int nip=0; nip<=npoints; nip++){ 
     data.Y=ymin + nip*step;
-    // JPsi cross section
-    if(NRQCD==1){
-      NDIM = 8;
-      llVegas(NDIM, NCOMP, FullIntegrand, &data, NVEC,
+
+     
+    NDIM=3;
+    llVegas(NDIM, NCOMP, GluonsNoB, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
               GRIDNO, NULL, NULL,
               &neval, &fail, integral, error, prob);
-      
-      //Print the result
-      gresult = (double)integral[0];
-      gerror = (double)error[0];
+
+    gresult = (double)integral[0];
+    gerror = (double)error[0];          
+    // JPsi cross section
+    if(NRQCD==1){
+
       NDIM = 12;
       llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCs, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
@@ -1752,16 +1793,6 @@ int main(int argc, char *argv[]) {
       JPsi2error_co = (double)error[0];
     }
     else{   
-      NDIM = 8;
-      llVegas(NDIM, NCOMP, FullIntegrand, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
-      
-      //Print the result
-      gresult = (double)integral[0];
-      gerror = (double)error[0];
  
       NDIM = 12;
       llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
