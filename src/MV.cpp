@@ -214,8 +214,8 @@ double MV::PhipBKFluc(double k, double Tp, double x){
 
 double MV::PhipBK(double k, double R, double sizeFactor, double x){
   
-  //double bfactor = 2.19; //2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0)
-  double bfactor = 1.;
+  double bfactor = 2.19; //2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0)
+  //double bfactor = 1.;
   double A = constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*bfactor; 
   
   int iA = int(A/deltaA); 
@@ -307,8 +307,8 @@ double MV::Phit(double k, double TA, double Qs){
 
 double MV::PhitBK(double k, double TA, double x){
   
- // double bfactor = 2.19; //2.19 goes from b-independent proton to Gaussian proton (normalizes to TA=1 at b=0)
-  double bfactor = 1.;
+  double bfactor = 2.19; //2.19 goes from b-independent proton to Gaussian proton (normalizes to TA=1 at b=0)
+  //double bfactor = 1.;
   double A = constants::CA/4./constants::CF*TA*bfactor; 
   int iA = int(A/deltaA); 
   int ik = int((k+0.01)/deltak);
@@ -372,8 +372,8 @@ double MV::StF(double k, double TA, double Qs){
 
 double MV::StFBK(double k, double TA, double x){
   
-  //double bfactor = 2.19;//2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0); 
-  double bfactor = 1;
+  double bfactor = 2.19;//2.19 goes from b-independent proton to Gaussian proto (normalizes to TA=1 at b=0); 
+  //double bfactor = 1;
   double A = 1./4.*TA*bfactor;
   
   int iA = int(A/deltaA); 

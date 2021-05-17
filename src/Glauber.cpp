@@ -383,7 +383,7 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp){
             double xpos = nuc->nucleonList.at(i).x+xq[i][iq]; 
             double ypos = nuc->nucleonList.at(i).y+yq[i][iq]; 
             TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))
-                                    /hbarc/hbarc/2./Bq)*gauss[i][iq]/ (2. * Bq)/3. * (2. * Bp) ; //Pi's cancel. I want to normalize to 1 at zero.
+                                    /hbarc/hbarc/2./Bq)*gauss[i][iq]/ (2. * Bq)/3. * (2. * Bp) ; //Pi's cancel. I want to normalize nucleon to 1 at zero.
           }
         }
         else{
