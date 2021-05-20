@@ -212,9 +212,9 @@ double MV::PhipBKFluc(double k, double Tp, double x){
   return k*k*constants::Nc/4./constants::alphas*result;
 }
 
-double MV::PhipBK(double k, double R, double sizeFactor, double x){
+double MV::PhipBK(double k, double R, double sizeFactor, double x, double bfactor){
   
-  double A = 1.87*constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor)); // Eq. 114 notes. To be removed when having b-independent results
+  double A = bfactor*constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor)); // Eq. 114 notes. To be removed when having b-independent results
   
   int iA = int(A/deltaA); 
   int ik = int((k+0.01)/deltak);
@@ -249,9 +249,9 @@ double MV::PhipBK(double k, double R, double sizeFactor, double x){
 }
 
 
-double MV::Phip(double k, double R, double Qs, double sizeFactor){
+double MV::Phip(double k, double R, double Qs, double sizeFactor, double bfactor){
 
-  double A = constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*Qs*Qs;
+  double A = bfactor*constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*Qs*Qs;
   
   int iA = int(A/deltaA); 
   int ik = int((k+0.01)/deltak);
