@@ -33,8 +33,6 @@ using namespace std;
 
 void display_logo();
 
-// Constants to be used
-// MV.cpp has constants too, make sure they are the same... needs to be improved
 namespace constants {
   const double PI = 3.14159265358979323846;
   const int Nc = 3;
@@ -65,6 +63,10 @@ namespace constants {
   const double bindep_A = 2.77; // Eqs. 118 and 123 notes == 4.13*0.67
   const double bdep_fluc_p = 1.87; // Eq. 114 notes
   const double bdep_fluc_A = 1.87; // same as for the proton
+
+  const double sigma02 = 1.8 /constants::hbarc /constants::hbarc; // 7.2mb
+  const double rt2 =  4.9 /constants::hbarc  * 4.9 /constants::hbarc; // pi * Rt^2 with Rt = 4.9 fm
+ 
 }
 
 // Parameters that need to be passed to the integrand
@@ -87,8 +89,11 @@ struct params {
   Glauber *glauberClass; 
   double protonSizeFactor;
   int BK;
+  int useFluc;
+  int bdep;
 };
 
+// Kinematic variables for ICEM
 struct kinqq {
   double p;
   double phip;
@@ -148,6 +153,8 @@ kinqq convert(kinPair input) {
   return output;
 }
   
+// Transverse profiles with fluctuations
+
 double returnTA2D(double x, double y, Glauber *glauberClass){
   return glauberClass->returnNucleusTA(x, y);
 }
@@ -166,37 +173,57 @@ double PhipGBW(double k, double R, double Qs){
     *exp(-constants::CF*exp(R*R/(2.*constants::Bp))*k*k/(constants::CA*Qs*Qs));
 }
 
-// choose between MV and GBW - should make this choice a parameter of course
+// choose between MV and BK 
 double PhipFluc(double k, double Tp, double Qs, double sizeFactor, MV *mv, int BK, double x){
   if(BK){
+    Tp = Tp * constants::bdep_fluc_p; // To convert BK b-indepedent to BK dependent
     return mv->PhipBKFluc(k, Tp, x);
   }
   else{
     return mv->PhipFluc(k, Tp, Qs, sizeFactor);
   }
-  //  return mv->Phip(k, RorTp, Qs, sizeFactor);
-  //return PhipGBW(k, R, Qs);
 }
 
-double Phip(double k, double R, double Qs, double sizeFactor, MV *mv, int BK, double x){
+double Phip(double k, double R, double Qs, double sizeFactor, MV *mv, int BK, double x, int bdep){
   if(BK){
-    return mv->PhipBK(k, R, sizeFactor,x);
+    if(bdep==1){  
+        double bfactor = constants::bdep_p;  
+        return mv->PhipBK(k, R, sizeFactor,x, bfactor);
+    }
+    else{
+        double bfactor = 1.0;
+        return mv->PhipBK(k, R, sizeFactor,x, bfactor);
+    }
   }
   else{
     return mv->Phip(k, R, Qs, sizeFactor);
   }
 }
 
-// Unintegrated gluon distribution for lead
+// Unintegrated gluon distribution for lead (Not revisited)
 double PhitGBW(double k, double TA, double Qs){
   return constants::PI*k*k*constants::Nc/constants::alphas*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA))/(constants::CA*Qs*Qs*TA);
 }
 
-// choose between MV and GBW - should make this choice a parameter of course
-double Phit(double k, double TA, double Qs, MV *mv, int BK, double x){
+// choose between BK and MV
+double Phit(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc){
   if(BK){
-    return mv->PhitBK(k, TA, x);
-  }
+      if(useFluc==1){
+        TA = TA*constants::bdep_fluc_A;
+        return mv->PhitBK(k, TA, x);
+      }
+      else{
+        if(bdep==1){
+            TA = TA*constants::bdep_A;
+            return mv->PhitBK(k, TA, x);
+        }
+        else{
+            TA = TA*constants::bindep_A;  
+            return mv->PhitBK(k, TA, x);
+        }
+     }
+  } 
+  
   else{
     return mv->Phit(k, TA, Qs);
   }
@@ -208,16 +235,33 @@ double StFGBW(double k, double TA, double Qs){
   return 4.*constants::PI*exp(-(k*k/(Qs*Qs*TA)))/(Qs*Qs*TA);
 } 
 
-// choose between MV and GBW - should make this choice a parameter of course
-double StF(double k, double TA, double Qs, MV *mv, int BK, double x){
+// choose between MV and BK 
+double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc){
   if(BK){
-    return mv->StFBK(k, TA, x);
-  }
+      if(useFluc==1){
+        TA = TA*constants::bdep_fluc_A;
+      }
+      else{
+        if(bdep==1){
+            TA = TA*constants::bdep_A;
+            return mv->StFBK(k, TA, x);
+        }
+        else{
+            TA = TA*constants::bindep_A;
+            return mv->StFBK(k, TA, x);
+        }
+     }
+  } 
   else{
     return mv->StF(k, TA, Qs);
   }
-//return StFGBW(k, TA, Qs);
 }
+
+// NRQCD in what follows
+
+////////////////////////////////////////////////////
+///// b-independent J/Psi cross section ///////////
+//////////////////////////////////////////////////
 
 static int JPsiIntegrandNRQCDCsNob(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
@@ -235,8 +279,10 @@ static int JPsiIntegrandNRQCDCsNob(const int *ndim, const cubareal xx[],
   double kscale = 30.;
   double pscale = 30.;
 
-  double BK = static_cast<params*>(userdata)->BK;
+  int BK = static_cast<params*>(userdata)->BK;
   double Y = static_cast<params*>(userdata)->Y;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
@@ -253,6 +299,192 @@ static int JPsiIntegrandNRQCDCsNob(const int *ndim, const cubareal xx[],
   double phik1 = nobcs4phik1*2.*constants::PI;
   double kprime = nobcs4kprime*kscale;
   double phikprime = nobcs4phikprime*2.*constants::PI;
+  
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
+
+  if (xp>1.){
+    f = 0;
+  }
+  else if (xA>1.){
+    f= 0;
+  }
+  else {
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  // get sums of vectors
+    double px = p*cos(phip); 
+    double py = p*sin(phip);
+    double kx = k*cos(phik);
+    double ky = k*sin(phik);
+    double k1x = k1*cos(phik1);
+    double k1y = k1*sin(phik1);
+    double kprimex = kprime*cos(phikprime);
+    double kprimey = kprime*sin(phikprime);
+    double pminuskminusk1minuskprimex = px-kx-k1x-kprimex;
+    double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
+    double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
+                                    +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
+    double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
+ 
+    double myTA = 1.;
+
+    if(pminuskminusk1minuskprime>30.){
+        f=0.;
+    }
+    else{
+     f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+        *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_cs
+        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
+        *constants::sigma02
+        *constants::PI*constants::rt2
+        *p*pscale*2.*constants::PI
+        *k*kscale*2.*constants::PI
+        *k1*kscale*2.*constants::PI
+        *kprime*kscale*2.*constants::PI; 
+    // scaled momenta above (in PT)
+    // last rows are scaling of integration measures:
+    // d2R
+    // d2b
+    // d2p
+    // d2k
+    // d2k1
+    // d2kprime
+    }
+  }
+  return 0;
+} 
+
+
+static int JPsiIntegrandNRQCDCoNob(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define nobco4k xx[0]
+#define nobco4phik xx[1]
+#define nobco4k1 xx[2]
+#define nobco4phik1 xx[3]
+#define nobco4p xx[4]
+#define nobco4phip xx[5]
+
+  double kscale = 30.;
+  double pscale = 30.;
+
+  int BK = static_cast<params*>(userdata)->BK;
+  double Y = static_cast<params*>(userdata)->Y;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables  
+  double p = nobco4p*pscale;
+  double phip = nobco4phip*2.*constants::PI;
+  double k = nobco4k*kscale;
+  double phik = nobco4phik*2.*constants::PI;
+  double k1 = nobco4k1*kscale;
+  double phik1 = nobco4phik1*2.*constants::PI;
+  
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  
+  //!!
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
+  if (xp>1.){
+    f = 0;
+  }
+
+  else if (xA>1.){
+    f= 0;
+  }
+  else {
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  // get sums of vectors
+    double px = p*cos(phip); 
+    double py = p*sin(phip);
+    double kx = k*cos(phik);
+    double ky = k*sin(phik);
+    double k1x = k1*cos(phik1);
+    double k1y = k1*sin(phik1);
+    double pminuskminusk1x = px-kx-k1x;
+    double pminuskminusk1y = py-ky-k1y;
+    double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
+                                    +pminuskminusk1y*pminuskminusk1y);
+  
+    double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
+ 
+    double myTA = 1.;
+ 
+    f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+        *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_co
+        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
+        *constants::sigma02
+        *constants::PI*constants::rt2
+        *p*pscale*2.*constants::PI
+        *k*kscale*2.*constants::PI
+        *k1*kscale*2.*constants::PI; 
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // d2R
+  // d2b
+  // d2p
+  // d2k
+  // d2k1
+   
+  }
+  return 0;
+}
+
+//////////////////////////////////////////////////////////
+///// b-independent J/Psi cross section for pt spectrum //
+/////////////////////////////////////////////////////////
+
+static int JPsiIntegrandNRQCDCsNobNoPT(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define nobptcs4k xx[0]
+#define nobptcs4phik xx[1]
+#define nobptcs4k1 xx[2]
+#define nobptcs4phik1 xx[3]
+#define nobptcs4kprime xx[4]
+#define nobptcs4phikprime xx[5]
+#define nobptcs4phip xx[6]
+
+
+  double kscale = 30.;
+
+  int BK = static_cast<params*>(userdata)->BK;
+  double Y = static_cast<params*>(userdata)->Y;
+  double PT = static_cast<params*>(userdata)->PT;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables  
+  double p = PT;
+  double phip = nobptcs4phip*2.*constants::PI;
+  double k = nobptcs4k*kscale;
+  double phik = nobptcs4phik*2.*constants::PI;
+  double k1 = nobptcs4k1*kscale;
+  double phik1 = nobptcs4phik1*2.*constants::PI;
+  double kprime = nobptcs4kprime*kscale;
+  double phikprime = nobptcs4phikprime*2.*constants::PI;
   
   double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
   double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
@@ -281,23 +513,23 @@ static int JPsiIntegrandNRQCDCsNob(const int *ndim, const cubareal xx[],
   double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
   double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
                                     +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
-  double phi_pminuskminusk1minuskprime = atan2(pminuskminusk1minuskprimey,pminuskminusk1minuskprimex);
-
   
   double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
  
-  double myTA = 1.*constants::bindep_A;
+  double myTA = 1.;
  
   if(pminuskminusk1minuskprime>30.){
     f=0.;
   }
   else{
     f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp)*factorxp/(k1*k1)*H_cs
-      *(StF(k,myTA,QsA,mv,BK,xA)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA)*factorxA)
-      *2.*constants::PI*constants::Bp
-      *2.*constants::PI*constants::Bt
-      *p*pscale*2.*constants::PI
+      *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_cs
+      *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA
+      *StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA
+      *StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
+      *constants::sigma02
+      *constants::PI*constants::rt2
+      *p*2.*constants::PI
       *k*kscale*2.*constants::PI
       *k1*kscale*2.*constants::PI
       *kprime*kscale*2.*constants::PI; 
@@ -305,16 +537,104 @@ static int JPsiIntegrandNRQCDCsNob(const int *ndim, const cubareal xx[],
     // last rows are scaling of integration measures:
     // d2R
     // d2b
-    // d2p
+    // pdphi
     // d2k
     // d2k1
     // d2kprime
-  }
+   }
   }
   return 0;
 } 
 
-// Integrand for the combined J/Psi integral in the color singlet channel
+static int JPsiIntegrandNRQCDCoNobNoPT(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define nobptco4k xx[0]
+#define nobptco4phik xx[1]
+#define nobptco4k1 xx[2]
+#define nobptco4phik1 xx[3]
+#define nobptco4phip xx[4]
+
+  double kscale = 30.;
+
+  int BK = static_cast<params*>(userdata)->BK;
+  double Y = static_cast<params*>(userdata)->Y;
+  double PT = static_cast<params*>(userdata)->PT;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables  
+  double p = PT;
+  double phip = nobptco4phip*2.*constants::PI;
+  double k = nobptco4k*kscale;
+  double phik = nobptco4phik*2.*constants::PI;
+  double k1 = nobptco4k1*kscale;
+  double phik1 = nobptco4phik1*2.*constants::PI;
+  
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  
+  //!!
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
+  if (xp>1.){
+    f = 0;
+  }
+
+  else if (xA>1.){
+    f= 0;
+  }
+  else {
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  // get sums of vectors
+    double px = p*cos(phip); 
+    double py = p*sin(phip);
+    double kx = k*cos(phik);
+    double ky = k*sin(phik);
+    double k1x = k1*cos(phik1);
+    double k1y = k1*sin(phik1);
+    double pminuskminusk1x = px-kx-k1x;
+    double pminuskminusk1y = py-ky-k1y;
+    double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
+                                    +pminuskminusk1y*pminuskminusk1y);
+  
+    double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
+ 
+    double myTA = 1.;
+   
+    f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+        *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_co
+        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
+        *constants::sigma02
+        *constants::PI*constants::rt2
+        *p*2.*constants::PI
+        *k*kscale*2.*constants::PI
+        *k1*kscale*2.*constants::PI; 
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // d2R
+  // d2b
+  // pdphip
+  // d2k
+  // d2k1
+   
+  }
+  return 0;
+}
+
+//////////////////////////////////////////////////
+///// b-dependent J/Psi cross section ///////////
+/////////////////////////////////////////////////
+
 static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
@@ -337,8 +657,11 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 12./constants::hbarc; //!!
 
-  double BK = static_cast<params*>(userdata)->BK;
+  int BK = static_cast<params*>(userdata)->BK;
   double Y = static_cast<params*>(userdata)->Y;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
@@ -394,15 +717,15 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   
   double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
  
-  double myTA = returnTA(Rminusb,TAclass)*constants::bdep_A; //(2.37=0.4*(208)^(1/3))
-  
+  double myTA = returnTA(Rminusb,TAclass); 
+
   if(pminuskminusk1minuskprime>30.){
     f=0.;
   }
   else{
     f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp)*factorxp/(k1*k1)*H_cs
-      *(StF(k,myTA,QsA,mv,BK,xA)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA)*factorxA)
+      *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_cs
+      *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
       *R*Rscale*2.*constants::PI
       *b*bscale*2.*constants::PI
       *p*pscale*2.*constants::PI
@@ -421,6 +744,110 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   }
   return 0;
 } 
+
+static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define coR xx[0]
+#define cophiR xx[1]
+#define cob xx[2]
+#define cophib xx[3]
+#define co4k xx[4]
+#define co4phik xx[5]
+#define co4k1 xx[6]
+#define co4phik1 xx[7]
+#define co4p xx[8]
+#define co4phip xx[9]
+
+  double kscale = 30.;
+  double pscale = 30.;
+  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 12./constants::hbarc; //!!
+  
+  int BK = static_cast<params*>(userdata)->BK;
+  double Y = static_cast<params*>(userdata)->Y;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables  
+  double R = coR*Rscale;
+  double b = cob*bscale;
+  double p = co4p*pscale;
+  double phip = co4phip*2.*constants::PI;
+  double k = co4k*kscale;
+  double phik = co4phik*2.*constants::PI;
+  double k1 = co4k1*kscale;
+  double phik1 = co4phik1*2.*constants::PI;
+  double phiR = cophiR*2*constants::PI;
+  double phib = cophib*2*constants::PI;
+  
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  
+  
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
+  if (xp>1.){
+    f = 0;
+  }
+
+  else if (xA>1.){
+    f= 0;
+  }
+  else {
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double pminuskminusk1x = px-kx-k1x;
+  double pminuskminusk1y = py-ky-k1y;
+  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
+                                    +pminuskminusk1y*pminuskminusk1y);
+  double phi_pminuskminusk1 = atan2(pminuskminusk1y,pminuskminusk1x);
+
+  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
+  
+  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
+ 
+  double myTA = returnTA(Rminusb,TAclass); 
+  
+  f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_co
+    *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
+    *R*Rscale*2.*constants::PI
+    *b*bscale*2.*constants::PI
+    *p*pscale*2.*constants::PI
+    *k*kscale*2.*constants::PI
+    *k1*kscale*2.*constants::PI; 
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // d2R
+  // d2b
+  // d2p
+  // d2k
+  // d2k1
+   
+  }
+  return 0;
+} 
+
+////////////////////////////////////////////////////////
+///// b-dependent J/Psi cross section for pt spectrum //
+///////////////////////////////////////////////////////
 
 static int JPsiIntegrandNRQCDCsNoPT(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
@@ -441,9 +868,12 @@ static int JPsiIntegrandNRQCDCsNoPT(const int *ndim, const cubareal xx[],
   double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 12./constants::hbarc; //!!
 
-  double BK = static_cast<params*>(userdata)->BK;
+  int BK = static_cast<params*>(userdata)->BK;
   double Y = static_cast<params*>(userdata)->Y;
   double PT = static_cast<params*>(userdata)->PT;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
@@ -478,42 +908,41 @@ static int JPsiIntegrandNRQCDCsNoPT(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   // get sums of vectors
-  double px = p*cos(phip); 
-  double py = p*sin(phip);
-  double kx = k*cos(phik);
-  double ky = k*sin(phik);
-  double k1x = k1*cos(phik1);
-  double k1y = k1*sin(phik1);
-  double kprimex = kprime*cos(phikprime);
-  double kprimey = kprime*sin(phikprime);
-  double pminuskminusk1minuskprimex = px-kx-k1x-kprimex;
-  double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
-  double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
+    double px = p*cos(phip); 
+    double py = p*sin(phip);
+    double kx = k*cos(phik);
+    double ky = k*sin(phik);
+    double k1x = k1*cos(phik1);
+    double k1y = k1*sin(phik1);
+    double kprimex = kprime*cos(phikprime);
+    double kprimey = kprime*sin(phikprime);
+    double pminuskminusk1minuskprimex = px-kx-k1x-kprimex;
+    double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
+    double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
                                     +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
-  double phi_pminuskminusk1minuskprime = atan2(pminuskminusk1minuskprimey,pminuskminusk1minuskprimex);
 
-  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
+    double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
   
-  double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
+    double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
  
-  double myTA = returnTA(Rminusb,TAclass)*constants::bdep_A; //(2.37=0.4*(208)^(1/3))
+    double myTA = returnTA(Rminusb,TAclass); //(2.37=0.4*(208)^(1/3))
   
-  if(pminuskminusk1minuskprime>30.){
-    f=0.;
-  }
-  else{
-    f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp)*factorxp/(k1*k1)*H_cs
-      *(StF(k,myTA,QsA,mv,BK,xA)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA)*factorxA)
-      *R*Rscale*2.*constants::PI
-      *b*bscale*2.*constants::PI
-      *p*2.*constants::PI
-      *k*kscale*2.*constants::PI
-      *k1*kscale*2.*constants::PI
-      *kprime*kscale*2.*constants::PI; 
+    if(pminuskminusk1minuskprime>30.){
+        f=0.;
+    }
+    else{
+        f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+        *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_cs
+        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
+        *R*Rscale*2.*constants::PI
+        *b*bscale*2.*constants::PI
+        *p*2.*constants::PI
+        *k*kscale*2.*constants::PI
+        *k1*kscale*2.*constants::PI
+        *kprime*kscale*2.*constants::PI; 
     // scaled momenta above (in PT)
     // last rows are scaling of integration measures:
     // d2R
@@ -527,7 +956,107 @@ static int JPsiIntegrandNRQCDCsNoPT(const int *ndim, const cubareal xx[],
   return 0;
 } 
 
-// Integrand for the combined J/Psi integral in the color singlet channel with fluctuations
+static int JPsiIntegrandNRQCDCoNoPT(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define conoptR xx[0]
+#define conoptphiR xx[1]
+#define conoptb xx[2]
+#define conoptphib xx[3]
+#define conopt4k xx[4]
+#define conopt4phik xx[5]
+#define conopt4k1 xx[6]
+#define conopt4phik1 xx[7]
+#define conopt4phip xx[8]
+
+  double kscale = 30.;
+  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  double bscale = 12./constants::hbarc; //!!
+  
+  int BK = static_cast<params*>(userdata)->BK;
+  double Y = static_cast<params*>(userdata)->Y;
+  double PT = static_cast<params*>(userdata)->PT;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables  
+  double R = conoptR*Rscale;
+  double b = conoptb*bscale;
+  double p = PT;
+  double phip = conopt4phip*2.*constants::PI;
+  double k = conopt4k*kscale;
+  double phik = conopt4phik*2.*constants::PI;
+  double k1 = conopt4k1*kscale;
+  double phik1 = conopt4phik1*2.*constants::PI;
+  double phiR = conoptphiR*2*constants::PI;
+  double phib = conoptphib*2*constants::PI;
+  
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  
+  
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
+  if (xp>1.){
+    f = 0;
+  }
+
+  else if (xA>1.){
+    f = 0;
+  }
+  else {
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    // get sums of vectors
+    double px = p*cos(phip); 
+    double py = p*sin(phip);
+    double kx = k*cos(phik);
+    double ky = k*sin(phik);
+    double k1x = k1*cos(phik1);
+    double k1y = k1*sin(phik1);
+    double pminuskminusk1x = px-kx-k1x;
+    double pminuskminusk1y = py-ky-k1y;
+    double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
+                                    +pminuskminusk1y*pminuskminusk1y);
+
+    double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
+  
+    double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
+ 
+    double myTA = returnTA(Rminusb,TAclass); 
+  
+     f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+        *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_co
+        *(StF(k,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
+        *R*Rscale*2.*constants::PI
+        *b*bscale*2.*constants::PI
+        *p*2.*constants::PI
+        *k*kscale*2.*constants::PI
+        *k1*kscale*2.*constants::PI; 
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // d2R
+  // d2b
+  // dp_phi
+  // d2k
+  // d2k1
+   
+  }
+  return 0;
+} 
+
+//////////////////////////////////////////////////
+///// Fluctuating b J/Psi cross section //////////
+/////////////////////////////////////////////////
+
 static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
@@ -546,7 +1075,9 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   double pscale = 30.;
   double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
 
-  double BK = static_cast<params*>(userdata)->BK;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
@@ -602,8 +1133,8 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   
   double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
   
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass)*constants::bdep_fluc_A;
-  double Tp = returnTp2D(Rx,Ry,glauberClass)*constants::bdep_fluc_p;
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
   
   if(pminuskminusk1minuskprime>30.){
     f=0.;
@@ -612,7 +1143,7 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
     {
       f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
         *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_cs
-        *(StF(k,TA,QsA,mv, BK, xA)*factorxA*StF(kprime,TA,QsA,mv, BK, xA)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv, BK, xA)*factorxA)
+        *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(kprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
         *Rscale*Rscale
         *p*pscale*2.*constants::PI
         *k*kscale*2.*constants::PI
@@ -630,287 +1161,6 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   return 0;
 } 
 
-static int JPsiIntegrandNRQCDCoNob(const int *ndim, const cubareal xx[],
-  const int *ncomp, cubareal ff[], void *userdata) {
-
-#define nobco4k xx[0]
-#define nobco4phik xx[1]
-#define nobco4k1 xx[2]
-#define nobco4phik1 xx[3]
-#define nobco4p xx[4]
-#define nobco4phip xx[5]
-
-  double kscale = 30.;
-  double pscale = 30.;
-
-  double BK = static_cast<params*>(userdata)->BK;
-  double Y = static_cast<params*>(userdata)->Y;
-  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
-
-  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
-  MV *mv = static_cast<params*>(userdata)->mv;
-
-  double m = constants::mc;//static_cast<params*>(userdata)->m;
-
-  // scale the integration variables  
-  double p = nobco4p*pscale;
-  double phip = nobco4phip*2.*constants::PI;
-  double k = nobco4k*kscale;
-  double phik = nobco4phik*2.*constants::PI;
-  double k1 = nobco4k1*kscale;
-  double phik1 = nobco4phik1*2.*constants::PI;
-  
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
-  
-  //!!
-  double factorxp = pow(1.-xp,4.);
-  double factorxA = pow(1.-xA,4.);
-  if (xp>1.){
-    f = 0;
-  }
-
-  else if (xA>1.){
-    f= 0;
-  }
-  else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
-  // get sums of vectors
-  double px = p*cos(phip); 
-  double py = p*sin(phip);
-  double kx = k*cos(phik);
-  double ky = k*sin(phik);
-  double k1x = k1*cos(phik1);
-  double k1y = k1*sin(phik1);
-  double pminuskminusk1x = px-kx-k1x;
-  double pminuskminusk1y = py-ky-k1y;
-  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
-                                    +pminuskminusk1y*pminuskminusk1y);
-  double phi_pminuskminusk1 = atan2(pminuskminusk1y,pminuskminusk1x);
-  
-  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
- 
-  double myTA = 1.*constants::bindep_A;
-  
-  f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp)*factorxp/(k1*k1)*H_co
-    *(StF(k,myTA,QsA,mv, BK, xA)*factorxA*StF(pminuskminusk1,myTA,QsA,mv, BK, xA)*factorxA)
-    *2.*constants::PI*constants::Bp
-    *2.*constants::PI*constants::Bt
-    *p*pscale*2.*constants::PI
-    *k*kscale*2.*constants::PI
-    *k1*kscale*2.*constants::PI; 
-  // scaled momenta above (in PT)
-  // last rows are scaling of integration measures:
-  // d2R
-  // d2b
-  // d2p
-  // d2k
-  // d2k1
-   
-  }
-  return 0;
-}
-
-// Integrand for the combined J/Psi integral in the color octet channel
-static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
-  const int *ncomp, cubareal ff[], void *userdata) {
-
-#define coR xx[0]
-#define cophiR xx[1]
-#define cob xx[2]
-#define cophib xx[3]
-#define co4k xx[4]
-#define co4phik xx[5]
-#define co4k1 xx[6]
-#define co4phik1 xx[7]
-#define co4p xx[8]
-#define co4phip xx[9]
-
-  double kscale = 15.;
-  double pscale = 15.;
-  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bscale = 12./constants::hbarc; //!!
-  
-  double BK = static_cast<params*>(userdata)->BK;
-  double Y = static_cast<params*>(userdata)->Y;
-  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
-
-  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
-  MV *mv = static_cast<params*>(userdata)->mv;
-
-  double m = constants::mc;//static_cast<params*>(userdata)->m;
-
-  // scale the integration variables  
-  double R = coR*Rscale;
-  double b = cob*bscale;
-  double p = co4p*pscale;
-  double phip = co4phip*2.*constants::PI;
-  double k = co4k*kscale;
-  double phik = co4phik*2.*constants::PI;
-  double k1 = co4k1*kscale;
-  double phik1 = co4phik1*2.*constants::PI;
-  double phiR = cophiR*2*constants::PI;
-  double phib = cophib*2*constants::PI;
-  
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
-  
-  
-  double factorxp = pow(1.-xp,4.);
-  double factorxA = pow(1.-xA,4.);
-  if (xp>1.){
-    f = 0;
-  }
-
-  else if (xA>1.){
-    f= 0;
-  }
-  else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
-  // get sums of vectors
-  double px = p*cos(phip); 
-  double py = p*sin(phip);
-  double kx = k*cos(phik);
-  double ky = k*sin(phik);
-  double k1x = k1*cos(phik1);
-  double k1y = k1*sin(phik1);
-  double pminuskminusk1x = px-kx-k1x;
-  double pminuskminusk1y = py-ky-k1y;
-  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
-                                    +pminuskminusk1y*pminuskminusk1y);
-  double phi_pminuskminusk1 = atan2(pminuskminusk1y,pminuskminusk1x);
-
-  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
-  
-  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
- 
-  double myTA = returnTA(Rminusb,TAclass)*constants::bdep_A; //(2.37=0.4*(208)^(1/3));
-  
-  f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp)*factorxp/(k1*k1)*H_co
-    *(StF(k,myTA,QsA,mv, BK, xA)*factorxA*StF(pminuskminusk1,myTA,QsA,mv, BK, xA)*factorxA)
-    *R*Rscale*2.*constants::PI
-    *b*bscale*2.*constants::PI
-    *p*pscale*2.*constants::PI
-    *k*kscale*2.*constants::PI
-    *k1*kscale*2.*constants::PI; 
-  // scaled momenta above (in PT)
-  // last rows are scaling of integration measures:
-  // d2R
-  // d2b
-  // d2p
-  // d2k
-  // d2k1
-   
-  }
-  return 0;
-} 
-
-// Integrand for the combined J/Psi integral in the color octet channel
-static int JPsiIntegrandNRQCDCoNoPT(const int *ndim, const cubareal xx[],
-  const int *ncomp, cubareal ff[], void *userdata) {
-
-#define conoptR xx[0]
-#define conoptphiR xx[1]
-#define conoptb xx[2]
-#define conoptphib xx[3]
-#define conopt4k xx[4]
-#define conopt4phik xx[5]
-#define conopt4k1 xx[6]
-#define conopt4phik1 xx[7]
-#define conopt4phip xx[8]
-
-  double kscale = 30.;
-  double Rscale = 2./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bscale = 12./constants::hbarc; //!!
-  
-  double BK = static_cast<params*>(userdata)->BK;
-  double Y = static_cast<params*>(userdata)->Y;
-  double PT = static_cast<params*>(userdata)->PT;
-  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
-
-  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
-  MV *mv = static_cast<params*>(userdata)->mv;
-
-  double m = constants::mc;//static_cast<params*>(userdata)->m;
-
-  // scale the integration variables  
-  double R = conoptR*Rscale;
-  double b = conoptb*bscale;
-  double p = PT;
-  double phip = conopt4phip*2.*constants::PI;
-  double k = conopt4k*kscale;
-  double phik = conopt4phik*2.*constants::PI;
-  double k1 = conopt4k1*kscale;
-  double phik1 = conopt4phik1*2.*constants::PI;
-  double phiR = conoptphiR*2*constants::PI;
-  double phib = conoptphib*2*constants::PI;
-  
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
-  
-  
-  double factorxp = pow(1.-xp,4.);
-  double factorxA = pow(1.-xA,4.);
-  if (xp>1.){
-    f = 0;
-  }
-
-  else if (xA>1.){
-    f= 0;
-  }
-  else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
-  // get sums of vectors
-  double px = p*cos(phip); 
-  double py = p*sin(phip);
-  double kx = k*cos(phik);
-  double ky = k*sin(phik);
-  double k1x = k1*cos(phik1);
-  double k1y = k1*sin(phik1);
-  double pminuskminusk1x = px-kx-k1x;
-  double pminuskminusk1y = py-ky-k1y;
-  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
-                                    +pminuskminusk1y*pminuskminusk1y);
-  double phi_pminuskminusk1 = atan2(pminuskminusk1y,pminuskminusk1x);
-
-  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
-  
-  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
- 
-  double myTA = returnTA(Rminusb,TAclass)*constants::bdep_A; //(2.37=0.4*(208)^(1/3));
-  
-  f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp)*factorxp/(k1*k1)*H_co
-    *(StF(k,myTA,QsA,mv, BK, xA)*factorxA*StF(pminuskminusk1,myTA,QsA,mv, BK, xA)*factorxA)
-    *R*Rscale*2.*constants::PI
-    *b*bscale*2.*constants::PI
-    *p*2.*constants::PI
-    *k*kscale*2.*constants::PI
-    *k1*kscale*2.*constants::PI; 
-  // scaled momenta above (in PT)
-  // last rows are scaling of integration measures:
-  // d2R
-  // d2b
-  // dp_phi
-  // d2k
-  // d2k1
-   
-  }
-  return 0;
-} 
-
-// Integrand for the combined J/Psi integral in the color octet channel for fluctuations
 static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
@@ -927,7 +1177,9 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   double pscale = 30.;
   double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
 
-  double BK = static_cast<params*>(userdata)->BK;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
@@ -980,8 +1232,8 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
                 +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
  
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass)*constants::bdep_fluc_A;
-  double Tp = returnTp2D(Rx,Ry,glauberClass)*constants::bdep_fluc_p;
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
  
   if(pminuskminusk1>30.){
     f=0.;
@@ -990,7 +1242,7 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
     {
       f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
         *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_co
-        *(StF(k,TA,QsA,mv, BK, xA)*factorxA*StF(pminuskminusk1,TA,QsA,mv, BK, xA)*factorxA)
+        *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
         *Rscale*Rscale
         *p*pscale*2.*constants::PI
         *k*kscale*2.*constants::PI
@@ -1006,7 +1258,215 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   return 0;
 }
 
-// Integrand for the combined J/Psi integral
+///////////////////////////////////////////////////////////
+///// Fluctuating b J/Psi cross section for pt spectrum ///
+//////////////////////////////////////////////////////////
+
+static int JPsiIntegrandNRQCDCsFlucNoPT(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define noptfcsRx xx[0]
+#define noptfcsRy xx[1]
+#define noptfcs4k xx[2]
+#define noptfcs4phik xx[3]
+#define noptfcs4k1 xx[4]
+#define noptfcs4phik1 xx[5]
+#define noptfcs4kprime xx[6]
+#define noptfcs4phikprime xx[7]
+#define noptfcs4phip xx[8]
+
+  double kscale = 30.;
+  double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double Y = static_cast<params*>(userdata)->Y;
+  double PT = static_cast<params*>(userdata)->PT;
+  double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
+  double by=static_cast<params*>(userdata)->by/constants::hbarc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+  Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
+
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables  
+  double Rx = noptfcsRx*Rscale-Rscale/2.;
+  double Ry = noptfcsRy*Rscale-Rscale/2.;
+  double p = PT;
+  double phip = noptfcs4phip*2.*constants::PI;
+  double k = noptfcs4k*kscale;
+  double phik = noptfcs4phik*2.*constants::PI;
+  double k1 = noptfcs4k1*kscale;
+  double phik1 = noptfcs4phik1*2.*constants::PI;
+  double kprime = noptfcs4kprime*kscale;
+  double phikprime = noptfcs4phikprime*2.*constants::PI;
+  
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
+  if (xp>1.){
+    f = 0;
+  }
+
+  else if (xA>1.){
+    f= 0;
+  }
+  else {
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double kprimex = kprime*cos(phikprime);
+  double kprimey = kprime*sin(phikprime);
+
+  double pminuskminusk1minuskprimex = px-kx-k1x-kprimex;
+  double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
+  double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
+                                    +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
+  
+  double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
+  
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
+  
+  if(pminuskminusk1minuskprime>30.){
+    f=0.;
+  }
+  else
+    {
+      f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+        *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_cs
+        *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(kprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
+        *Rscale*Rscale
+        *p*2.*constants::PI
+        *k*kscale*2.*constants::PI
+        *k1*kscale*2.*constants::PI
+        *kprime*kscale*2.*constants::PI; 
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // dRxdRy
+  // pdphip
+  // d2k
+  // d2k1
+  // d2kprime
+    }
+  }
+  return 0;
+} 
+
+static int JPsiIntegrandNRQCDCoFlucNoPT(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define noptfcoRx xx[0]
+#define noptfcoRy xx[1]
+#define noptfco4k xx[2]
+#define noptfco4phik xx[3]
+#define noptfco4k1 xx[4]
+#define noptfco4phik1 xx[5]
+#define noptfco4phip xx[6]
+
+  double kscale = 30.;
+  double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double Y = static_cast<params*>(userdata)->Y;
+  double PT = static_cast<params*>(userdata)->PT;
+  double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
+  double by=static_cast<params*>(userdata)->by/constants::hbarc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+  Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
+
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables  
+  double Rx = noptfcoRx*Rscale-Rscale/2.;
+  double Ry = noptfcoRy*Rscale-Rscale/2.;
+  double p = PT;
+  double phip = noptfco4phip*2.*constants::PI;
+  double k = noptfco4k*kscale;
+  double phik = noptfco4phik*2.*constants::PI;
+  double k1 = noptfco4k1*kscale;
+  double phik1 = noptfco4phik1*2.*constants::PI;
+  
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
+  if (xp>1.){
+    f = 0;
+  }
+
+  else if (xA>1.){
+    f= 0;
+  }
+  else {
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double pminuskminusk1x = px-kx-k1x;
+  double pminuskminusk1y = py-ky-k1y;
+  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
+                                    +pminuskminusk1y*pminuskminusk1y);
+
+  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
+ 
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
+ 
+  if(pminuskminusk1>30.){
+    f=0.;
+  }
+  else
+    {
+      f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+        *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_co
+        *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
+        *Rscale*Rscale
+        *p*2.*constants::PI
+        *k*kscale*2.*constants::PI
+        *k1*kscale*2.*constants::PI; 
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // dRxdRy
+  // pdphip
+  // d2k
+  // d2k1
+    }
+  }
+  return 0;
+}
+
+// ICEM
+
+///////////////////////////////////////////////////
+///// b-independent J/Psi cross section ///////////
+///////////////////////////////////////////////////
+
 static int JPsiIntegrandAllNob(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
@@ -1021,12 +1481,10 @@ static int JPsiIntegrandAllNob(const int *ndim, const cubareal xx[],
 
   double kscale = 30.;
   double pscale = 30.;
-  // Qs will be made rapidity dependent
-  double BK = static_cast<params*>(userdata)->BK;
-  
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
-  // double Qsp = static_cast<params*>(userdata)->Qsp;
-  // double QsA = static_cast<params*>(userdata)->QsA;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
@@ -1100,7 +1558,7 @@ static int JPsiIntegrandAllNob(const int *ndim, const cubareal xx[],
     // get Jacobian  
     double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
     
-    double myTA = 1.*constants::bindep_A;
+    double myTA = 1.;
     double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
     double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
@@ -1108,8 +1566,8 @@ static int JPsiIntegrandAllNob(const int *ndim, const cubareal xx[],
 
     f = constants::alphas*double(constants::Nc)*double(constants::Nc)
       /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, 0., Qsp, sizeFactor, mv, BK,xp)*factorxp/(k1*k1)*H*J
-      *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA)*factorxA*StF(k,myTA,QsA,mv, BK, xA)*factorxA)
+      *Phip(k1, 0., Qsp, sizeFactor, mv, BK,xp,bdep)*factorxp/(k1*k1)*H*J
+      *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(k,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
       *2.*constants::PI*constants::Bp
       *2.*constants::PI*constants::Bt
       *PT*pscale*2.*constants::PI
@@ -1134,6 +1592,10 @@ static int JPsiIntegrandAllNob(const int *ndim, const cubareal xx[],
   return 0;
 }  
 
+//////////////////////////////////////////////////
+///// b-dependent J/Psi cross section ///////////
+/////////////////////////////////////////////////
+
 // Integrand for the combined J/Psi integral
 static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
@@ -1151,20 +1613,16 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
 #define qq4k1 xx[10]
 #define qq4phik1 xx[11]
 
-  // double kscale = 10.;
-  // double pscale = 10.;
-  // double Rscale = 20./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  // double bscale = 20./constants::hbarc; 
+
   double kscale = 30.;
   double pscale = 30.;
   double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
   double bscale = 12./constants::hbarc; 
   // Qs will be made rapidity dependent
-  double BK = static_cast<params*>(userdata)->BK;
-  
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
-  // double Qsp = static_cast<params*>(userdata)->Qsp;
-  // double QsA = static_cast<params*>(userdata)->QsA;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
@@ -1177,7 +1635,6 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
   double qtilde = qqqtilde*qtildescale;
   double PT = qqPT*pscale; 
-  //double phiPT = qqphiPT*2.*constants::PI;
   double R = qqR*Rscale;
   double b = qqb*bscale;
   double k = qq4k*kscale;
@@ -1224,15 +1681,6 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
   double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
   double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
- 
-  // double Rx = R*cos(phiR);
-  // double Ry = R*sin(phiR);
-  // double bx = b*cos(phib);
-  // double by = b*sin(phib);
-  // double Rminusbx = Rx-bx;
-  // double Rminusby = Ry-by;
-  // double Rminusb = sqrt(Rminusbx*Rminusbx+Rminusby*Rminusby);
-  // double phi_Rminusb = atan2(Rminusby,Rminusbx);
   
   double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
   double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
@@ -1253,7 +1701,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
     // get Jacobian  
     double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
     
-    double myTA = returnTA(Rminusb,TAclass)*constants::bdep_A; //(2.37=0.4*(208)^(1/3));
+    double myTA = returnTA(Rminusb,TAclass); 
     double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
     double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
@@ -1261,8 +1709,8 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
 
     f = constants::alphas*double(constants::Nc)*double(constants::Nc)
       /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, R, Qsp, sizeFactor, mv, BK,xp)*factorxp/(k1*k1)*H*J
-      *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA)*factorxA*StF(k,myTA,QsA,mv, BK, xA)*factorxA)
+      *Phip(k1, R, Qsp, sizeFactor, mv, BK,xp,bdep)*factorxp/(k1*k1)*H*J
+      *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA, bdep,useFluc)*factorxA*StF(k,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
       *R*Rscale*2.*constants::PI
       *b*bscale*2.*constants::PI
       *PT*pscale*2.*constants::PI
@@ -1285,9 +1733,12 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   
   }
   return 0;
-}  
+}
 
-// Integrand for the combined J/Psi integral (no b integral) for fluctuations
+//////////////////////////////////////////////////
+///// Fluctuating b J/Psi cross section //////////
+/////////////////////////////////////////////////
+
 static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
@@ -1305,10 +1756,9 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double kscale = 30.;
   double pscale = 30.;
   double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  // double bscale = 24./constants::hbarc; 
-  // double Qsp = static_cast<params*>(userdata)->Qsp;
-  // double QsA = static_cast<params*>(userdata)->QsA;
-  double BK = static_cast<params*>(userdata)->BK;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
@@ -1325,16 +1775,9 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
   double qtilde = fqqqtilde*qtildescale;
   double PT = fqqPT*pscale; 
-  //double phiPT = qqphiPT*2.*constants::PI;
 
   double Rx = fqqRx*Rscale-Rscale/2.;
   double Ry = fqqRy*Rscale-Rscale/2.;
-  //double bx = fqqbx*bscale-bscale/2.;
-  //double by = fqqby*bscale-bscale/2.;
-  //double R = fqqR*Rscale;
-  //double b = fqqb*bscale;
-  //double phiR = fqqphiR*2*constants::PI;
-  //double phib = fqqphib*2*constants::PI;
   double k = fqq4k*kscale;
   double phik = fqq4phik*2.*constants::PI;
   double k1 = fqq4k1*kscale;
@@ -1360,14 +1803,17 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
   double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
 
-  double factorxp = pow(1.-xp,4.);
+
   if (xp>1.){
-    factorxp = 0.;
+        f = 0.;
   }
+  else if (xA>1.){
+       f = 0.;
+  }
+  
+  else{
+  double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
-  if (xA>1.){
-    factorxA = 0.;
-  }
 
   double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
   double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
@@ -1391,16 +1837,7 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double pplusqminusk1y = py+qy-k1y;
   double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
   double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
-  //double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
- 
-  // double Rx = R*cos(phiR);
-  // double Ry = R*sin(phiR);
-  // double bx = b*cos(phib);
-  // double by = b*sin(phib);
-  // double Rminusbx = Rx-bx;
-  // double Rminusby = Ry-by;
-  // double Rminusb = sqrt(Rminusbx*Rminusbx+Rminusby*Rminusby);
-  // double phi_Rminusb = atan2(Rminusby,Rminusbx);
+
   
   double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
@@ -1410,20 +1847,15 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
 
-  //double R = sqrt(Rx*Rx+Ry*Ry);
-  //double b = sqrt(bx*bx+by*by);
-  //double TA = returnTA(sqrt((Rx-bx)*(Rx-bx)+(Ry-by)*(Ry-by)),TAclass);
-  
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass)*constants::bdep_fluc_A;
-  double Tp = returnTp2D(Rx,Ry,glauberClass)*constants::bdep_fluc_p;
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
 
   // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,TA,QsA,mv, BK, xA)*factorxA*StF(k,TA,QsA,mv,BK,xA))*factorxA
+    *(StF(pplusqminusk1minusk,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(k,TA,QsA,mv,BK,xA,bdep,useFluc))*factorxA
     *Rscale*Rscale
-    //  *bscale*bscale
     *PT*pscale*2.*constants::PI
     *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
     *qtildescale
@@ -1441,237 +1873,16 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   // dphi
   // d2k
   // d2k1
-
+  } 
   return 0;
 }  
 
-// Integrand for the combined ccbar integral (no b integral) for fluctuations
-static int ccBarIntegrandAllFluc(const int *ndim, const cubareal xx[],
-  const int *ncomp, cubareal ff[], void *userdata) {
 
-#define fccRx xx[0]
-#define fccRy xx[1]
-#define fccq xx[2]
-#define fccqphi xx[3]
-#define fccp xx[4]
-#define fccpphi xx[5]
-#define fcc4k xx[6]
-#define fcc4phik xx[7]
-#define fcc4k1 xx[8]
-#define fcc4phik1 xx[9]
+// Gluons
 
-  double kscale = 30.;
-  double pscale = 30.;
-  double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
-  double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
-  double by=static_cast<params*>(userdata)->by/constants::hbarc;
-  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
-
-  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
-  MV *mv = static_cast<params*>(userdata)->mv;
-  Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
- 
-  double m = constants::mc;//static_cast<params*>(userdata)->m;
-  double BK = static_cast<params*>(userdata)->BK;
- 
-  // scale the integration variables 
-  double q = fccq*pscale; // cbar transverse momentum
-  double phiq = fccqphi*2.*constants::PI; // and its angle
-  double p = fccp*pscale; // c transverse momentum
-  double phip = fccpphi*2.*constants::PI; // and its angle
-  double k = fcc4k*kscale; // exchaged k momentum
-  double phik = fcc4phik*2.*constants::PI;// and its angle
-  double k1 = fcc4k1*kscale; // exchaged k1 momentum
-  double phik1 = fcc4phik1*2.*constants::PI;
-  double Rx = fccRx*Rscale-Rscale/2.;
-  double Ry = fccRy*Rscale-Rscale/2.;
-
-  double yq = static_cast<params*>(userdata)->yq; // c bar rapidity
-  double yp = static_cast<params*>(userdata)->yp; // c rapidity
-
-  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
-  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
-
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
-  
-  // get sums of vectors
-  double px = p*cos(phip); 
-  double py = p*sin(phip);
-  double qx = q*cos(phiq); 
-  double qy = q*sin(phiq);
-  double kx = k*cos(phik);
-  double ky = k*sin(phik);
-  double k1x = k1*cos(phik1);
-  double k1y = k1*sin(phik1);
-  double pplusqminusk1minuskx = px+qx-kx-k1x;
-  double pplusqminusk1minusky = py+qy-ky-k1y;
-  double pplusqminusk1minusk = sqrt(pplusqminusk1minuskx*pplusqminusk1minuskx
-                                    +pplusqminusk1minusky*pplusqminusk1minusky);
-  double phi_pplusqminusk1minusk = atan2(pplusqminusk1minusky,pplusqminusk1minuskx);
-
-  double pplusqminusk1x = px+qx-k1x;
-  double pplusqminusk1y = py+qy-k1y;
-  double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
-  double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
- 
-  double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
-  // double H = Hard::qqqq(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m)
-  //  +Hard::qqg(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m)
-  //  +Hard::gg(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
- 
-  double R = sqrt(Rx*Rx+Ry*Ry);
-  
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-  double Tp = returnTp2D(Rx,Ry,glauberClass);
-
-  // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
-  f = constants::alphas*double(constants::Nc)*double(constants::Nc)
-    /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)/(k1*k1)*H
-    *(StF(pplusqminusk1minusk,TA,QsA,mv, BK, xA)*StF(k,TA,QsA,mv, BK, xA))
-    *Rscale*Rscale // dRx dRy
-    *k*kscale*2.*constants::PI // d2k
-    *k1*kscale*2.*constants::PI // d2k1
-    *p*pscale*2.*constants::PI // d2p
-    *q*pscale*2.*constants::PI // d2q
-    *2.; // for p and q direction
- 
-
-  return 0;
-}  
-// Integrand for the combined J/Psi integral
-static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
-  const int *ncomp, cubareal ff[], void *userdata) {
-
-#define nqqR xx[0]
-#define nqqphiR xx[1]
-#define nqqb xx[2]
-#define nqqphib xx[3]
-#define nqqqtilde xx[4]
-#define nqqphi xx[5]
-#define nqqM xx[6]
-#define nqq4k xx[7]
-#define nqq4phik xx[8]
-#define nqq4k1 xx[9]
-#define nqq4phik1 xx[10]
-
-  double kscale = 30.;
-  double Rscale = 2./constants::hbarc; // choose a small scale (proton Phip will cut off at large R)
-  double bscale = 12./constants::hbarc; 
-  // Qs will be made rapidity dependent
-  double Qsp = static_cast<params*>(userdata)->Qsp;
-  double QsA = static_cast<params*>(userdata)->QsA;
-  double Y = static_cast<params*>(userdata)->Y;
-  double PT = static_cast<params*>(userdata)->PT;
-  double m = constants::mc;//static_cast<params*>(userdata)->m;
-  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
-
-  TAInt* TAclass = static_cast<params*>(userdata)->TAclass;
-  MV *mv = static_cast<params*>(userdata)->mv;
-  double BK = static_cast<params*>(userdata)->BK;
- 
-
-  // scale the integration variables 
-  double M = constants::mJPsi + nqqM*(2.*constants::mD-constants::mJPsi); 
-  double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
-  double qtilde = nqqqtilde*qtildescale;
-  double R = nqqR*Rscale;
-  double b = nqqb*bscale;
-  double k = nqq4k*kscale;
-  double phik = nqq4phik*2.*constants::PI;
-  double k1 = nqq4k1*kscale;
-  double phik1 = nqq4phik1*2.*constants::PI;
-  double phiR = nqqphiR*2*constants::PI;
-  double phib = nqqphib*2*constants::PI;
-
-
-  kinPair in;
-  in.M = M;
-  in.PT  = PT;
-  in.phi = nqqphi*2.*constants::PI; // not the PT phi
-  in.qtilde = qtilde;
-  in.Y = Y;
-  in.m = m;
-
-  kinqq out = convert(in);
-  
-  double p = out.p;
-  double phip = out.phip;
-  double q = out.q;
-  double phiq = out.phiq;
-  double yp = out.yp;
-  double yq = out.yq;
-  
-  // get sums of vectors
-  double px = p*cos(phip); 
-  double py = p*sin(phip);
-  double qx = q*cos(phiq); 
-  double qy = q*sin(phiq);
-  double kx = k*cos(phik);
-  double ky = k*sin(phik);
-  double k1x = k1*cos(phik1);
-  double k1y = k1*sin(phik1);
-  double pplusqminusk1minuskx = px+qx-kx-k1x;
-  double pplusqminusk1minusky = py+qy-ky-k1y;
-  double pplusqminusk1minusk = sqrt(pplusqminusk1minuskx*pplusqminusk1minuskx
-                                    +pplusqminusk1minusky*pplusqminusk1minusky);
-  double phi_pplusqminusk1minusk = atan2(pplusqminusk1minusky,pplusqminusk1minuskx);
-
-  double pplusqminusk1x = px+qx-k1x;
-  double pplusqminusk1y = py+qy-k1y;
-  double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
-  double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
-  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
-
-  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
-  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
-
- 
-  // double Rx = R*cos(phiR);
-  // double Ry = R*sin(phiR);
-  // double bx = b*cos(phib);
-  // double by = b*sin(phib);
-  // double Rminusbx = Rx-bx;
-  // double Rminusby = Ry-by;
-  // double Rminusb = sqrt(Rminusbx*Rminusbx+Rminusby*Rminusby);
-  // double phi_Rminusb = atan2(Rminusby,Rminusbx);
-  
-  double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
-
-  // get Jacobian
-  double betax = PT/sqrt(M*M+PT*PT);
-  double gammax = 1./sqrt(1.-betax*betax);
-  double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
-
-  double myTA = returnTA(Rminusb,TAclass)*constants::bdep_A; //TA(Rminusb);
-
-  f = constants::alphas*double(constants::Nc)*double(constants::Nc)
-    /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor, mv, BK,xp)/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA)*StF(k,myTA,QsA,mv, BK, xA))
-    *R*Rscale*2.*constants::PI
-    *b*bscale*2.*constants::PI
-    *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
-    *qtildescale
-    *2.*constants::PI
-    *k*kscale*2.*constants::PI
-    *k1*kscale*2.*constants::PI
-    *2.; // for p and q direction
-  // scaled momenta above (in PT)
-  // last rows are scaling of integration measures:
-  // d2R
-  // d2b
-  // dM
-  // dqtilde
-  // dphi
-  // d2k
-  // d2k1
-  
-  //don't forget F, it is one at the moment.
-
-  return 0;
-}  
+///////////////////////////////////////////////////
+///// b-independent gluons cross section //////////
+//////////////////////////////////////////////////
 
 static int GluonsNoB(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
@@ -1684,21 +1895,22 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
   double kscale = 30.;
   double pscale = 30.;
   
-  double Qsp;// = static_cast<params*>(userdata)->Qsp;
-  double QsA;// = static_cast<params*>(userdata)->QsA;
+
   double lambda = static_cast<params*>(userdata)->lambda;
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
-  double BK = static_cast<params*>(userdata)->BK;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
  
   double xp = (nobp*pscale+lambda)*exp(Y)/constants::roots;
   double xA = (nobp*pscale+lambda)*exp(-Y)/constants::roots;
-  Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
-  double TA = 1.*constants::bdep_A; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
+  double TA = 1.; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
   if (xp>1.){
@@ -1709,18 +1921,22 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
   }
   else {
     f = constants::alphas/constants::CF/(nobp*pscale+lambda)/(nobp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-      *Phip(nobk*kscale, 0, Qsp, sizeFactor, mv, BK, xp)*Phit(sqrt((nobp*pscale+lambda)*(nobp*pscale+lambda) + nobk*nobk*kscale*kscale - 2.*(nobp*pscale+lambda)*nobk*kscale*cos((nobphi-nobphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)
+      *Phip(nobk*kscale, 0, Qsp, sizeFactor, mv, BK, xp,bdep)
+      *Phit(sqrt((nobp*pscale+lambda)*(nobp*pscale+lambda) + nobk*nobk*kscale*kscale - 2.*(nobp*pscale+lambda)*nobk*kscale*cos((nobphi-nobphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc)
       *2.*constants::PI*nobk*kscale*kscale  //kdkdphik
-      *2.*constants::PI*constants::Bt  //R-integral
-      *2.*constants::PI*constants::Bp  // b-integral
+      *constants::sigma02  //R-integral
+      *constants::PI*constants::rt2  // b-integral
       *2.*constants::PI*pscale*(nobp*pscale+lambda); //pdpdphip
     //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   }
     return 1;
 }
 
-// Integrand for integral over everything but |p|
-static int Integrand(const int *ndim, const cubareal xx[],
+///////////////////////////////////////////////////
+///// b-dependent gluons cross section ///////////
+//////////////////////////////////////////////////
+
+static int Gluons(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define gk xx[0]
@@ -1730,58 +1946,26 @@ static int Integrand(const int *ndim, const cubareal xx[],
 #define gb xx[4]
 #define gphib xx[5]
 #define gphi xx[6]
-
-  double kscale = 15.;
-  double Rscale = 10./constants::hbarc;
-  double p = static_cast<params*>(userdata)->pe;
-  double Qsp = static_cast<params*>(userdata)->Qsp;
-  double QsA = static_cast<params*>(userdata)->QsA;
-  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
-  double BK = static_cast<params*>(userdata)->BK;
- 
-  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
-  MV *mv = static_cast<params*>(userdata)->mv;
-  double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*Rscale*Rscale - 2.*gR*gb*Rscale*Rscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass);
-
-  // determine x values
-
-  f = constants::alphas/constants::CF/(p)/(p)/pow((2*constants::PI*constants::PI),3.)
-    *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK,0)*Phit(sqrt(p*p + gk*gk*kscale*kscale - 2.*p*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, 0)
-    *2.*constants::PI*gk*kscale*kscale  //kdkdphik
-    *2.*constants::PI*gR*Rscale*Rscale  //RdRdphiR
-    *2.*constants::PI*gb*Rscale*Rscale;  //bdbdphib
-  return 0;
-}
-
-static int FullIntegrand(const int *ndim, const cubareal xx[],
-  const int *ncomp, cubareal ff[], void *userdata) {
-
 #define gp xx[7]
-
-  //cout << "xx[0] = " << xx[0] << endl;
-  if (xx[0]>1.){
-    cout << "xx[0] = " << xx[0] << endl;
-    cout << "xx[7] = " << xx[7] << endl;
-    cout << "f=" << f << endl;
- }
 
   double kscale = 30.;
   double pscale = 30.;
   double Rscale = 2./constants::hbarc;
-  double bscale = 12./constants::hbarc; //!!
-  double Qsp;// = static_cast<params*>(userdata)->Qsp;
-  double QsA;// = static_cast<params*>(userdata)->QsA;
-  double lambda = static_cast<params*>(userdata)->lambda;
-  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
-  MV *mv = static_cast<params*>(userdata)->mv;
+  double bscale = 12./constants::hbarc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
-  double BK = static_cast<params*>(userdata)->BK;
+  double lambda = static_cast<params*>(userdata)->lambda;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
- 
+  
   double xp = (gp*pscale+lambda)*exp(Y)/constants::roots;
   double xA = (gp*pscale+lambda)*exp(-Y)/constants::roots;
   double factorxA = pow(1.-xA,4.);
   double factorxp = pow(1.-xp,4.);
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
   if (xp>1.){
     f = 0.;
   }
@@ -1789,25 +1973,27 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
     f = 0.;
   }
   else{
-    
-    Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
-    
-    double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*bscale*bscale - 2.*gR*gb*Rscale*bscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass)*constants::bdep_A; //(2.37=0.4*(208)^(1/3));
-    
+   double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+   double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+
+   double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*Rscale*Rscale - 2.*gR*gb*Rscale*Rscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass);
+
     f = constants::alphas/constants::CF/(gp*pscale+lambda)/(gp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-      *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK,xp)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)
+      *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK,xp,bdep)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc)
       *2.*constants::PI*gk*kscale*kscale  //kdkdphik
       *2.*constants::PI*gR*Rscale*Rscale  //RdRdphiR
       *2.*constants::PI*gb*bscale*bscale  //bdbdphib
       *2.*constants::PI*pscale*(gp*pscale+lambda); //pdpdphip
     //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   }
-  return 1;
+  return 0;
 }
 
+////////////////////////////////////////////////////
+///// Fluctuating b gluons cross section ///////////
+///////////////////////////////////////////////////
 
-static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
+static int GluonsFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define fgk xx[0]
@@ -1820,25 +2006,18 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   double kscale = 30.;
   double pscale = 30.;
   double Rscale = 4./constants::hbarc;
-  //double bscale = 24./constants::hbarc;
-  //double Rscale = 1./constants::hbarc;
-  //double bscale = 4./constants::hbarc;
   double Rx = fgRx*Rscale-Rscale/2.;
   double Ry = fgRy*Rscale-Rscale/2.;
-  //double bx = fgbx*bscale-bscale/2.;
-  //double by = fgby*bscale-bscale/2.;
 
-  double BK = static_cast<params*>(userdata)->BK;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
 
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
-  //double Qsp = static_cast<params*>(userdata)->Qsp;
-  //double QsA = static_cast<params*>(userdata)->QsA;
   double lambda = static_cast<params*>(userdata)->lambda;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
   double Y = static_cast<params*>(userdata)->Y;
-  double Qsp=0.;
-  double QsA=0.;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
@@ -1846,9 +2025,8 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
 
   double R = sqrt(Rx*Rx+Ry*Ry);
   double b = sqrt(bx*bx+by*by);
-  //double TA = returnTA(sqrt((Rx-bx)*(Rx-bx)+(Ry-by)*(Ry-by)),TAclass);
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass)*constants::bdep_fluc_A;
-  double Tp = returnTp2D(Rx,Ry,glauberClass)*constants::bdep_fluc_p;
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
 
   double xp = (fgp*pscale+lambda)*exp(Y)/constants::roots;
   double xA = (fgp*pscale+lambda)*exp(-Y)/constants::roots;
@@ -1863,12 +2041,13 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   }
   else{
     
-    Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = constants::alphas/constants::CF/(fgp*pscale+lambda)/(fgp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-      *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp*Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)*factorxA
+      *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp
+      *Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc)*factorxA
       *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
       *Rscale*Rscale  //dRxdRy
       //    *bscale*bscale  //bdxdby
@@ -1878,12 +2057,14 @@ static int FullIntegrandFluc(const int *ndim, const cubareal xx[],
   return 1;
 }
 
+/////////////////////////////////////////////////////
+///// Fluctuating b hadrons cross section ///////////
+////////////////////////////////////////////////////
 
-// Integrand for the full 9D integral
-static int HadronIntegrand(const int *ndim, const cubareal xx[],
+static int HadronsFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-#define z xx[6]
+ #define z xx[6] 
 
   double Kch = 1.; //irrelevant for the ratio
   double sigmainel = 1.; //irrelevant for the ratio
@@ -1893,17 +2074,12 @@ static int HadronIntegrand(const int *ndim, const cubareal xx[],
   double pscale = 30.;
   double Rscale = 4./constants::hbarc;
   double bscale = 24./constants::hbarc;
-  //double Rscale = 1./constants::hbarc;
-  //double bscale = 4./constants::hbarc;
   double Rx = fgRx*Rscale-Rscale/2.;
   double Ry = fgRy*Rscale-Rscale/2.;
-  //double bx = fgbx*bscale-bscale/2.;
-  //double by = fgby*bscale-bscale/2.;
 
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
-  //double Qsp = static_cast<params*>(userdata)->Qsp;
-  //double QsA = static_cast<params*>(userdata)->QsA;
+
   double lambda = static_cast<params*>(userdata)->lambda;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
   double Y = static_cast<params*>(userdata)->Y;
@@ -1911,16 +2087,18 @@ static int HadronIntegrand(const int *ndim, const cubareal xx[],
   double Qsp=0.;
   double QsA=0.;
 
-  double BK = static_cast<params*>(userdata)->BK;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
   MV *mv = static_cast<params*>(userdata)->mv;
 
   double R = sqrt(Rx*Rx+Ry*Ry);
   double b = sqrt(bx*bx+by*by);
-  //double TA = returnTA(sqrt((Rx-bx)*(Rx-bx)+(Ry-by)*(Ry-by)),TAclass);
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass)*constants::bdep_fluc_A;
-  double Tp = returnTp2D(Rx,Ry,glauberClass)*constants::bdep_fluc_p;
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+  double Tp = returnTp2D(Rx,Ry,glauberClass);
   
   double p = (fgp*pscale+lambda);
   
@@ -1947,13 +2125,14 @@ static int HadronIntegrand(const int *ndim, const cubareal xx[],
     double factorxA = pow(1.-xA,4.);
     double factorxp = pow(1.-xp,4.);
     
-    Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh/z/z*J* 
       constants::alphas/constants::CF/(pg)/(pg)/pow((2*constants::PI*constants::PI),3.)
-      *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp*Phit(sqrt(pg*pg + fgk*fgk*kscale*kscale - 2.*pg*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)*factorxA
+      *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp
+      *Phit(sqrt(pg*pg + fgk*fgk*kscale*kscale - 2.*pg*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc)*factorxA
       *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
       *Rscale*Rscale  //dRxdRy
       //    *bscale*bscale  //bdxdby
@@ -1963,21 +2142,9 @@ static int HadronIntegrand(const int *ndim, const cubareal xx[],
   return 1;
 }
 
-double Qsp(double pT, double roots, double y){
-  //return pow((0.0003*roots/pT/exp(-y)),0.288/2.);
-  return pow((constants::x0*roots/pT/exp(-y)),constants::lambdaSpeedp/2.);
-  //return pow((0.00008*roots/pT/exp(-y)),0.9/2.);
-  //return 0.5;
-}
-
-double QsA(double pT, double roots, double y){
-  //  return sqrt(0.4*pow(208.,(1./3.))*pow(Qsp(pT,roots,y),2.));
-  return pow((constants::x0*roots/pT/exp(-y)),constants::lambdaSpeedA/2.);
-}
-
 // Main program
 int main(int argc, char *argv[]) {
-  // MPI things
+ // MPI things
   int rank=0;
   int size=1;
   
@@ -1987,8 +2154,9 @@ int main(int argc, char *argv[]) {
   int Nevents = 1;
   int NRQCD = 0;
   int BK = 0;
+  int bdep = 0;
 
-  std::vector <std::string> sources;
+std::vector <std::string> sources;
   std::string destination;
   for (int i = 1; i < argc; ++i) {
     if (std::string(argv[i]) == "--readTable") {
@@ -2036,6 +2204,15 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--bdep") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        bdep = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--bdep option requires one argument, 0 for b-independent or 1 for b-dependent." << std::endl;
+        return 1;
+      }  
+    }
   }
     
   // initialize MPI
@@ -2043,17 +2220,15 @@ int main(int argc, char *argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank); // get current process id
   MPI_Comm_size(MPI_COMM_WORLD, &size); // get number of processes
 
- 
   int h5Flag = 0;
   pretty_ostream messenger;
 
  
   if (rank==0){
-    display_logo();
     cout << "Options: read MV dipole from file yes(1)/no(0)= " << readTable << ", fluctuations on(1)/off(0) = " << useFluc << ", Number of events = " << Nevents << endl;
     messenger.flush("info");
   }
-  
+
   long int seed = time(NULL)+rank*100000;
   //long int seed = 1;
  
@@ -2102,13 +2277,7 @@ int main(int argc, char *argv[]) {
     exit(0);
   }
 
-  //  messenger.flush("info");
-
-  //  cout << "Phip=" << mv->Phip(0.1,1.,1.) << endl;
-
-  ////double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
- 
-  // Cuba's parameters for integration
+    // Cuba's parameters for integration
   int NDIM = 9;
   int NCOMP = 1;
   const long long int NVEC = 1;
@@ -2132,23 +2301,6 @@ int main(int argc, char *argv[]) {
   const long long int NINCREASE = 1000000;
   const long long int NBATCH = 1000;
   int GRIDNO = 0;
-
-  //suave
-  int NNEW = 2000;
-  int NMIN = 2;
-  int FLATNESS = 25;
-
-  //divonne
-  int KEY1 = 7;
-  int KEY2 = 7;
-  int KEY3 = 1;
-  int MAXPASS = 1000;
-  double BORDER = 0.;
-  double MAXCHISQ = 10.;
-  double MINDEVIATION = 0.25;
-  int NGIVEN = 0;
-  int LDXGIVEN = 0;
-  int NEXTRA = 0;
  
   int comp, nregions, fail;
   long long int neval;
@@ -2157,96 +2309,7 @@ int main(int argc, char *argv[]) {
 
   params data;
 
-  //  double QspPre = 0.43; // prefactors for scaling
-  //  double QsAPre = 0.43; // prefactors for scaling
-  double QspPre = constants::prefactor; // prefactors for scaling
-  double QsAPre = constants::prefactor; // prefactors for scaling
 
-  double inQsp;
-  double inQsA;
-
-  double Y_g = 0.;
-  double Y_fwd = 3.;
-  double Y_bck= -3.8; //use minus sign
- 
-  data.Y = Y_g;
-
-  data.BK = BK;
-
-  if(useFluc ==0){
-    inQsp = QspPre*Qsp(0.8,constants::roots,-Y_g);
-    inQsA = QsAPre*QsA(0.8,constants::roots,Y_g);
-  }
-  else{
-    //    inQsp = QspPre*Qsp(0.8,constants::roots,0.);
-    //inQsA = QsAPre*Qsp(0.8,constants::roots,0.);
-    inQsp = QspPre*Qsp(0.8,constants::roots,-Y_g);
-    inQsA = QsAPre*QsA(0.8,constants::roots,Y_g);
-  }
-
-  data.PT = 0.; // dummy for now
-  data.pe = 0.; // dummy for now
-  data.k = 0.;  // dummy for now
-  data.m = 0.;
-  data.Qs = 0.; // Saturation scale in GeV - not used anymore
-  data.lambda = 0.05; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
-  data.Qsp = inQsp; // midrapidity proton Saturation scale in GeV
-  data.QsA = inQsA; // midrapidity Pb Saturation scale in GeV
-  data.mv = mv; // MV class
-  data.TAclass = TAclass; // TA class
-  data.glauberClass = glauber; // Glauber class
-  data.protonSizeFactor = 1.; // allows to make proton larger at small x and smaller at large x (not used, leave at one)
- 
-  if (rank==0){
-  cout << "Qsp(y=0) = " << inQsp << endl;
-  cout << "QsA(y=0) = " << inQsA << endl;
-  }
-
-  double inQsp_fwd;
-  double inQsA_fwd;
-
-  if(useFluc == 0){
-    inQsp_fwd = QspPre*Qsp(3,constants::roots,-Y_fwd);
-    inQsA_fwd = QsAPre*QsA(3,constants::roots,Y_fwd);
-  }
-  else{
-    //    inQsp_fwd = QspPre*Qsp(3,constants::roots,-3.);
-    //inQsA_fwd = QsAPre*Qsp(3,constants::roots,3.);
-    inQsp_fwd = QspPre*Qsp(3.,constants::roots,-Y_fwd);
-    inQsA_fwd = QsAPre*QsA(3.,constants::roots,Y_fwd);
-  }
-
-  if (rank==0){
-    cout << "Qsp(y=" << Y_fwd << ") = " << inQsp_fwd << endl;
-    cout << "QsA(y="<< Y_fwd << ") = " << inQsA_fwd << endl;
-  }
-
-  double inQsp_bck;
-  double inQsA_bck;
-
-  if(useFluc == 0){
-    inQsp_bck = QspPre*Qsp(2.7,constants::roots,-Y_bck);
-    inQsA_bck = QsAPre*QsA(2.7,constants::roots,Y_bck);
-  }
-  else{
-    //   inQsp_bck = QspPre*Qsp(2.7,constants::roots,3.8);
-    //inQsA_bck = QsAPre*Qsp(2.7,constants::roots,-3.8);
-    inQsp_bck = QspPre*Qsp(2.7,constants::roots,-Y_bck);
-    inQsA_bck = QsAPre*QsA(2.7,constants::roots,Y_bck);
-  }
-
-  if (rank==0){
-  cout << "Qsp(y=" << Y_bck << ") = " << inQsp_bck << endl;
-  cout << "QsA(y=" << Y_bck << ") = " << inQsA_bck << endl;
-  }
-  // // test the interpolation routine
-  // for(int i=0;i<100;i++){
-  //   double myR = double(i)/10./constants::hbarc;
-  //   cout << returnTA(myR,TAclass) <<  " " << TA(myR) << endl;
-  // }
-
-
- 
   double gresult;
   double gerror;
 
@@ -2265,197 +2328,132 @@ int main(int argc, char *argv[]) {
   double JPsi2result2;
   double JPsi2error2;
 
-  //test StF
- // for (int ik=0; ik<1000; ik++){
-  //  double k = ik*0.01;
-    //double StF(double k, double TA, double Qs, MV *mv, int BK, double x)
-  //  cout << k << " " << StF(k, 1., 0.4949, mv, 0, 0.0001)  << endl;
- // }
+  data.Y = 0;
+  data.useFluc = useFluc;
+  data.bdep = bdep;
+  data.BK = BK;
 
+  data.PT = 0.; // dummy for now
+  data.pe = 0.; // dummy for now
+  data.k = 0.;  // dummy for now
+  data.m = 0.;
+  data.lambda = 0.05; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
+  data.mv = mv; // MV class
+  data.TAclass = TAclass; // TA class
+  data.glauberClass = glauber; // Glauber class
+  data.protonSizeFactor = 1.;
 
-  // Now compute midrapidity gluons
   if(useFluc == 0){
-    cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl;
-    // Run 8D Vegas integration
-    // printf("Midrapidity gluon: %.8f +- %.8f\t\n", gresult, gerror);
+    cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl; 
+    if(bdep == 0){
+    cout << "b-independent results"  << endl;
+    NDIM = 4;
+    llVegas(NDIM, NCOMP, GluonsNoB, &data, NVEC,
+            EPSREL, EPSABS, VERBOSE, SEED,
+            MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+            GRIDNO, NULL, NULL,
+            &neval, &fail, integral, error, prob);
+    gresult = (double)integral[0];
+    gerror = (double)error[0];
+    cout << gresult << endl;
+        if(NRQCD==1){
+        cout << "Using NRQCD"  << endl;
+        NDIM = 8;
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsNob, &data, NVEC,
+               EPSREL, EPSABS, VERBOSE, SEED,
+               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+               GRIDNO, NULL, NULL,
+               &neval, &fail, integral, error, prob);
 
-    //data.Qsp = inQsp_fwd; // forward proton Saturation scale in GeV
-    //data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
-    //data.Y = Y_fwd;
-    double ptmin = log10(0.01);
-    double ptmax = log10(5);
-    int npoints = 20;
-    
-    double step = (ptmax-ptmin)/npoints;
-    // stringstream strfilename;
-    // strfilename << "djpsi_gluons_bk_nrqcd_nob.dat";
-    // string filename;
-    // filename = strfilename.str();
-    // fstream fout(filename.c_str(), ios::app);
-    // for (int nip=0; nip<=npoints; nip++){ 
-    // data.Y=ymin + nip*step;
+        JPsi2result_cs = (double)integral[0];
+        JPsi2error_cs = (double)error[0];    
 
-     
-    // NDIM = 4;
-    // llVegas(NDIM, NCOMP, GluonsNoB, &data, NVEC,
-    //           EPSREL, EPSABS, VERBOSE, SEED,
-    //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-    //           GRIDNO, NULL, NULL,
-    //           &neval, &fail, integral, error, prob);
-
-    // gresult = (double)integral[0];
-    // gerror = (double)error[0];          
-    // // JPsi cross section
-    // if(NRQCD==1){
-
-    //   NDIM = 8;
-    //   llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsNob, &data, NVEC,
-    //           EPSREL, EPSABS, VERBOSE, SEED,
-    //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-    //           GRIDNO, NULL, NULL,
-    //           &neval, &fail, integral, error, prob);
-
-    //   JPsi2result_cs = (double)integral[0];
-    //   JPsi2error_cs = (double)error[0];
-
-    //   NDIM = 6;
-    //   llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoNob, &data, NVEC,
-    //           EPSREL, EPSABS, VERBOSE, SEED,
-    //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-    //           GRIDNO, NULL, NULL,
-    //           &neval, &fail, integral, error, prob);
-
-    //   JPsi2result_co= (double)integral[0];
-    //   JPsi2error_co = (double)error[0];
-    // }
-    // else{   
- 
-    //   NDIM = 8;
-    //   llVegas(NDIM, NCOMP, JPsiIntegrandAllNob, &data, NVEC,
-    //           EPSREL, EPSABS, VERBOSE, SEED,
-    //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-    //           GRIDNO, NULL, NULL,
-    //           &neval, &fail, integral, error, prob);
-    //   JPsi2result = (double)integral[0];
-    //   JPsi2error = (double)error[0];
-    // }
-    stringstream strfilename;
-    strfilename << "avpt_den_djpsi_bk_nrqcd_pt_nofluc_bind_bwd.dat";
-    string filename;
-    filename = strfilename.str();
-    fstream fout(filename.c_str(), ios::app);
-    data.Y = Y_bck;
-    
-
-   // for (int nip=0; nip<=npoints; nip++){ 
-   //     data.PT= pow(10,ptmin + nip*step);
-
-     
-     //NDIM = 8;
-     //llVegas(NDIM, NCOMP, FullIntegrand, &data, NVEC,
-     //          EPSREL, EPSABS, VERBOSE, SEED,
-      //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-      //         GRIDNO, NULL, NULL,
-      //         &neval, &fail, integral, error, prob);
-
-     //gresult = (double)integral[0];
-    // gerror = (double)error[0];          
-    // JPsi cross section
-    if(NRQCD==1){
-
-      NDIM = 12;
-      llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsNob, &data, NVEC,
+        NDIM = 6;
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoNob, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
               GRIDNO, NULL, NULL,
               &neval, &fail, integral, error, prob);
+        JPsi2result_co= (double)integral[0];
+        JPsi2error_co = (double)error[0];
 
-      JPsi2result_cs = (double)integral[0];
-      JPsi2error_cs = (double)error[0];
-
-      NDIM = 10;
-      llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoNob, &data, NVEC,
+        }
+        
+        else{
+        cout << "Using ICEM"  << endl;    
+        NDIM = 8;
+        llVegas(NDIM, NCOMP, JPsiIntegrandAllNob, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
               GRIDNO, NULL, NULL,
               &neval, &fail, integral, error, prob);
+        JPsi2result = (double)integral[0];
+        JPsi2error = (double)error[0];  
+        }
 
-      JPsi2result_co= (double)integral[0];
-      JPsi2error_co = (double)error[0];
-    }
-    else{   
-      NDIM = 8;
-      llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
-      JPsi2result = (double)integral[0];
-      JPsi2error = (double)error[0];
     }
 
-
-   // Print the result
-   // printf("Forward JPsi: %.8e +- %.8e\t\n", JPsi2result_cs, JPsi2error);
-
-   // data.Qsp = inQsp_bck; // forward proton Saturation scale in GeV
-   // data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
-   // data.Y = Y_bck;
+    else{
     
-    //if(NRQCD==1){
-    //  NDIM = 12;
-    //  llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCs, &data, NVEC,
-    //          EPSREL, EPSABS, VERBOSE, SEED,
-     //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-     //         GRIDNO, NULL, NULL,
-     //         &neval, &fail, integral, error, prob);
-
-  //    JPsi2result2 = (double)integral[0];
-    //  JPsi2error2 = (double)error[0];
-
-    //  NDIM = 10;
-    //  llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCo, &data, NVEC,
-    //          EPSREL, EPSABS, VERBOSE, SEED,
-    //          MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-    //          GRIDNO, NULL, NULL,
-    //          &neval, &fail, integral, error, prob);
-
-    //  JPsi2result2 += (double)integral[0];
-    //  JPsi2error2 += (double)error[0];
-    //}
-    //else{
-    //  NDIM = 12;
-     // llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
-    //          EPSREL, EPSABS, VERBOSE, SEED,
-    //          MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-     //         GRIDNO, NULL, NULL,
-     //         &neval, &fail, integral, error, prob);
-     // JPsi2result2 = (double)integral[0];
-    //  JPsi2error2 = (double)error[0];
-   // }
-
-   // printf("Backward JPsi: %.8e +- %.8e\t\n", JPsi2result2, JPsi2error2);
-
+    cout << "b-dependent results"  << endl;
+    
+    NDIM = 8;
+    llVegas(NDIM, NCOMP, Gluons, &data, NVEC,
+            EPSREL, EPSABS, VERBOSE, SEED,
+            MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+            GRIDNO, NULL, NULL,
+            &neval, &fail, integral, error, prob);
+    gresult = (double)integral[0];
+    gerror = (double)error[0];
+    cout << gresult << endl;
     if(NRQCD==1){
-      cout << setprecision(10)  << JPsi2result_co << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << " " << data.Y << endl;
+        cout << "Using NRQCD"  << endl;
+        NDIM = 12;
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCs, &data, NVEC,
+               EPSREL, EPSABS, VERBOSE, SEED,
+               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+               GRIDNO, NULL, NULL,
+               &neval, &fail, integral, error, prob);
+
+        JPsi2result_cs = (double)integral[0];
+        JPsi2error_cs = (double)error[0];    
+
+        NDIM = 10;
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCo, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+        JPsi2result_co= (double)integral[0];
+        JPsi2error_co = (double)error[0];
+
+        }
+        
+        else{
+        cout << "Using ICEM"  << endl;    
+        NDIM = 12;
+        llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+        JPsi2result = (double)integral[0];
+        JPsi2error = (double)error[0];  
+        }
+    }
+     
+    if(NRQCD==1){
+      cout << setprecision(10)  << JPsi2result_co << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << " " << endl;
     }
     else{
-      cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " "  << data.Y << endl;
+      cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " "  << endl;
     }
-    //stringstream strfilename;
-    //strfilename << "output_bIntegrated.dat";
-   // string filename;
-   // filename = strfilename.str();
-   // fstream fout(filename.c_str(), ios::app);
-    
-    fout << std::scientific << setprecision(5) << JPsi2result_co << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << " " << data.Y << endl;
-   // }
-    fout.close();
+         
+   }
 
-
-  }
-  else{
-    for (int ni=0; ni<Nevents; ni++){
+   else{
+   cout << "Fluctuating b results"  << endl; 
+   for (int ni=0; ni<Nevents; ni++){
       // Run Vegas integration with fluctuations
       // Make a new target
       glauber->makeNuclei(random, constants::Bp);
@@ -2473,23 +2471,9 @@ int main(int argc, char *argv[]) {
       data.by = b*sin(phib);
       
       cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
-
-      // fluctuate the proton Qs:
-      // it is included when using quarks in the proton
-      double QspFac = 1.;
-      //    QspFac = sqrt((exp(random->Gauss(0, 0.5))) /
-      //              std::exp(0.5 * 0.5 / 2.0)); //
       
-      //      cout << "QspFac=" << QspFac << endl;
-      
-      // Do gluons:
-
-      data.Qsp = inQsp*QspFac; // forward proton Saturation scale in GeV
-      data.QsA = inQsA; // forward Pb Saturation scale in GeV
-      data.Y = Y_g;
-
       NDIM = 6;
-      llVegas(NDIM, NCOMP, FullIntegrandFluc, &data, NVEC,
+      llVegas(NDIM, NCOMP, GluonsFluc, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
               GRIDNO, NULL, NULL,
@@ -2504,10 +2488,10 @@ int main(int argc, char *argv[]) {
         cout << "Gluon number < 1, skipping event" << endl;
         continue;
       }
-
+      
       // do hadrons next (one more (z) integral)
       NDIM = 7;
-      llVegas(NDIM, NCOMP, HadronIntegrand, &data, NVEC,
+      llVegas(NDIM, NCOMP, HadronsFluc, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
               GRIDNO, NULL, NULL,
@@ -2520,144 +2504,57 @@ int main(int argc, char *argv[]) {
             
       if(gresult<1.){
         cout << "Gluon number < 1, skipping event" << endl;
-        continue;
-      }
-
-      // Gluons and hadrons done, her comes J/Psi
-      
-      data.Qsp = inQsp_fwd*QspFac; // forward proton Saturation scale in GeV
-      data.QsA = inQsA_fwd; // forward Pb Saturation scale in GeV
-      data.Y = Y_fwd;
+        continue; 
+       }
 
       if(NRQCD==1){
+        cout << "Using NRQCD"  << endl;
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
-        
-        JPsi2result = (double)integral[0];
-        JPsi2error = (double)error[0];
+               EPSREL, EPSABS, VERBOSE, SEED,
+               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+               GRIDNO, NULL, NULL,
+               &neval, &fail, integral, error, prob);
+
+        JPsi2result_cs = (double)integral[0];
+        JPsi2error_cs = (double)error[0];    
 
         NDIM = 8;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+        JPsi2result_co= (double)integral[0];
+        JPsi2error_co = (double)error[0];
+
+        }
         
-        JPsi2result += (double)integral[0];
-        JPsi2error += (double)error[0]; //should add in quadrature
-      }
-      else{
+        else{
+        cout << "Using ICEM"  << endl;    
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
         JPsi2result = (double)integral[0];
-        JPsi2error = (double)error[0];
-      }
-      // Print the result
-      printf("Forward JPsi: %.8e +- %.8e\t\n", JPsi2result, JPsi2error);   
-      
-      data.Qsp = inQsp_bck*QspFac; // forward proton Saturation scale in GeV
-      data.QsA = inQsA_bck; // forward Pb Saturation scale in GeV
-      data.Y = Y_bck;
-   
-      if(NRQCD==1){
-        NDIM = 10;   
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
-        
-        JPsi2result2 = (double)integral[0];
-        JPsi2error2 = (double)error[0];
+        JPsi2error = (double)error[0];  
+        }
 
-        NDIM = 8;
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
-        
-        JPsi2result2 += (double)integral[0];
-        JPsi2error2 += (double)error[0]; //should add in quadrature
-      }
-      else{
-        NDIM = 10;
-        llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
-        JPsi2result2 = (double)integral[0];
-        JPsi2error2 = (double)error[0];
-      }
-      // Print the result
-      printf("Backward JPsi: %.8e +- %.8e\t\n", JPsi2result2, JPsi2error2);   
-
-      double TA = returnTA2D(-data.bx,-data.by,glauber);
-
-      cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result 
-           << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 
-           << " " << sqrt(data.bx*data.bx+data.by*data.by) 
-           << " " << TA << endl;
-      
-      stringstream strfilename;
-      strfilename << "output_g_" << rank << ".dat";
-      string filename;
-      filename = strfilename.str();
-      fstream fout(filename.c_str(), ios::app);
-      
-      fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result 
-           << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " " 
-           << sqrt(data.bx*data.bx+data.by*data.by) 
-           << " " << TA << endl;
-      fout.close();
-
-      stringstream strfilenameh;
-      strfilenameh << "output_h_" << rank << ".dat";
-      string filenameh;
-      filenameh = strfilenameh.str();
-      fstream fouth(filenameh.c_str(), ios::app);
-      
-      fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << JPsi2result 
-            << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
-      fouth.close();
 
     }
-  }
-  
-  cout << " - - - - - - - - - - - - - - - - - " << endl;
 
-  // // Integrate 11D to get PT-spectrum
-  // int ppoints = 30; // Points in |p| to compute
-  // double pstep = 0.25; // Step width in |p|
-
-  // NDIM = 11;
-  // int runs = 1;
-  // for (int r=0; r<runs; r++){
-  //   for (int i=0; i<=ppoints; i++){
-  //     data.PT = 0.1+i*(pstep);
-  //     SEED = time(NULL)+r*10000;
-      
-  //     llVegas(NDIM, NCOMP, JPsiIntegrandNoPT, &data, NVEC,
-  //           EPSREL, EPSABS, VERBOSE, SEED,
-  //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-  //           GRIDNO, NULL, NULL,
-  //           &neval, &fail, integral, error, prob);
-      
-  //     JPsi2result = (double)integral[0];
-  //     JPsi2error = (double)error[0];
-  //     printf("%.3f \t \t%.8e \t%.8e\n", data.PT, JPsi2result, JPsi2error);
-  //   }
-  // }
+    if(NRQCD==1){
+      cout << setprecision(10)  << JPsi2result_co << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << " " << endl;
+    }
+    else{
+      cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " "  << endl;
+    }
     
+   }
+
+  cout << " - - - - - - - - - - - - - - - - - " << endl; 
   delete Glauber_param;
   delete random;
   delete mv;
@@ -2667,11 +2564,7 @@ int main(int argc, char *argv[]) {
   MPI_Finalize();
 
   return 1;
+
 }
 
-
-void display_logo() {
-  cout << endl;
-  cout << "- compute JPsi production with fluctuations -------------------------------------------------------------------" << endl;
-  cout << endl;
-}
+// TODO: introduce the observable that we want to compute as another option in the command line?

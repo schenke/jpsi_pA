@@ -249,9 +249,9 @@ double MV::PhipBK(double k, double R, double sizeFactor, double x, double bfacto
 }
 
 
-double MV::Phip(double k, double R, double Qs, double sizeFactor, double bfactor){
+double MV::Phip(double k, double R, double Qs, double sizeFactor){
 
-  double A = bfactor*constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*Qs*Qs;
+  double A = constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*Qs*Qs;
   
   int iA = int(A/deltaA); 
   int ik = int((k+0.01)/deltak);
