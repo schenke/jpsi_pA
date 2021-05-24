@@ -288,7 +288,7 @@ static int JPsiIntegrandNRQCDCsNob(const int *ndim, const cubareal xx[],
   else{
     f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
       *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp)*factorxp/(k1*k1)*H_cs
-      *(StF(k,2.37*2.19*myTA,QsA,mv,BK,xA)*factorxA*StF(kprime,2.37*2.19*myTA,QsA,mv,BK,xA)*factorxA*StF(pminuskminusk1minuskprime,2.37*2.19*myTA,QsA,mv,BK,xA)*factorxA)
+      *(StF(k,2.21*myTA,QsA,mv,BK,xA)*factorxA*StF(kprime,2.21*myTA,QsA,mv,BK,xA)*factorxA*StF(pminuskminusk1minuskprime,2.21*myTA,QsA,mv,BK,xA)*factorxA)
       *2.*constants::PI*constants::Bp
       *2.*constants::PI*constants::Bt
       *p*pscale*2.*constants::PI
@@ -388,7 +388,7 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   
   double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
  
-  double myTA = returnTA(Rminusb,TAclass)*2.37; //(2.37=0.4*(208)^(1/3))
+  double myTA = returnTA(Rminusb,TAclass)*2.21; //(2.21=factor between Qsp0 and QsA0)
   
   if(pminuskminusk1minuskprime>30.){
     f=0.;
@@ -586,7 +586,7 @@ static int JPsiIntegrandNRQCDCoNob(const int *ndim, const cubareal xx[],
   
   f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp)*factorxp/(k1*k1)*H_co
-    *(StF(k,myTA*2.37*2.19,QsA,mv, BK, xA)*factorxA*StF(pminuskminusk1,myTA*2.37*2.19,QsA,mv, BK, xA)*factorxA)
+    *(StF(k,myTA*2.21,QsA,mv, BK, xA)*factorxA*StF(pminuskminusk1,myTA*2.21,QsA,mv, BK, xA)*factorxA)
     *2.*constants::PI*constants::Bp
     *2.*constants::PI*constants::Bt
     *p*pscale*2.*constants::PI
@@ -680,7 +680,7 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
                 +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
  
-  double myTA = returnTA(Rminusb,TAclass)*2.37; //(2.37=0.4*(208)^(1/3));
+  double myTA = returnTA(Rminusb,TAclass)*2.21; //(2.21=factor between Qsp0 and QsA0);
   
   f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp)*factorxp/(k1*k1)*H_co
@@ -901,7 +901,7 @@ static int JPsiIntegrandAllNob(const int *ndim, const cubareal xx[],
     f = constants::alphas*double(constants::Nc)*double(constants::Nc)
       /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
       *Phip(k1, 0., Qsp, sizeFactor, mv, BK,xp)*factorxp/(k1*k1)*H*J
-      *(StF(pplusqminusk1minusk,myTA*2.37*2.19,QsA,mv, BK, xA)*factorxA*StF(k,myTA*2.37*2.19,QsA,mv, BK, xA)*factorxA)
+      *(StF(pplusqminusk1minusk,myTA*2.21,QsA,mv, BK, xA)*factorxA*StF(k,myTA*2.21,QsA,mv, BK, xA)*factorxA)
       *2.*constants::PI*constants::Bp
       *2.*constants::PI*constants::Bt
       *PT*pscale*2.*constants::PI
@@ -1045,7 +1045,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
     // get Jacobian  
     double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
     
-    double myTA = returnTA(Rminusb,TAclass)*2.37; //(2.37=0.4*(208)^(1/3));
+    double myTA = returnTA(Rminusb,TAclass)*2.21; //(2.21=factor between Qsp0 and QsA0);
     double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
     double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
@@ -1436,7 +1436,7 @@ static int JPsiIntegrandNoPT(const int *ndim, const cubareal xx[],
   double gammax = 1./sqrt(1.-betax*betax);
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
 
-  double myTA = returnTA(Rminusb,TAclass)*2.37; //TA(Rminusb);
+  double myTA = returnTA(Rminusb,TAclass)*2.21; //TA(Rminusb);
 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
@@ -1501,7 +1501,7 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
   }
   else {
     f = constants::alphas/constants::CF/(nobp*pscale+lambda)/(nobp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-      *Phip(nobk*kscale, 0, Qsp, sizeFactor, mv, BK, xp)*Phit(sqrt((nobp*pscale+lambda)*(nobp*pscale+lambda) + nobk*nobk*kscale*kscale - 2.*(nobp*pscale+lambda)*nobk*kscale*cos((nobphi-nobphik)*2.*constants::PI)), TA*2.37*2.19, QsA, mv, BK, xA)
+      *Phip(nobk*kscale, 0, Qsp, sizeFactor, mv, BK, xp)*Phit(sqrt((nobp*pscale+lambda)*(nobp*pscale+lambda) + nobk*nobk*kscale*kscale - 2.*(nobp*pscale+lambda)*nobk*kscale*cos((nobphi-nobphik)*2.*constants::PI)), TA*2.21, QsA, mv, BK, xA)
       *2.*constants::PI*nobk*kscale*kscale  //kdkdphik
       *2.*constants::PI*constants::Bt  //R-integral
       *2.*constants::PI*constants::Bp  // b-integral
@@ -1585,7 +1585,7 @@ static int FullIntegrand(const int *ndim, const cubareal xx[],
     Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
     QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
-    double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*bscale*bscale - 2.*gR*gb*Rscale*bscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass)*2.37; //(2.37=0.4*(208)^(1/3));
+    double TA = returnTA(sqrt(max(gR*Rscale*gR*Rscale + gb*gb*bscale*bscale - 2.*gR*gb*Rscale*bscale*cos((gphiR - gphib)*2.*constants::PI),0.)),TAclass)*2.21; //(2.21=factor between Qsp0 and QsA0);
     
     f = constants::alphas/constants::CF/(gp*pscale+lambda)/(gp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
       *Phip(gk*kscale, gR*Rscale, Qsp, sizeFactor, mv, BK,xp)*Phit(sqrt((gp*pscale+lambda)*(gp*pscale+lambda) + gk*gk*kscale*kscale - 2.*(gp*pscale+lambda)*gk*kscale*cos((gphi - gphik)*2.*constants::PI)), TA, QsA, mv, BK, xA)
