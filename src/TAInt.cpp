@@ -9,10 +9,10 @@ namespace constants {
 // Nuclear density for lead
 double TAInt::rhoA(double z, void * params) {
   // do everything in GeV^some power
-  double RA = 6.62/constants::hbarc;
+  double RA = 6.62/constants::hbarc; // normalization below is fixed for these numbers ( so careful when changing parameters )
   double d = 0.546/constants::hbarc;
   double R = *(double *) params;
-  double f = 1/(1 + exp((sqrt(R*R + z*z) - RA)/d))/1.;
+  double f = 1./(1 + exp((sqrt(R*R + z*z) - RA)/d));
   return f;
 }
 
@@ -31,8 +31,6 @@ void TAInt::computeTAIntegral(){
     TAgrid[i] = result/67.09678472225216694;// normalization for above parameters RA=6.62fm and d=0.546fm - adjust if parameters change;
   }
 }
-
-
   
 double TAInt::returnTA(double R){
   // gsl_interp_accel *acc
@@ -51,8 +49,8 @@ double TAInt::returnTA(double R){
     TA=0.;}
   // simple linear interpolation
   else{
-      int i = int(R*200./20.*constants::hbarc);
-      TA = (double(i)+1.-R*200./20.*constants::hbarc)*TAgrid[i] + (R*200./20.*constants::hbarc-double(i))*TAgrid[i+1];
+    int i = int(R*200./20.*constants::hbarc);
+    TA = (double(i)+1.-R*200./20.*constants::hbarc)*TAgrid[i] + (R*200./20.*constants::hbarc-double(i))*TAgrid[i+1];
     }
   return TA;
 }

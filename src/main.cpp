@@ -39,8 +39,8 @@ namespace constants {
   const double hbarc = 0.1973269804;
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
-  const double alphas = 0.3;
-  const double Bp = 4.; // == R_p = 0.4 fm
+  const double alphas = 0.3; // there is an alphas defined in MV.cpp as well - make sure they are the same
+  const double Bp = 4.; // == R_p = 0.4 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
   const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
@@ -240,6 +240,7 @@ double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, i
   if(BK){
       if(useFluc==1){
         TA = TA*constants::bdep_fluc_A;
+        return mv->StFBK(k, TA, x);
       }
       else{
         if(bdep==1){
@@ -1110,54 +1111,53 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   if (xp>1.){
     f = 0;
   }
-
   else if (xA>1.){
     f= 0;
   }
   else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
-  // get sums of vectors
-  double px = p*cos(phip); 
-  double py = p*sin(phip);
-  double kx = k*cos(phik);
-  double ky = k*sin(phik);
-  double k1x = k1*cos(phik1);
-  double k1y = k1*sin(phik1);
-  double kprimex = kprime*cos(phikprime);
-  double kprimey = kprime*sin(phikprime);
-
-  double pminuskminusk1minuskprimex = px-kx-k1x-kprimex;
-  double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
-  double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
-                                    +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
-  
-  double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
-  
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-  double Tp = returnTp2D(Rx,Ry,glauberClass);
-  
-  if(pminuskminusk1minuskprime>30.){
-    f=0.;
-  }
-  else
-    {
-      f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-        *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_cs
-        *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(kprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
-        *Rscale*Rscale
-        *p*pscale*2.*constants::PI
-        *k*kscale*2.*constants::PI
-        *k1*kscale*2.*constants::PI
-        *kprime*kscale*2.*constants::PI; 
-  // scaled momenta above (in PT)
-  // last rows are scaling of integration measures:
-  // dRxdRy
-  // d2p
-  // d2k
-  // d2k1
-  // d2kprime
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    // get sums of vectors
+    double px = p*cos(phip); 
+    double py = p*sin(phip);
+    double kx = k*cos(phik);
+    double ky = k*sin(phik);
+    double k1x = k1*cos(phik1);
+    double k1y = k1*sin(phik1);
+    double kprimex = kprime*cos(phikprime);
+    double kprimey = kprime*sin(phikprime);
+    
+    double pminuskminusk1minuskprimex = px-kx-k1x-kprimex;
+    double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
+    double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
+                                            +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
+    
+    double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
+    
+    double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
+    double Tp = returnTp2D(Rx,Ry,glauberClass);
+    
+    if(pminuskminusk1minuskprime>30.){
+      f=0.;
     }
+    else
+      {
+        f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+          *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_cs
+          *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(kprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
+          *Rscale*Rscale
+          *p*pscale*2.*constants::PI
+          *k*kscale*2.*constants::PI
+          *k1*kscale*2.*constants::PI
+          *kprime*kscale*2.*constants::PI; 
+        // scaled momenta above (in PT)
+        // last rows are scaling of integration measures:
+        // dRxdRy
+        // d2p
+        // d2k
+        // d2k1
+        // d2kprime
+      }
   }
   return 0;
 } 
@@ -1932,7 +1932,7 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
     return 1;
 }
 
-///////////////////////////////////////////////////
+//////////////////////////////////////////////////
 ///// b-dependent gluons cross section ///////////
 //////////////////////////////////////////////////
 
@@ -2247,8 +2247,8 @@ int main(int argc, char *argv[]) {
   int NRQCD = 0;
   int BK = 0;
   int bdep = 0;
-
-std::vector <std::string> sources;
+  
+  std::vector <std::string> sources;
   std::string destination;
   for (int i = 1; i < argc; ++i) {
     if (std::string(argv[i]) == "--readTable") {
@@ -2311,27 +2311,27 @@ std::vector <std::string> sources;
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank); // get current process id
   MPI_Comm_size(MPI_COMM_WORLD, &size); // get number of processes
-
+  
   int h5Flag = 0;
   pretty_ostream messenger;
-
- 
+  
+  
   if (rank==0){
     cout << "Options: read MV dipole from file yes(1)/no(0)= " << readTable << ", fluctuations on(1)/off(0) = " << useFluc << ", Number of events = " << Nevents << endl;
     messenger.flush("info");
   }
-
+  
   long int seed = time(NULL)+rank*100000;
   //long int seed = 1;
- 
+  
   Parameters *Glauber_param;
   Glauber_param = new Parameters();
   Glauber_param->setParameters();
-
+  
   Random *random;
   random = new Random();
   random->init_genrand64(seed);
-
+  
   Glauber *glauber;
   glauber = new Glauber(Glauber_param);
   glauber->init(random);
@@ -2438,127 +2438,123 @@ std::vector <std::string> sources;
   if(useFluc == 0){
     cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl; 
     if(bdep == 0){
-    cout << "b-independent results"  << endl;
-    NDIM = 4;
-    llVegas(NDIM, NCOMP, GluonsNoB, &data, NVEC,
-            EPSREL, EPSABS, VERBOSE, SEED,
-            MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-            GRIDNO, NULL, NULL,
-            &neval, &fail, integral, error, prob);
-    gresult = (double)integral[0];
-    gerror = (double)error[0];
-    cout << gresult << endl;
-        if(NRQCD==1){
+      cout << "b-independent results"  << endl;
+      NDIM = 4;
+      llVegas(NDIM, NCOMP, GluonsNoB, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+      gresult = (double)integral[0];
+      gerror = (double)error[0];
+      cout << gresult << endl;
+      if(NRQCD==1){
         cout << "Using NRQCD"  << endl;
         NDIM = 8;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsNob, &data, NVEC,
-               EPSREL, EPSABS, VERBOSE, SEED,
-               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-               GRIDNO, NULL, NULL,
-               &neval, &fail, integral, error, prob);
-
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        
         JPsi2result_cs = (double)integral[0];
         JPsi2error_cs = (double)error[0];    
-
+        
         NDIM = 6;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoNob, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
         JPsi2result_co= (double)integral[0];
         JPsi2error_co = (double)error[0];
-
-        }
         
-        else{
+      }
+      else{
         cout << "Using ICEM"  << endl;    
         NDIM = 8;
         llVegas(NDIM, NCOMP, JPsiIntegrandAllNob, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        JPsi2result = (double)integral[0];
+        JPsi2error = (double)error[0];  
+      }
+    }
+    else{
+      cout << "b-dependent results"  << endl;
+      
+      NDIM = 8;
+      llVegas(NDIM, NCOMP, Gluons, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
               GRIDNO, NULL, NULL,
               &neval, &fail, integral, error, prob);
-        JPsi2result = (double)integral[0];
-        JPsi2error = (double)error[0];  
-        }
-
-    }
-
-    else{
-    
-    cout << "b-dependent results"  << endl;
-    
-    NDIM = 8;
-    llVegas(NDIM, NCOMP, Gluons, &data, NVEC,
-            EPSREL, EPSABS, VERBOSE, SEED,
-            MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-            GRIDNO, NULL, NULL,
-            &neval, &fail, integral, error, prob);
-    gresult = (double)integral[0];
-    gerror = (double)error[0];
-    cout <<  std::setprecision(8) << gresult << endl;
-    NDIM = 9;
-    llVegas(NDIM, NCOMP, Hadrons, &data, NVEC,
-            EPSREL, EPSABS, VERBOSE, SEED,
-            MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-            GRIDNO, NULL, NULL,
-            &neval, &fail, integral, error, prob);
-    hresult = (double)integral[0];
-    herror = (double)error[0];
-    cout <<  std::setprecision(8) << hresult << endl;
-    if(NRQCD==1){
+      gresult = (double)integral[0];
+      gerror = (double)error[0];
+      cout <<  std::setprecision(8) << gresult << endl;
+      NDIM = 9;
+      llVegas(NDIM, NCOMP, Hadrons, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+      hresult = (double)integral[0];
+      herror = (double)error[0];
+      cout <<  std::setprecision(8) << hresult << endl;
+      if(NRQCD==1){
         cout << "Using NRQCD"  << endl;
         NDIM = 12;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCs, &data, NVEC,
-               EPSREL, EPSABS, VERBOSE, SEED,
-               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-               GRIDNO, NULL, NULL,
-               &neval, &fail, integral, error, prob);
-
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        
         JPsi2result_cs = (double)integral[0];
         JPsi2error_cs = (double)error[0];    
-
+        
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCo, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
         JPsi2result_co= (double)integral[0];
         JPsi2error_co = (double)error[0];
-
-        }
         
-        else{
+      }
+      
+      else{
         cout << "Using ICEM"  << endl;    
         NDIM = 12;
         llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
         JPsi2result = (double)integral[0];
         JPsi2error = (double)error[0];  
-        }
+      }
     }
-     
+    
     if(NRQCD==1){
       cout << setprecision(10)  << JPsi2result_co << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << " " << endl;
     }
     else{
       cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " "  << endl;
     }
-         
-   }
-
-   else{
-   cout << "Fluctuating b results"  << endl; 
-   for (int ni=0; ni<Nevents; ni++){
+    
+  }
+  
+  else{
+    cout << "Fluctuating b results"  << endl; 
+    for (int ni=0; ni<Nevents; ni++){
       // Run Vegas integration with fluctuations
       // Make a new target
       glauber->makeNuclei(random, constants::Bp);
-
+      
       // Sample b
       double bmin = 0.;
       double bmax = 10.;
@@ -2584,7 +2580,7 @@ std::vector <std::string> sources;
       gresult = (double)integral[0];
       gerror = (double)error[0];
       printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
-            
+      
       if(gresult<1.){
         cout << "Gluon number < 1, skipping event" << endl;
         continue;
@@ -2602,57 +2598,100 @@ std::vector <std::string> sources;
       hresult = (double)integral[0];
       herror = (double)error[0];
       printf("Hadrons (fluc): %.8f +- %.8f\t\n", hresult, herror);
-            
+      
       if(gresult<1.){
         cout << "Gluon number < 1, skipping event" << endl;
         continue; 
-       }
-
+      }
+      
       if(NRQCD==1){
         cout << "Using NRQCD"  << endl;
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
-               EPSREL, EPSABS, VERBOSE, SEED,
-               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-               GRIDNO, NULL, NULL,
-               &neval, &fail, integral, error, prob);
-
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        
         JPsi2result_cs = (double)integral[0];
         JPsi2error_cs = (double)error[0];    
-
+        
         NDIM = 8;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
         JPsi2result_co= (double)integral[0];
         JPsi2error_co = (double)error[0];
-
-        }
         
-        else{
+        double TA = returnTA2D(-data.bx,-data.by,glauber);
+        cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result_co
+             << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs
+             << " " << sqrt(data.bx*data.bx+data.by*data.by)
+             << " " << TA << endl;
+        
+      }
+      
+      else{
         cout << "Using ICEM"  << endl;    
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
         JPsi2result = (double)integral[0];
         JPsi2error = (double)error[0];  
-        }
+        
+        double TA = returnTA2D(-data.bx,-data.by,glauber);
+        cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result
+             << " " << JPsi2error 
+             << " " << sqrt(data.bx*data.bx+data.by*data.by)
+             << " " << TA << endl;
+      }
+      
+      
+      stringstream strfilename;
+      strfilename << "output_g_" << rank << ".dat";
+      string filename;
+      filename = strfilename.str();
+      fstream fout(filename.c_str(), ios::app);
+      double TA = returnTA2D(-data.bx,-data.by,glauber);
+      
+      if(NRQCD) {
+        fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result_co
+             << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << " "
+             << sqrt(data.bx*data.bx+data.by*data.by)
+             << " " << TA << endl;
+        fout.close();
+      }
+      else{
+        fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result
+             << " " << JPsi2error << " " << 0. << " " << 0. << " "
+             << sqrt(data.bx*data.bx+data.by*data.by)
+             << " " << TA << endl;
+        fout.close();
+      }
 
-
-    }
-
-    if(NRQCD==1){
-      cout << setprecision(10)  << JPsi2result_co << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << " " << endl;
-    }
-    else{
-      cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " "  << endl;
-    }
-    
+      stringstream strfilenameh;
+      strfilenameh << "output_h_" << rank << ".dat";
+      string filenameh;
+      filenameh = strfilenameh.str();
+      fstream fouth(filenameh.c_str(), ios::app);
+      
+      if(NRQCD) {
+        fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << JPsi2result_co
+              << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << endl;
+        fouth.close();
+      }
+      else{
+        fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << JPsi2result
+              << " " << JPsi2error << " " << 0. << " " << 0. << endl;
+        fouth.close();
+      }
+       
+   }
    }
 
   cout << " - - - - - - - - - - - - - - - - - " << endl; 
