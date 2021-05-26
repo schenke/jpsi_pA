@@ -2420,7 +2420,6 @@ int main(int argc, char *argv[]) {
   double JPsi2result2;
   double JPsi2error2;
 
-  data.Y = 0;
   data.useFluc = useFluc;
   data.bdep = bdep;
   data.BK = BK;
@@ -2434,6 +2433,8 @@ int main(int argc, char *argv[]) {
   data.TAclass = TAclass; // TA class
   data.glauberClass = glauber; // Glauber class
   data.protonSizeFactor = 1.;
+
+  data.Y = 0;
 
   if(useFluc == 0){
     cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl; 
@@ -2566,7 +2567,8 @@ int main(int argc, char *argv[]) {
       
       data.bx = b*cos(phib);
       data.by = b*sin(phib);
-      
+      data.Y = 0;
+
       cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
       
       NDIM = 6;
@@ -2606,6 +2608,9 @@ int main(int argc, char *argv[]) {
       
       if(NRQCD==1){
         cout << "Using NRQCD"  << endl;
+        
+        data.Y = 2.73; //forward
+         
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
@@ -2625,9 +2630,37 @@ int main(int argc, char *argv[]) {
         JPsi2result_co= (double)integral[0];
         JPsi2error_co = (double)error[0];
         
+        JPsi2result = JPsi2result_co + JPsi2result_cs;
+        JPsi2error = JPsi2error_co + JPsi2error_cs;
+    
+
+        data.Y = -3.71; //backward
+         
+        NDIM = 10;
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        
+        JPsi2result_cs = (double)integral[0];
+        JPsi2error_cs = (double)error[0];    
+        
+        NDIM = 8;
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        JPsi2result_co= (double)integral[0];
+        JPsi2error_co = (double)error[0];
+        
+        JPsi2result2 = JPsi2result_co + JPsi2result_cs;
+        JPsi2error2 = JPsi2error_co + JPsi2error_cs;
+
         double TA = returnTA2D(-data.bx,-data.by,glauber);
-        cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result_co
-             << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs
+        cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result
+             << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2
              << " " << sqrt(data.bx*data.bx+data.by*data.by)
              << " " << TA << endl;
         
@@ -2635,6 +2668,9 @@ int main(int argc, char *argv[]) {
       
       else{
         cout << "Using ICEM"  << endl;    
+ 
+        data.Y = 2.73; //forward
+         
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
@@ -2644,13 +2680,24 @@ int main(int argc, char *argv[]) {
         JPsi2result = (double)integral[0];
         JPsi2error = (double)error[0];  
         
+        data.Y = -3.71; //backward
+         
+        NDIM = 10;
+        llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        JPsi2result2 = (double)integral[0];
+        JPsi2error2 = (double)error[0];  
+        
         double TA = returnTA2D(-data.bx,-data.by,glauber);
-        cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result
-             << " " << JPsi2error 
+        cout << setprecision(10) << gresult << " " << gerror 
+             << " " << JPsi2result << " " << JPsi2error 
+             << " " << JPsi2result2 << " " << JPsi2error2
              << " " << sqrt(data.bx*data.bx+data.by*data.by)
              << " " << TA << endl;
       }
-      
       
       stringstream strfilename;
       strfilename << "output_g_" << rank << ".dat";
@@ -2660,15 +2707,15 @@ int main(int argc, char *argv[]) {
       double TA = returnTA2D(-data.bx,-data.by,glauber);
       
       if(NRQCD) {
-        fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result_co
-             << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << " "
+        fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result
+             << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " "
              << sqrt(data.bx*data.bx+data.by*data.by)
              << " " << TA << endl;
         fout.close();
       }
       else{
         fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result
-             << " " << JPsi2error << " " << 0. << " " << 0. << " "
+             << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " "
              << sqrt(data.bx*data.bx+data.by*data.by)
              << " " << TA << endl;
         fout.close();
