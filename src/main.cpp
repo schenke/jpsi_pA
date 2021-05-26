@@ -2601,10 +2601,6 @@ int main(int argc, char *argv[]) {
       herror = (double)error[0];
       printf("Hadrons (fluc): %.8f +- %.8f\t\n", hresult, herror);
       
-      if(gresult<1.){
-        cout << "Gluon number < 1, skipping event" << endl;
-        continue; 
-      }
       
       if(NRQCD==1){
         cout << "Using NRQCD"  << endl;
@@ -2728,8 +2724,8 @@ int main(int argc, char *argv[]) {
       fstream fouth(filenameh.c_str(), ios::app);
       
       if(NRQCD) {
-        fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << JPsi2result_co
-              << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << endl;
+        fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << JPsi2result
+              << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
         fouth.close();
       }
       else{
