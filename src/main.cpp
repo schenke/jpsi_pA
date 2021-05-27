@@ -40,7 +40,7 @@ namespace constants {
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3; // there is an alphas defined in MV.cpp as well - make sure they are the same
-  const double Bp = 4.; // == R_p = 0.4 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
+  const double Bp = 2.; // == R_p = 0.4 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
   const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
@@ -2247,6 +2247,9 @@ int main(int argc, char *argv[]) {
   int NRQCD = 0;
   int BK = 0;
   int bdep = 0;
+  double Yg = 0.;
+  double YJPsi1 = 2.73;
+  double YJPsi2 = -3.71;
   
   std::vector <std::string> sources;
   std::string destination;
@@ -2302,6 +2305,33 @@ int main(int argc, char *argv[]) {
         bdep = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
       } else { // Uh-oh, there was no argument to the destination option.
         std::cerr << "--bdep option requires one argument, 0 for b-independent or 1 for b-dependent." << std::endl;
+        return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "--Yg") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        Yg = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--Yg option requires one argument, gluon rapidity" << std::endl;
+        return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "--YJPsi1") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        YJPsi1 = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--YJPsi1 option requires one argument, first JPsi rapidity" << std::endl;
+        return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "--YJPsi2") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        YJPsi2 = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--YJPsi2 option requires one argument, second JPsi rapidity" << std::endl;
         return 1;
       }  
     }
@@ -2369,6 +2399,15 @@ int main(int argc, char *argv[]) {
     exit(0);
   }
 
+
+ //  //test StF
+ // for (int ik=0; ik<1000; ik++){
+ //   double k = ik*0.01;
+ //   //    double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc){
+ //   cout << k << " " << Phit(k, 1., 0.4949, mv, 1, 0.01,1,1)  << endl;
+ // }
+
+
     // Cuba's parameters for integration
   int NDIM = 9;
   int NCOMP = 1;
@@ -2434,7 +2473,7 @@ int main(int argc, char *argv[]) {
   data.glauberClass = glauber; // Glauber class
   data.protonSizeFactor = 1.;
 
-  data.Y = 0;
+  data.Y = Yg;
 
   if(useFluc == 0){
     cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl; 
@@ -2486,72 +2525,81 @@ int main(int argc, char *argv[]) {
     else{
       cout << "b-dependent results"  << endl;
       
-      NDIM = 8;
-      llVegas(NDIM, NCOMP, Gluons, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
-      gresult = (double)integral[0];
-      gerror = (double)error[0];
-      cout <<  std::setprecision(8) << gresult << endl;
-      NDIM = 9;
-      llVegas(NDIM, NCOMP, Hadrons, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
-      hresult = (double)integral[0];
-      herror = (double)error[0];
-      cout <<  std::setprecision(8) << hresult << endl;
-      if(NRQCD==1){
-        cout << "Using NRQCD"  << endl;
-        NDIM = 12;
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCs, &data, NVEC,
+      for(int i=0; i<11;i++){
+        data.Y = -5.+i;
+        
+        NDIM = 8;
+        llVegas(NDIM, NCOMP, Gluons, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
+        gresult = (double)integral[0];
+        gerror = (double)error[0];
+
+        //        cout <<  std::setprecision(8) << gresult << endl;
         
-        JPsi2result_cs = (double)integral[0];
-        JPsi2error_cs = (double)error[0];    
-        
-        NDIM = 10;
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCo, &data, NVEC,
+        NDIM = 9;
+        llVegas(NDIM, NCOMP, Hadrons, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
-        JPsi2result_co= (double)integral[0];
-        JPsi2error_co = (double)error[0];
+        hresult = (double)integral[0];
+        herror = (double)error[0];
+        //cout <<  std::setprecision(8) << hresult << endl;
         
-      }
-      
-      else{
-        cout << "Using ICEM"  << endl;    
-        NDIM = 12;
-        llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
-        JPsi2result = (double)integral[0];
-        JPsi2error = (double)error[0];  
+        if(NRQCD==1){
+          //cout << "Using NRQCD"  << endl;
+          NDIM = 12;
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCs, &data, NVEC,
+                  EPSREL, EPSABS, VERBOSE, SEED,
+                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                  GRIDNO, NULL, NULL,
+                  &neval, &fail, integral, error, prob);
+          
+          JPsi2result_cs = (double)integral[0];
+          JPsi2error_cs = (double)error[0];    
+          
+          NDIM = 10;
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCo, &data, NVEC,
+                  EPSREL, EPSABS, VERBOSE, SEED,
+                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                  GRIDNO, NULL, NULL,
+                  &neval, &fail, integral, error, prob);
+          JPsi2result_co= (double)integral[0];
+          JPsi2error_co = (double)error[0];
+          
+          cout << data.Y << " " << gresult << " " << hresult << " " << JPsi2result_cs+JPsi2result_co << endl;
+        }
+        else{
+          cout << "Using ICEM"  << endl;    
+          NDIM = 12;
+          llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
+                  EPSREL, EPSABS, VERBOSE, SEED,
+                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                  GRIDNO, NULL, NULL,
+                  &neval, &fail, integral, error, prob);
+          JPsi2result = (double)integral[0];
+          JPsi2error = (double)error[0];  
+          cout << data.Y << " " << gresult << " " << hresult << " " << JPsi2result << endl;
+        }
       }
     }
     
-    if(NRQCD==1){
-      cout << setprecision(10)  << JPsi2result_co << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << " " << endl;
-    }
-    else{
-      cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " "  << endl;
-    }
+    // if(NRQCD==1){
+    //   cout << setprecision(10)  << JPsi2result_co << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << " " << endl;
+    // }
+    // else{
+    //   cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " "  << endl;
+    // }
     
   }
   
   else{
     cout << "Fluctuating b results"  << endl; 
-    for (int ni=0; ni<Nevents; ni++){
+    int ni=0;
+    while (ni<Nevents){
       // Run Vegas integration with fluctuations
       // Make a new target
       glauber->makeNuclei(random, constants::Bp);
@@ -2567,7 +2615,7 @@ int main(int argc, char *argv[]) {
       
       data.bx = b*cos(phib);
       data.by = b*sin(phib);
-      data.Y = 0;
+      data.Y = Yg;
 
       cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
       
@@ -2588,6 +2636,7 @@ int main(int argc, char *argv[]) {
         continue;
       }
       
+      
       // do hadrons next (one more (z) integral)
       NDIM = 7;
       llVegas(NDIM, NCOMP, HadronsFluc, &data, NVEC,
@@ -2605,7 +2654,7 @@ int main(int argc, char *argv[]) {
       if(NRQCD==1){
         cout << "Using NRQCD"  << endl;
         
-        data.Y = 2.73; //forward
+        data.Y = YJPsi1; //forward
          
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
@@ -2630,7 +2679,7 @@ int main(int argc, char *argv[]) {
         JPsi2error = JPsi2error_co + JPsi2error_cs;
     
 
-        data.Y = -3.71; //backward
+        data.Y = YJPsi2; //backward
          
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
@@ -2665,7 +2714,7 @@ int main(int argc, char *argv[]) {
       else{
         cout << "Using ICEM"  << endl;    
  
-        data.Y = 2.73; //forward
+        data.Y = YJPsi1; //forward
          
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
@@ -2676,7 +2725,7 @@ int main(int argc, char *argv[]) {
         JPsi2result = (double)integral[0];
         JPsi2error = (double)error[0];  
         
-        data.Y = -3.71; //backward
+        data.Y = YJPsi2; //backward
          
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
@@ -2702,20 +2751,11 @@ int main(int argc, char *argv[]) {
       fstream fout(filename.c_str(), ios::app);
       double TA = returnTA2D(-data.bx,-data.by,glauber);
       
-      if(NRQCD) {
-        fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result
-             << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " "
-             << sqrt(data.bx*data.bx+data.by*data.by)
-             << " " << TA << endl;
-        fout.close();
-      }
-      else{
-        fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result
-             << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " "
-             << sqrt(data.bx*data.bx+data.by*data.by)
-             << " " << TA << endl;
-        fout.close();
-      }
+      fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result
+           << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " "
+           << sqrt(data.bx*data.bx+data.by*data.by)
+           << " " << TA << endl;
+      fout.close();
 
       stringstream strfilenameh;
       strfilenameh << "output_h_" << rank << ".dat";
@@ -2723,19 +2763,14 @@ int main(int argc, char *argv[]) {
       filenameh = strfilenameh.str();
       fstream fouth(filenameh.c_str(), ios::app);
       
-      if(NRQCD) {
-        fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << JPsi2result
-              << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
-        fouth.close();
-      }
-      else{
-        fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << JPsi2result
-              << " " << JPsi2error << " " << 0. << " " << 0. << endl;
-        fouth.close();
-      }
-       
-   }
-   }
+      fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << JPsi2result
+            << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << endl;
+      fouth.close();
+     
+      ni++;
+  
+    }
+  }
 
   cout << " - - - - - - - - - - - - - - - - - " << endl; 
   delete Glauber_param;
