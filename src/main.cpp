@@ -40,8 +40,8 @@ namespace constants {
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3; // there is an alphas defined in MV.cpp as well - make sure they are the same
-  const double Bp = 2.; // == R_p = 0.4 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
-  const double Bq = 0.4; // size of hot spots
+  const double Bp = 0.; // == R_p = 0.4 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
+  const double Bq = 4.; // size of hot spots
   const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
@@ -2242,7 +2242,7 @@ int main(int argc, char *argv[]) {
   int size=1;
   
   // Options
-  int readTable = 0;
+  int readTable = 1;
   int useFluc = 0;
   int Nevents = 1;
   int NRQCD = 0;

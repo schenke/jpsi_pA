@@ -312,7 +312,7 @@ void Glauber::generateProtonTp(Nucleus *nuc, Random *random, double Bp, double B
       double y = (double(iy)/40.*4.-2.);
       Tpgrid2D[ix][iy] = 0.;
       for(unsigned int i=0; i<3; i++){
-        Tpgrid2D[ix][iy] += exp(-((x-xq[i])*(x-xq[i])+(y-yq[i])*(y-yq[i]))/hbarc/hbarc/2./Bq)*gauss[i]/ (2. * Bq)/3. * (2. * Bp) ; //Pi's cancel. I want to normalize to 1 at zero.
+        Tpgrid2D[ix][iy] += exp(-((x-xq[i])*(x-xq[i])+(y-yq[i])*(y-yq[i]))/hbarc/hbarc/2./Bq)*gauss[i]/ (2. * Bq)/3.;
       }
     }
   }
@@ -381,7 +381,7 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp, double 
             double xpos = nuc->nucleonList.at(i).x+xq[i][iq]; 
             double ypos = nuc->nucleonList.at(i).y+yq[i][iq]; 
             TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))
-                                    /hbarc/hbarc/2./Bq)*gauss[i][iq]/ (2. * Bq)/3. * (2. * Bp) ; //Pi's cancel. I want to normalize nucleon to 1 at zero.
+                                    /hbarc/hbarc/2./Bq)*gauss[i][iq]/ (2. * Bq)/3.;
           }
         }
         else{
