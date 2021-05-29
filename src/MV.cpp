@@ -186,15 +186,19 @@ double MV::PhipBKFluc(double k, double Tp, double x){
   
   
   if (iA>=sizeA){
-    cerr << "MV::PhipBK: A out of range." << endl;
+    cerr << "MV::PhipBKFluc: A out of range." << endl;
     return 0.;
   }
   if (ik>=sizek){
-    cerr << "MV::PhipBK: k out of range." << endl;
+    cerr << "MV::PhipBKFluc: k out of range." << endl;
     return 0.;
   }
   if (iy>=sizey){
-    cerr << "MV::PhipBK: x out of range." << endl;
+    cerr << "MV::PhipBKFluc: x out of range." << endl;
+    return 0.;
+  }
+  if (iy<0){
+    cerr << "MV::PhipBKFluc: x > 1" << endl;
     return 0.;
   }
 
@@ -321,6 +325,10 @@ double MV::PhitBK(double k, double TA, double x){
   }
   if (iy>=sizey){
     cerr << "MV::PhitBK: x out of range." << endl;
+    return 0.;
+  }
+  if (iy<0){
+    cerr << "MV::PhitBK: x > 1" << endl;
     return 0.;
   }
 

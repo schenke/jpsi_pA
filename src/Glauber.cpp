@@ -167,7 +167,7 @@ void Glauber::init(Random *random)
   //  int rank = MPI::COMM_WORLD.Get_rank(); //number of current processor
 } 
 
-void Glauber::makeNuclei(Random *random, double Bp)
+void Glauber::makeNuclei(Random *random, double Bp, double Bq)
 {
   int Nx = param->getOutputNumberOfTransverseCells();
 
@@ -274,15 +274,14 @@ void Glauber::makeNuclei(Random *random, double Bp)
   //           }
   //       } 
   
-  generateNucleusTA(&Target, random, Bp); 
-  generateProtonTp(&Target, random, Bp); 
+  generateNucleusTA(&Target, random, Bp, Bq); 
+  generateProtonTp(&Target, random, Bp, Bq); 
 
 }
 
-void Glauber::generateProtonTp(Nucleus *nuc, Random *random, double Bp){
+void Glauber::generateProtonTp(Nucleus *nuc, Random *random, double Bp, double Bq){
   // Bp, Bq are in GeV^-2
   double hbarc = 0.1973269804;
-  double Bq = 0.4;
   
   double gauss[3];
   double xq[3];
@@ -321,10 +320,9 @@ void Glauber::generateProtonTp(Nucleus *nuc, Random *random, double Bp){
 
 
 
-void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp){
+void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp, double Bq){
   // Bp is in GeV^-2
   double hbarc = 0.1973269804;
-  double Bq = 0.4;
   int useQuarks = 1;
   
   // stringstream strfilename;

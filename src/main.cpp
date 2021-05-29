@@ -41,6 +41,7 @@ namespace constants {
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3; // there is an alphas defined in MV.cpp as well - make sure they are the same
   const double Bp = 2.; // == R_p = 0.4 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
+  const double Bq = 0.4; // size of hot spots
   const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
@@ -2365,7 +2366,7 @@ int main(int argc, char *argv[]) {
   Glauber *glauber;
   glauber = new Glauber(Glauber_param);
   glauber->init(random);
-  glauber->makeNuclei(random, constants::Bp);
+  glauber->makeNuclei(random, constants::Bp, constants::Bq);
 
   TAInt *TAclass;
   TAclass = new TAInt();
@@ -2440,24 +2441,23 @@ int main(int argc, char *argv[]) {
 
   params data;
 
+  double gresult = 0.;
+  double gerror = 0.;
 
-  double gresult;
-  double gerror;
+  double hresult = 0.;
+  double herror = 0.;
 
-  double hresult;
-  double herror;
+  double JPsi2result = 0.;
+  double JPsi2error = 0.;
 
-  double JPsi2result;
-  double JPsi2error;
+  double JPsi2result_cs = 0.;
+  double JPsi2error_cs = 0.;
 
-  double JPsi2result_cs;
-  double JPsi2error_cs;
+  double JPsi2result_co = 0.;
+  double JPsi2error_co = 0.;
 
-  double JPsi2result_co;
-  double JPsi2error_co;
-
-  double JPsi2result2;
-  double JPsi2error2;
+  double JPsi2result2 = 0.;
+  double JPsi2error2 = 0.;
 
   data.useFluc = useFluc;
   data.bdep = bdep;
@@ -2602,7 +2602,7 @@ int main(int argc, char *argv[]) {
     while (ni<Nevents){
       // Run Vegas integration with fluctuations
       // Make a new target
-      glauber->makeNuclei(random, constants::Bp);
+      glauber->makeNuclei(random, constants::Bp, constants::Bq);
       
       // Sample b
       double bmin = 0.;

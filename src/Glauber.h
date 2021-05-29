@@ -68,9 +68,9 @@ class Glauber{
   Nucleon sampleRho(Nucleus *nucleus, Random *random); 
   Quark sampleQuark(Random *random);
   double ExponentialDistribution(double a, double r);
-  void makeNuclei(Random *random, double Bp);
-  void generateProtonTp(Nucleus *nuc, Random *random, double Bp);
-  void generateNucleusTA(Nucleus *nuc, Random *random, double Bp);
+  void makeNuclei(Random *random, double Bp, double Bq);
+  void generateProtonTp(Nucleus *nuc, Random *random, double Bp, double Bq);
+  void generateNucleusTA(Nucleus *nuc, Random *random, double Bp, double Bq);
   double returnNucleusTA(double x, double y);
   double returnProtonTp(double x, double y);
 
