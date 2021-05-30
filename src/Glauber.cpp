@@ -291,20 +291,21 @@ void Glauber::generateProtonTp(Nucleus *nuc, Random *random, double Bp, double B
     gauss[i] = (exp(random->Gauss(0, width))) /
       std::exp(width * width / 2.0);
   }
+
   double avgxq = 0.;
   double avgyq = 0.;
   for (int iq = 0; iq < 3; iq++) {
     xq[iq] = sqrt(Bp * hbarc * hbarc) * random->Gauss();
     yq[iq] = sqrt(Bp * hbarc * hbarc) * random->Gauss();
   }
-  for (int iq = 0; iq < 3; iq++) {
-    avgxq += xq[iq];
-    avgyq += yq[iq];
-  }
-  for (int iq = 0; iq < 3; iq++) {
-    xq[iq] -= avgxq / 3.;
-    yq[iq] -= avgyq / 3.;
-  }
+  // for (int iq = 0; iq < 3; iq++) {
+  //   avgxq += xq[iq];
+  //   avgyq += yq[iq];
+  // }
+  // for (int iq = 0; iq < 3; iq++) {
+  //   xq[iq] -= avgxq / 3.;
+  //   yq[iq] -= avgyq / 3.;
+  // }
   
   for(int ix=0; ix<40; ix++){
     double x = (double(ix)/40.*4.-2.);
@@ -312,7 +313,7 @@ void Glauber::generateProtonTp(Nucleus *nuc, Random *random, double Bp, double B
       double y = (double(iy)/40.*4.-2.);
       Tpgrid2D[ix][iy] = 0.;
       for(unsigned int i=0; i<3; i++){
-        Tpgrid2D[ix][iy] += exp(-((x-xq[i])*(x-xq[i])+(y-yq[i])*(y-yq[i]))/hbarc/hbarc/2./Bq)*gauss[i]/ (2. * Bq)/3.;
+        Tpgrid2D[ix][iy] += exp(-((x-xq[i])*(x-xq[i])+(y-yq[i])*(y-yq[i]))/hbarc/hbarc/2./Bq)*gauss[i]/Bq/3.*(Bq+Bp); // normalize to 1 at zero on average
       }
     }
   }
@@ -350,14 +351,14 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp, double 
         xq[i][iq] = sqrt(Bp * hbarc * hbarc) * random->Gauss();
         yq[i][iq] = sqrt(Bp * hbarc * hbarc) * random->Gauss();
       }
-      for (int iq = 0; iq < 3; iq++) {
-        avgxq += xq[i][iq];
-        avgyq += yq[i][iq];
-      }
-      for (int iq = 0; iq < 3; iq++) {
-        xq[i][iq] -= avgxq / 3.;
-        yq[i][iq] -= avgyq / 3.;
-      }
+      // for (int iq = 0; iq < 3; iq++) {
+      //   avgxq += xq[i][iq];
+      //   avgyq += yq[i][iq];
+      // }
+      // for (int iq = 0; iq < 3; iq++) {
+      //   xq[i][iq] -= avgxq / 3.;
+      //   yq[i][iq] -= avgyq / 3.;
+      // }
     }
   }
   // //  double gauss[nuc->nucleonList.size()];
@@ -381,7 +382,7 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp, double 
             double xpos = nuc->nucleonList.at(i).x+xq[i][iq]; 
             double ypos = nuc->nucleonList.at(i).y+yq[i][iq]; 
             TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))
-                                    /hbarc/hbarc/2./Bq)*gauss[i][iq]/ (2. * Bq)/3.;
+                                    /hbarc/hbarc/2./Bq)*gauss[i][iq]/Bq/3.*(Bq+Bp); // normalize to 1 at zero on average
           }
         }
         else{

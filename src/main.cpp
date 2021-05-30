@@ -40,8 +40,8 @@ namespace constants {
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3; // there is an alphas defined in MV.cpp as well - make sure they are the same
-  const double Bp = 0.; // == R_p = 0.4 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
-  const double Bq = 4.; // size of hot spots
+  const double Bp = 2.; // == R_p = 0.4 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
+  const double Bq = 0.4; // size of hot spots
   const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
@@ -2619,24 +2619,6 @@ int main(int argc, char *argv[]) {
 
       cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
       
-      NDIM = 6;
-      llVegas(NDIM, NCOMP, GluonsFluc, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
-      
-      // Print the result
-      gresult = (double)integral[0];
-      gerror = (double)error[0];
-      printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
-      
-      if(gresult<1.){
-        cout << "Gluon number < 1, skipping event" << endl;
-        continue;
-      }
-      
-      
       // do hadrons next (one more (z) integral)
       NDIM = 7;
       llVegas(NDIM, NCOMP, HadronsFluc, &data, NVEC,
@@ -2649,6 +2631,26 @@ int main(int argc, char *argv[]) {
       hresult = (double)integral[0];
       herror = (double)error[0];
       printf("Hadrons (fluc): %.8f +- %.8f\t\n", hresult, herror);
+
+      if(hresult<0.1){
+        cout << "Hadron number < 0.1, skipping event" << endl;
+        continue;
+      }
+
+      NDIM = 6;
+      llVegas(NDIM, NCOMP, GluonsFluc, &data, NVEC,
+              EPSREL, EPSABS, VERBOSE, SEED,
+              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+              GRIDNO, NULL, NULL,
+              &neval, &fail, integral, error, prob);
+      
+      // Print the result
+      gresult = (double)integral[0];
+      gerror = (double)error[0];
+      printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
+      
+      
+      
       
       
       if(NRQCD==1){
