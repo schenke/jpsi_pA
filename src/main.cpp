@@ -2251,6 +2251,7 @@ int main(int argc, char *argv[]) {
   double Yg = 0.;
   double YJPsi1 = 2.73;
   double YJPsi2 = -3.71;
+  int xsec = 0;
   
   std::vector <std::string> sources;
   std::string destination;
@@ -2333,6 +2334,15 @@ int main(int argc, char *argv[]) {
         YJPsi2 = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
       } else { // Uh-oh, there was no argument to the destination option.
         std::cerr << "--YJPsi2 option requires one argument, second JPsi rapidity" << std::endl;
+        return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "--xsec") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        xsec = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--xsec option requires one argument, 0 or 1, with 1 meaning that we run an event to later determine the inelastic cross section" << std::endl;
         return 1;
       }  
     }
@@ -2631,6 +2641,34 @@ int main(int argc, char *argv[]) {
       hresult = (double)integral[0];
       herror = (double)error[0];
       printf("Hadrons (fluc): %.8f +- %.8f\t\n", hresult, herror);
+      
+      if(xsec == 1){
+        if(hresult<0.1){
+          cout << "Hadron number < 0.1, skipping event" << endl;
+          stringstream strfilenameh;
+          strfilenameh << "output_h_" << rank << ".dat";
+          string filenameh;
+          filenameh = strfilenameh.str();
+          fstream fouth(filenameh.c_str(), ios::app);
+          
+          fouth << std::scientific << setprecision(5) << 0 << " " << 0 << endl;
+          fouth.close();
+          exit(0);
+        }
+        else{
+          stringstream strfilenameh;
+          strfilenameh << "output_h_" << rank << ".dat";
+          string filenameh;
+          filenameh = strfilenameh.str();
+          fstream fouth(filenameh.c_str(), ios::app);
+          
+          fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << 0.
+                << " " << 0. << " " << 0. << " " << 0. << endl;
+          fouth.close();
+          exit(0);
+        }
+      }
+
 
       if(hresult<0.1){
         cout << "Hadron number < 0.1, skipping event" << endl;
@@ -2648,10 +2686,7 @@ int main(int argc, char *argv[]) {
       gresult = (double)integral[0];
       gerror = (double)error[0];
       printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
-      
-      
-      
-      
+        
       
       if(NRQCD==1){
         cout << "Using NRQCD"  << endl;
