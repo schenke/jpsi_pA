@@ -2645,14 +2645,6 @@ int main(int argc, char *argv[]) {
       if(xsec == 1){
         if(hresult<0.1){
           cout << "Hadron number < 0.1, skipping event" << endl;
-          stringstream strfilenameh;
-          strfilenameh << "output_h_" << rank << ".dat";
-          string filenameh;
-          filenameh = strfilenameh.str();
-          fstream fouth(filenameh.c_str(), ios::app);
-          
-          fouth << std::scientific << setprecision(5) << 0 << " " << 0 << endl;
-          fouth.close();
           exit(0);
         }
         else{
