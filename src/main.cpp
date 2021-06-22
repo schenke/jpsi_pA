@@ -2608,13 +2608,13 @@ int main(int argc, char *argv[]) {
           JPsi2error = (double)error[0];  
           //cout << data.Y << " " << gresult << " " << hresult << " " << JPsi2result << endl;
         }
+        cout << data.Y << " " << setprecision(10) << gresult << " " << gerror << " " 
+             << hresult << " " << herror << " " << JPsi2result
+             << " " << JPsi2error << endl;
+  
       }
     }
-    
-    cout << setprecision(10) << gresult << " " << gerror << " " 
-         << hresult << " " << herror << " " << JPsi2result
-         << " " << JPsi2error << endl;
-    
+      
   }
   
   else{
