@@ -2527,7 +2527,9 @@ int main(int argc, char *argv[]) {
                 &neval, &fail, integral, error, prob);
         JPsi2result_co= (double)integral[0];
         JPsi2error_co = (double)error[0];
-        
+
+        JPsi2result = JPsi2result_cs + JPsi2result_co;
+        JPsi2error = JPsi2error_cs + JPsi2error_co;
       }
       else{
         cout << "Using ICEM"  << endl;    
@@ -2589,7 +2591,10 @@ int main(int argc, char *argv[]) {
           JPsi2result_co= (double)integral[0];
           JPsi2error_co = (double)error[0];
           
-          cout << data.Y << " " << gresult << " " << hresult << " " << JPsi2result_cs+JPsi2result_co << endl;
+          JPsi2result = JPsi2result_cs + JPsi2result_co;
+          JPsi2error = JPsi2error_cs + JPsi2error_co;
+
+          //          cout << data.Y << " " << gresult << " " << hresult << " " << JPsi2result_cs+JPsi2result_co << endl;
         }
         else{
           cout << "Using ICEM"  << endl;    
@@ -2601,17 +2606,14 @@ int main(int argc, char *argv[]) {
                   &neval, &fail, integral, error, prob);
           JPsi2result = (double)integral[0];
           JPsi2error = (double)error[0];  
-          cout << data.Y << " " << gresult << " " << hresult << " " << JPsi2result << endl;
+          //cout << data.Y << " " << gresult << " " << hresult << " " << JPsi2result << endl;
         }
       }
     }
     
-    // if(NRQCD==1){
-    //   cout << setprecision(10)  << JPsi2result_co << " " << JPsi2error_co << " " << JPsi2result_cs << " " << JPsi2error_cs << " " << endl;
-    // }
-    // else{
-    //   cout << setprecision(10) << gresult << " " << gerror << " " << JPsi2result << " " << JPsi2error << " "  << endl;
-    // }
+    cout << setprecision(10) << gresult << " " << gerror << " " 
+         << hresult << " " << herror << " " << JPsi2result
+         << " " << JPsi2error << endl;
     
   }
   
