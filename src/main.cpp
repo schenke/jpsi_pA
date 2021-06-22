@@ -59,7 +59,7 @@ namespace constants {
   const double ldme_octet_s13 = 0.0030; // +- 0.00012 GeV^3
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
 
-  const double bdep_p = 1.87; // Eq. 114 notes. We plug it in the MV.cpp
+  const double bdep_p = 1.87; // Eq. 114 notes. We plug it in the MV.cpp (depends on sigma0)
   const double bdep_A = 4.13; // Eq. 118 notes  
   const double bindep_A = 2.77; // Eqs. 118 and 123 notes == 4.13*0.67
   const double bdep_fluc_p = 1.87; // Eq. 114 notes
@@ -2344,6 +2344,15 @@ int main(int argc, char *argv[]) {
       } else { // Uh-oh, there was no argument to the destination option.
         std::cerr << "--xsec option requires one argument, 0 or 1, with 1 meaning that we run an event to later determine the inelastic cross section" << std::endl;
         return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "-?") {
+      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1)" << endl;
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        exit(0);
+      } else {
+        exit(0);
       }  
     }
   }
