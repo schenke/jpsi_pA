@@ -8,7 +8,7 @@ namespace constants {
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3;
-  const double Bp = 2.;
+  const double Bp = 4.;
 }
 
 

@@ -40,7 +40,7 @@ namespace constants {
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3; // there is an alphas defined in MV.cpp as well - make sure they are the same
-  const double Bp = 2.; // == R_p = 0.4 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
+  const double Bp = 4.; // == R_p = 0.558 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
   const double Bq = 0.4; // size of hot spots
   const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
   const double mD = 1.864;
@@ -59,14 +59,14 @@ namespace constants {
   const double ldme_octet_s13 = 0.0030; // +- 0.00012 GeV^3
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
 
-  const double bdep_p = 1.87; // Eq. 114 notes. We plug it in the MV.cpp (depends on sigma0)
-  const double bdep_A = 4.13; // Eq. 118 notes  
-  const double bindep_A = 2.77; // Eqs. 118 and 123 notes == 4.13*0.67
-  const double bdep_fluc_p = 1.87; // Eq. 114 notes
-  const double bdep_fluc_A = 1.87; // same as for the proton
+  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
+  const double rt2 =  (208./2.)*(2.*Bp*constants::hbarc*constants::hbarc)/constants::hbarc/constants::hbarc; // pi * Rt^2 with Rt = 4.9 fm
+  const double bdep_p = sigma02*constants::hbarc*constants::hbarc/2./PI/(2.*Bp*constants::hbarc*constants::hbarc); //0.96 for Bp=4GeV^-2 //1.87; // Eq. 114 notes. We plug it in the MV.cpp
+  const double bdep_A = 2.21*bdep_p;// this is for Pb // Eq. 118 notes  
+  const double bindep_A = 0.67*bdep_A; // Eqs. 118 and 123 notes
+  const double bdep_fluc_p = bdep_p; // Eq. 114 notes
+  const double bdep_fluc_A = bdep_p; // same as for the proton
 
-  const double sigma02 = 1.8 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
-  const double rt2 =  4.9 /constants::hbarc  * 4.9 /constants::hbarc; // pi * Rt^2 with Rt = 4.9 fm
  
 }
 
@@ -2115,7 +2115,8 @@ static int Hadrons(const int *ndim, const cubareal xx[],
   double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
   double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   
-  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))/((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -2137,9 +2138,12 @@ static int Hadrons(const int *ndim, const cubareal xx[],
     double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
+    
     f = Dh/z/z*J* 
       constants::alphas/constants::CF/pg/pg/pow((2.*constants::PI*constants::PI),3.)
-      *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep)*factorxp*Phit(sqrt((pg)*(pg) + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc)*factorxA
+      *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep)*factorxp
+      *Phit(sqrt((pg)*(pg) + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc)
+      *factorxA
       *2.*constants::PI*kscale*k  //kdkdphik
       *2.*constants::PI*Rscale*R  //RdRdphiR
       *2.*constants::PI*bscale*b  //bdbdphib
@@ -2240,8 +2244,8 @@ int main(int argc, char *argv[]) {
  // MPI things
   int rank=0;
   int size=1;
-  
-  // Options
+
+  // Option defaults
   int readTable = 1;
   int useFluc = 0;
   int Nevents = 1;
@@ -2252,7 +2256,7 @@ int main(int argc, char *argv[]) {
   double YJPsi1 = 2.73;
   double YJPsi2 = -3.71;
   int xsec = 0;
-  
+
   std::vector <std::string> sources;
   std::string destination;
   for (int i = 1; i < argc; ++i) {
@@ -2498,49 +2502,55 @@ int main(int argc, char *argv[]) {
     cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl; 
     if(bdep == 0){
       cout << "b-independent results"  << endl;
-      NDIM = 4;
-      llVegas(NDIM, NCOMP, GluonsNoB, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
-      gresult = (double)integral[0];
-      gerror = (double)error[0];
-      cout << gresult << endl;
-      if(NRQCD==1){
-        cout << "Using NRQCD"  << endl;
-        NDIM = 8;
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsNob, &data, NVEC,
+      for(int i=0; i<11;i++){
+        data.Y = -5.+i;
+        NDIM = 4;
+        llVegas(NDIM, NCOMP, GluonsNoB, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
+        gresult = (double)integral[0];
+        gerror = (double)error[0];
         
-        JPsi2result_cs = (double)integral[0];
-        JPsi2error_cs = (double)error[0];    
-        
-        NDIM = 6;
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoNob, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
-        JPsi2result_co= (double)integral[0];
-        JPsi2error_co = (double)error[0];
-
-        JPsi2result = JPsi2result_cs + JPsi2result_co;
-        JPsi2error = JPsi2error_cs + JPsi2error_co;
-      }
-      else{
-        cout << "Using ICEM"  << endl;    
-        NDIM = 8;
-        llVegas(NDIM, NCOMP, JPsiIntegrandAllNob, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
-        JPsi2result = (double)integral[0];
-        JPsi2error = (double)error[0];  
+        if(NRQCD==1){
+          //    cout << "Using NRQCD"  << endl;
+          NDIM = 8;
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsNob, &data, NVEC,
+                  EPSREL, EPSABS, VERBOSE, SEED,
+                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                  GRIDNO, NULL, NULL,
+                  &neval, &fail, integral, error, prob);
+          
+          JPsi2result_cs = (double)integral[0];
+          JPsi2error_cs = (double)error[0];    
+          
+          NDIM = 6;
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoNob, &data, NVEC,
+                  EPSREL, EPSABS, VERBOSE, SEED,
+                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                  GRIDNO, NULL, NULL,
+                  &neval, &fail, integral, error, prob);
+          JPsi2result_co= (double)integral[0];
+          JPsi2error_co = (double)error[0];
+          
+          JPsi2result = JPsi2result_cs + JPsi2result_co;
+          JPsi2error = JPsi2error_cs + JPsi2error_co;
+        }
+        else{
+          //cout << "Using ICEM"  << endl;    
+          NDIM = 8;
+          llVegas(NDIM, NCOMP, JPsiIntegrandAllNob, &data, NVEC,
+                  EPSREL, EPSABS, VERBOSE, SEED,
+                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                  GRIDNO, NULL, NULL,
+                  &neval, &fail, integral, error, prob);
+          JPsi2result = (double)integral[0];
+          JPsi2error = (double)error[0];  
+        }
+        cout << data.Y << " " << setprecision(10) << gresult << " " << gerror << " " 
+             << hresult << " " << herror << " " << JPsi2result
+             << " " << JPsi2error << endl;
       }
     }
     else{
