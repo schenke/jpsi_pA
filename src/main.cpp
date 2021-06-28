@@ -49,9 +49,16 @@ namespace constants {
   const double x0 = 0.000041;
   //const double lambdaSpeed = 0.277;
   //const double x0 = 0.00005;
-  const double lambdaSpeedp = 0.277;
-  const double lambdaSpeedA = 0.277;
-  const double prefactor = 0.56;
+
+  //  const double lambdaSpeedp = 0.277;
+  //const double lambdaSpeedA = 0.277;
+  //const double prefactor = 0.56;
+
+
+  const double lambdaSpeedp = 0.17;
+  const double lambdaSpeedA = 0.17;
+  const double prefactor = 0.48;
+
   //const double prefactor = 0.7;
   const double roots = 8160.;
   const double ldme_singlet = 1.16/2./double(Nc); // GeV^3
@@ -59,7 +66,8 @@ namespace constants {
   const double ldme_octet_s13 = 0.0030; // +- 0.00012 GeV^3
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
 
-  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
+  //  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
+  const double sigma02 = 1.6/constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
   const double rt2 =  (208./2.)*(2.*Bp*constants::hbarc*constants::hbarc)/constants::hbarc/constants::hbarc; // pi * Rt^2 with Rt = 4.9 fm
   const double bdep_p = sigma02*constants::hbarc*constants::hbarc/2./PI/(2.*Bp*constants::hbarc*constants::hbarc); //0.96 for Bp=4GeV^-2 //1.87; // Eq. 114 notes. We plug it in the MV.cpp
   const double bdep_A = 2.21*bdep_p;// this is for Pb // Eq. 118 notes  
@@ -2607,7 +2615,7 @@ int main(int argc, char *argv[]) {
           //          cout << data.Y << " " << gresult << " " << hresult << " " << JPsi2result_cs+JPsi2result_co << endl;
         }
         else{
-          cout << "Using ICEM"  << endl;    
+          //cout << "Using ICEM"  << endl;    
           NDIM = 12;
           llVegas(NDIM, NCOMP, JPsiIntegrandAll, &data, NVEC,
                   EPSREL, EPSABS, VERBOSE, SEED,

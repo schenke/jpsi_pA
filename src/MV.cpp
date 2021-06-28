@@ -24,13 +24,25 @@ double MV::MVintegrandForList(double z, void * params) {
 }
 
 
-// fakeBK r integrand (parametrization that has faster x evolution at small r than at large r) y=-log(x)
+// fakeBK r integrand (parametrization that has faster x evolution at small r than at large r) y=-log(x) MV initial condition
 double MV::BKintegrandForList(double z, void * params) {
   double lambda = 0.2; // IR regulator in GeV
   double A = ((double *)params)[0];
   double k = ((double *)params)[1];
   double y = ((double *)params)[2];  
   double f = 2.*constants::PI*pow(2.718281828+(1./lambda)/z,-A*z*z*pow(0.322*pow(0.01/(exp(-y)),(0.3/2.*0.5*(2.*exp(-0.16*z)/pow(z,0.05)))),2.))*z*gsl_sf_bessel_J0(z*k);
+  //double f = 2.*constants::PI*pow(2.718281828+(1./lambda/z),-A*z*z)*z*gsl_sf_bessel_J0(z*k);
+  //double f = 2.*constants::PI*exp(-A*z*z)*z*gsl_sf_bessel_J0(z*k); //GBW for testing the numerics only
+  return f;
+}
+
+// fakeBK r integrand (parametrization that has faster x evolution at small r than at large r) y=-log(x) MVe initial condition
+double MV::BKMVeintegrandForList(double z, void * params) {
+  double lambda = 0.2; // IR regulator in GeV
+  double A = ((double *)params)[0];
+  double k = ((double *)params)[1];
+  double y = ((double *)params)[2];  
+  double f = 2.*constants::PI*pow(18.9*2.718281828+(1./lambda)/z,-A*z*z*pow(0.245*pow(0.01/(exp(-y)),(0.405/2.*0.5*(2.*exp(-0.4*z)/pow(z,0.03)))),2.))*z*gsl_sf_bessel_J0(z*k);
   //double f = 2.*constants::PI*pow(2.718281828+(1./lambda/z),-A*z*z)*z*gsl_sf_bessel_J0(z*k);
   //double f = 2.*constants::PI*exp(-A*z*z)*z*gsl_sf_bessel_J0(z*k); //GBW for testing the numerics only
   return f;
@@ -95,7 +107,7 @@ void MV::computePhip(){
 void MV::computePhipBK(){
   double result, error;
   gsl_function F;
-  F.function = &MV::BKintegrandForList;
+  F.function = &MV::BKMVeintegrandForList;
   double sum=0.;
   int max_steps = 1000;
   double a,b;
@@ -456,7 +468,7 @@ int MV::writeTable(){
 int MV::writeTableBK(){
   
   stringstream name;
-  name << "BKTable.dat";
+  name << "BKMVeTable.dat";
   string BKTableName;
   BKTableName = name.str();
   

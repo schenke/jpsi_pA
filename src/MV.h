@@ -19,6 +19,7 @@ class MV{
  private:
   static double MVintegrandForList(double z, void * params);
   static double BKintegrandForList(double z, void * params);
+  static double BKMVeintegrandForList(double z, void * params);
   double ** Phip_array;
   double *** Phip_arrayBK;
   int sizeA=3200;
