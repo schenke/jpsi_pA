@@ -104,10 +104,13 @@ void MV::computePhip(){
 
 
 // Unintegrated gluon distribution in fake BK
-void MV::computePhipBK(){
+void MV::computePhipBK(int BKMVe){
   double result, error;
   gsl_function F;
-  F.function = &MV::BKMVeintegrandForList;
+  if(BKMVe)
+    F.function = &MV::BKMVeintegrandForList;
+  else
+    F.function = &MV::BKintegrandForList;
   double sum=0.;
   int max_steps = 1000;
   double a,b;
@@ -465,10 +468,14 @@ int MV::writeTable(){
   return 1;
 }
 
-int MV::writeTableBK(){
+int MV::writeTableBK(int BKMVe){
   
   stringstream name;
-  name << "BKMVeTable.dat";
+  if(BKMVe)
+    name << "BKMVeTable.dat";
+  else
+    name << "BKTable.dat";
+
   string BKTableName;
   BKTableName = name.str();
   
@@ -596,9 +603,13 @@ int MV::readTable(){
   return 1;
  }
 
-int MV::readTableBK(){
+int MV::readTableBK(int BKMVe){
   stringstream name;
-  name << "BKTable.dat";
+  if(BKMVe)
+    name << "BKMVeTable.dat";
+  else
+    name << "BKTable.dat";
+
   string BKTableName;
   BKTableName = name.str();
 

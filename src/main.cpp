@@ -67,7 +67,7 @@ namespace constants {
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
 
   //  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
-  const double sigma02 = 1.6/constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
+  const double sigma02 = 1.3/constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb  (16mb works for BK)
   const double rt2 =  (208./2.)*(2.*Bp*constants::hbarc*constants::hbarc)/constants::hbarc/constants::hbarc; // pi * Rt^2 with Rt = 4.9 fm
   const double bdep_p = sigma02*constants::hbarc*constants::hbarc/2./PI/(2.*Bp*constants::hbarc*constants::hbarc); //0.96 for Bp=4GeV^-2 //1.87; // Eq. 114 notes. We plug it in the MV.cpp
   const double bdep_A = 2.21*bdep_p;// this is for Pb // Eq. 118 notes  
@@ -2259,6 +2259,7 @@ int main(int argc, char *argv[]) {
   int Nevents = 1;
   int NRQCD = 0;
   int BK = 0;
+  int BKMVe = 0;
   int bdep = 0;
   double Yg = 0.;
   double YJPsi1 = 2.73;
@@ -2313,6 +2314,15 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--BKMVe") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        BKMVe = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--BKMVe option requires one argument, 0 for MV or 1 for MVe initial condition (only used if BK=1)" << std::endl;
+        return 1;
+      }  
+    }
     else if (std::string(argv[i]) == "--bdep") {
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
         i++;
@@ -2359,7 +2369,7 @@ int main(int argc, char *argv[]) {
       }  
     }
     else if (std::string(argv[i]) == "-?") {
-      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1)" << endl;
+      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1)" << endl;
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
         i++;
         exit(0);
@@ -2379,7 +2389,18 @@ int main(int argc, char *argv[]) {
   
   
   if (rank==0){
-    cout << "Options: read MV dipole from file yes(1)/no(0)= " << readTable << ", fluctuations on(1)/off(0) = " << useFluc << ", Number of events = " << Nevents << endl;
+    cout << "Options: read MV dipole from file yes(1)/no(0)= " << readTable 
+         << "\n fluctuations on(1)/off(0) = " << useFluc 
+         << "\n Number of events = " << Nevents 
+         << "\n NRQCD on(1)/off(0) = " << NRQCD 
+         << "\n BK on(1)/off(0) = " << BK
+         << "\n MVe initial consition = " << BKMVe 
+         << "\n b dependence on(1)/off(0) = " << bdep
+         << "\n Y_g = " << Yg
+         << "\n YJPsi1 = " << YJPsi1
+         << "\n YJPsi2 = " << YJPsi2 
+         << "\n cross section mode on(1)/off(0) = " << xsec 
+         << endl;
     messenger.flush("info");
   }
   
@@ -2414,8 +2435,8 @@ int main(int argc, char *argv[]) {
       //mv->writeTableText();
     }
     else{
-      mv->computePhipBK();
-      mv->writeTableBK();
+      mv->computePhipBK(BKMVe);
+      mv->writeTableBK(BKMVe);
     }
   }
   else if (readTable == 1){
@@ -2423,7 +2444,7 @@ int main(int argc, char *argv[]) {
       mv->readTable();
     }
     else{
-      mv->readTableBK();
+      mv->readTableBK(BKMVe);
     }
   }
   else{

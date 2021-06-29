@@ -182,38 +182,38 @@ void Parameters::setParameters()
   int rank = MPI::COMM_WORLD.Get_rank(); //number of current processor
   if(rank==0)
     {
-  // output parameter info
-  cout << "------------------------------------------------------------------------------------------------" << endl;
-  cout << "| Parameters: " << endl;
-  cout << "------------------------------------------------------------------------------------------------" << endl;
-  cout << setw(45) << left << "| Projectile: " << setw(20) << getProjectile() << setw(45) << " | (default p)" << endl;
-  cout << setw(45) << left << "| Target: " << setw(20) << getTarget() << setw(45) << " | (default Pb)" << endl;
-  convert << getb() << " fm";
-  cout << setw(45) << left << "| b: " << setw(20) << convert.str() << setw(45) << " | (default 0 fm)" << endl; convert.str(""); convert.clear();
-  cout << setw(45) << left << "| Gaussian Wounding: " << setw(20) << getGaussianWounding() << setw(45) << " | 0: off, 1: on (default 0)" << endl;
-  cout << setw(45) << left << "| use quarks: " << setw(20) << getUseQuarks() << setw(45) << " | 0: no, 1: yes (default 0)" << endl;
-  cout << setw(45) << left << "| use energy dependent cross section: " << setw(20) << getUseEnergyDependentCrossSection() << setw(45) << " | 0: no, 1: yes (default 0)" << endl;
-  if(getUseQuarks())
-    {
-      convert << getSigmaQQ() << " mb";
-      cout << setw(45) << left << "| sigmaQQ: " << setw(20) << convert.str() << setw(45) << " | (default 9.36 mb)" << endl; convert.str(""); convert.clear();
-    } 
-  else
-    {
-      convert << getSigmaNN() << " mb";
-      cout << setw(45) << left << "| sigmaNN: " << setw(20) << convert.str() << setw(45) << " | (default 42 mb)" << endl; convert.str(""); convert.clear();
-    }
-  convert << getRoots() << " GeV";
-  cout << setw(45) << left << "| center of mass energy: " << setw(20) << convert.str() << setw(45) << " | (default 200 GeV)" << endl; convert.str(""); convert.clear();
-  cout << setw(45) << left << "| using time for seed: " << setw(20) << getTimeForSeed() << setw(45) << " | 0: no, 1: yes (default 1)" << endl;
-  cout << setw(45) << left << "| seed: " << setw(20) << getSeed() << setw(45) << " |" << endl;
-  cout << setw(45) << left << "| number of transverse cells in output grid: " << setw(20) << getOutputNumberOfTransverseCells() << setw(45) << " | (default 200)" << endl;
-  convert << getOutputMaximalTransverseSize() << " fm";
-  cout << setw(45) << left << "| maximal transverse size: " << setw(20) << convert.str() << setw(45) << " | (default 12.0 fm)" << endl; convert.str(""); convert.clear();
-  convert << getTransverseGaussianSmearingWidth() << " fm";
-  cout << setw(45) << left << "| Gaussian smearing width in x and y: " << setw(20) << convert.str() << setw(45) << " | (default 0.4 fm)" << endl; convert.str(""); convert.clear();
-  cout << "------------------------------------------------------------------------------------------------" << endl;
-  cout << endl;
+  // // output parameter info
+  // cout << "------------------------------------------------------------------------------------------------" << endl;
+  // cout << "| Parameters: " << endl;
+  // cout << "------------------------------------------------------------------------------------------------" << endl;
+  // cout << setw(45) << left << "| Projectile: " << setw(20) << getProjectile() << setw(45) << " | (default p)" << endl;
+  // cout << setw(45) << left << "| Target: " << setw(20) << getTarget() << setw(45) << " | (default Pb)" << endl;
+  // convert << getb() << " fm";
+  // cout << setw(45) << left << "| b: " << setw(20) << convert.str() << setw(45) << " | (default 0 fm)" << endl; convert.str(""); convert.clear();
+  // cout << setw(45) << left << "| Gaussian Wounding: " << setw(20) << getGaussianWounding() << setw(45) << " | 0: off, 1: on (default 0)" << endl;
+  // cout << setw(45) << left << "| use quarks: " << setw(20) << getUseQuarks() << setw(45) << " | 0: no, 1: yes (default 0)" << endl;
+  // cout << setw(45) << left << "| use energy dependent cross section: " << setw(20) << getUseEnergyDependentCrossSection() << setw(45) << " | 0: no, 1: yes (default 0)" << endl;
+  // if(getUseQuarks())
+  //   {
+  //     convert << getSigmaQQ() << " mb";
+  //     cout << setw(45) << left << "| sigmaQQ: " << setw(20) << convert.str() << setw(45) << " | (default 9.36 mb)" << endl; convert.str(""); convert.clear();
+  //   } 
+  // else
+  //   {
+  //     convert << getSigmaNN() << " mb";
+  //     cout << setw(45) << left << "| sigmaNN: " << setw(20) << convert.str() << setw(45) << " | (default 42 mb)" << endl; convert.str(""); convert.clear();
+  //   }
+  // convert << getRoots() << " GeV";
+  // cout << setw(45) << left << "| center of mass energy: " << setw(20) << convert.str() << setw(45) << " | (default 200 GeV)" << endl; convert.str(""); convert.clear();
+  // cout << setw(45) << left << "| using time for seed: " << setw(20) << getTimeForSeed() << setw(45) << " | 0: no, 1: yes (default 1)" << endl;
+  // cout << setw(45) << left << "| seed: " << setw(20) << getSeed() << setw(45) << " |" << endl;
+  // cout << setw(45) << left << "| number of transverse cells in output grid: " << setw(20) << getOutputNumberOfTransverseCells() << setw(45) << " | (default 200)" << endl;
+  // convert << getOutputMaximalTransverseSize() << " fm";
+  // cout << setw(45) << left << "| maximal transverse size: " << setw(20) << convert.str() << setw(45) << " | (default 12.0 fm)" << endl; convert.str(""); convert.clear();
+  // convert << getTransverseGaussianSmearingWidth() << " fm";
+  // cout << setw(45) << left << "| Gaussian smearing width in x and y: " << setw(20) << convert.str() << setw(45) << " | (default 0.4 fm)" << endl; convert.str(""); convert.clear();
+  // cout << "------------------------------------------------------------------------------------------------" << endl;
+  // cout << endl;
     }    
 
 }
