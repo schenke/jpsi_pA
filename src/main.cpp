@@ -67,7 +67,7 @@ namespace constants {
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
 
   //  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
-  const double sigma02 = 1.3/constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb  (16mb works for BK)
+  const double sigma02 = 1.6/constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb  (16mb works for BK)
   const double rt2 =  (208./2.)*(2.*Bp*constants::hbarc*constants::hbarc)/constants::hbarc/constants::hbarc; // pi * Rt^2 with Rt = 4.9 fm
   const double bdep_p = sigma02*constants::hbarc*constants::hbarc/2./PI/(2.*Bp*constants::hbarc*constants::hbarc); //0.96 for Bp=4GeV^-2 //1.87; // Eq. 114 notes. We plug it in the MV.cpp
   const double bdep_A = 2.21*bdep_p;// this is for Pb // Eq. 118 notes  
@@ -75,6 +75,7 @@ namespace constants {
   const double bdep_fluc_p = bdep_p; // Eq. 114 notes
   const double bdep_fluc_A = bdep_p; // same as for the proton
 
+  const double BKfraction = 1.; //fraction of BK (1- fraction of MV) in BK mode 2 for testing.
  
 }
 
@@ -184,7 +185,7 @@ double PhipGBW(double k, double R, double Qs){
 
 // choose between MV and BK 
 double PhipFluc(double k, double Tp, double Qs, double sizeFactor, MV *mv, int BK, double x){
-  if(BK){
+  if(BK==1){
     Tp = Tp * constants::bdep_fluc_p; // To convert BK b-indepedent to BK dependent
     return mv->PhipBKFluc(k, Tp, x);
   }
@@ -194,7 +195,7 @@ double PhipFluc(double k, double Tp, double Qs, double sizeFactor, MV *mv, int B
 }
 
 double Phip(double k, double R, double Qs, double sizeFactor, MV *mv, int BK, double x, int bdep){
-  if(BK){
+  if(BK==1){
     if(bdep==1){  
         double bfactor = constants::bdep_p;  
         return mv->PhipBK(k, R, sizeFactor,x, bfactor);
@@ -204,9 +205,23 @@ double Phip(double k, double R, double Qs, double sizeFactor, MV *mv, int BK, do
         return mv->PhipBK(k, R, sizeFactor,x, bfactor);
     }
   }
-  else{
+  else if(BK==0){
     return mv->Phip(k, R, Qs, sizeFactor);
   }
+  else if(BK==2){
+    if(bdep==1){  
+      double bfactor = constants::bdep_p;  
+      double rv = constants::BKfraction*mv->PhipBK(k, R, sizeFactor,x, bfactor) + (1.-constants::BKfraction)*mv->Phip(k, R, Qs, sizeFactor);
+      return rv;
+    }
+    else{
+      double bfactor = 1.0;
+      double rv = constants::BKfraction*mv->PhipBK(k, R, sizeFactor,x, bfactor) + (1.-constants::BKfraction)*mv->Phip(k, R, Qs, sizeFactor);
+      return rv;
+    }
+  }
+  else
+    return 0.;
 }
 
 // Unintegrated gluon distribution for lead (Not revisited)
@@ -216,7 +231,7 @@ double PhitGBW(double k, double TA, double Qs){
 
 // choose between BK and MV
 double Phit(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc){
-  if(BK){
+  if(BK==1){
       if(useFluc==1){
         TA = TA*constants::bdep_fluc_A;
         return mv->PhitBK(k, TA, x);
@@ -232,10 +247,30 @@ double Phit(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, 
         }
      }
   } 
-  
-  else{
+  else if (BK==0){
     return mv->Phit(k, TA, Qs);
   }
+  else if (BK==2){
+    if(useFluc==1){
+      double TABK = TA*constants::bdep_fluc_A;
+      double rv = constants::BKfraction*mv->PhitBK(k, TABK, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
+      return rv;
+    }
+    else{
+      if(bdep==1){
+        double TABK = TA*constants::bdep_A;
+        double rv = constants::BKfraction*mv->PhitBK(k, TABK, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
+        return rv;
+      }
+      else{
+        double TABK = TA*constants::bindep_A;  
+        double rv = constants::BKfraction*mv->PhitBK(k, TABK, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
+        return rv;
+      }
+    }
+  }
+  else
+    return 0.;
   //return PhitGBW(k, TA, Qs);
 }
 
@@ -246,26 +281,46 @@ double StFGBW(double k, double TA, double Qs){
 
 // choose between MV and BK 
 double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc){
-  if(BK){
-      if(useFluc==1){
-        TA = TA*constants::bdep_fluc_A;
+  if(BK==1){
+    if(useFluc==1){
+      TA = TA*constants::bdep_fluc_A;
+      return mv->StFBK(k, TA, x);
+    }
+    else{
+      if(bdep==1){
+        TA = TA*constants::bdep_A;
         return mv->StFBK(k, TA, x);
       }
       else{
-        if(bdep==1){
-            TA = TA*constants::bdep_A;
-            return mv->StFBK(k, TA, x);
-        }
-        else{
-            TA = TA*constants::bindep_A;
-            return mv->StFBK(k, TA, x);
-        }
-     }
+        TA = TA*constants::bindep_A;
+        return mv->StFBK(k, TA, x);
+      }
+    }
   } 
-  else{
+  else if (BK==0){
     return mv->StF(k, TA, Qs);
   }
-  return 0.;
+  else if(BK==2){
+    if(useFluc==1){
+      double TABK = TA*constants::bdep_fluc_A;
+      double rv = constants::BKfraction*mv->StFBK(k, TABK, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
+      return rv;
+    }
+    else{
+      if(bdep==1){
+        double TABK = TA*constants::bdep_A;
+        double rv = constants::BKfraction*mv->StFBK(k, TABK, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
+        return rv;
+      }
+      else{
+        double TABK = TA*constants::bindep_A;
+        double rv = constants::BKfraction*mv->StFBK(k, TABK, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
+        return rv;
+      }
+    }
+  }
+  else
+    return 0.;
 }
 
 // NRQCD in what follows
@@ -808,50 +863,49 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   if (xp>1.){
     f = 0;
   }
-
   else if (xA>1.){
     f= 0;
   }
-  else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
-  // get sums of vectors
-  double px = p*cos(phip); 
-  double py = p*sin(phip);
-  double kx = k*cos(phik);
-  double ky = k*sin(phik);
-  double k1x = k1*cos(phik1);
-  double k1y = k1*sin(phik1);
-  double pminuskminusk1x = px-kx-k1x;
-  double pminuskminusk1y = py-ky-k1y;
-  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
-                                    +pminuskminusk1y*pminuskminusk1y);
-  double phi_pminuskminusk1 = atan2(pminuskminusk1y,pminuskminusk1x);
-
-  double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
-  
-  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
- 
-  double myTA = returnTA(Rminusb,TAclass); 
-  
-  f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_co
-    *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
-    *R*Rscale*2.*constants::PI
-    *b*bscale*2.*constants::PI
-    *p*pscale*2.*constants::PI
-    *k*kscale*2.*constants::PI
-    *k1*kscale*2.*constants::PI; 
-  // scaled momenta above (in PT)
-  // last rows are scaling of integration measures:
-  // d2R
-  // d2b
-  // d2p
-  // d2k
-  // d2k1
-   
+  else{
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    // get sums of vectors
+    double px = p*cos(phip); 
+    double py = p*sin(phip);
+    double kx = k*cos(phik);
+    double ky = k*sin(phik);
+    double k1x = k1*cos(phik1);
+    double k1y = k1*sin(phik1);
+    double pminuskminusk1x = px-kx-k1x;
+    double pminuskminusk1y = py-ky-k1y;
+    double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
+                                 +pminuskminusk1y*pminuskminusk1y);
+    double phi_pminuskminusk1 = atan2(pminuskminusk1y,pminuskminusk1x);
+    
+    double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
+    
+    double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+      +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+      +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
+    
+    double myTA = returnTA(Rminusb,TAclass); 
+    
+    f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+      *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_co
+      *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
+      *R*Rscale*2.*constants::PI
+      *b*bscale*2.*constants::PI
+      *p*pscale*2.*constants::PI
+      *k*kscale*2.*constants::PI
+      *k1*kscale*2.*constants::PI; 
+    // scaled momenta above (in PT)
+    // last rows are scaling of integration measures:
+    // d2R
+    // d2b
+    // d2p
+    // d2k
+    // d2k1
+    
   }
   return 0;
 } 
@@ -2310,7 +2364,7 @@ int main(int argc, char *argv[]) {
         i++;
         BK = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
       } else { // Uh-oh, there was no argument to the destination option.
-        std::cerr << "--BK option requires one argument, 0 for MV with Qs(x) or 1 for (at the moment fake) BK." << std::endl;
+        std::cerr << "--BK option requires one argument, 0 for MV with Qs(x), 1 for (at the moment fake) BK, or 2 for an interpolation of MV and BK (option 2 for testing in readTable mode only)." << std::endl;
         return 1;
       }  
     }
@@ -2389,7 +2443,7 @@ int main(int argc, char *argv[]) {
   
   
   if (rank==0){
-    cout << "Options: read MV dipole from file yes(1)/no(0)= " << readTable 
+    cout << "Options: read dipole from file yes(1)/no(0)= " << readTable 
          << "\n fluctuations on(1)/off(0) = " << useFluc 
          << "\n Number of events = " << Nevents 
          << "\n NRQCD on(1)/off(0) = " << NRQCD 
@@ -2443,7 +2497,11 @@ int main(int argc, char *argv[]) {
     if(BK==0){
       mv->readTable();
     }
-    else{
+    else if(BK==1){
+      mv->readTableBK(BKMVe);
+    }
+    else if(BK==2){
+      mv->readTable();
       mv->readTableBK(BKMVe);
     }
   }
@@ -2453,12 +2511,20 @@ int main(int argc, char *argv[]) {
   }
 
 
- //  //test StF
- // for (int ik=0; ik<1000; ik++){
- //   double k = ik*0.01;
- //   //    double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc){
- //   cout << k << " " << Phit(k, 1., 0.4949, mv, 1, 0.01,1,1)  << endl;
- // }
+  //test Phit
+ 
+  stringstream strfilenamet;
+  strfilenamet << "Phit.dat";
+  string filenamet;
+  filenamet = strfilenamet.str();
+  fstream foutt(filenamet.c_str(), ios::out);
+  double QsIn = constants::prefactor*pow(constants::x0/0.00001,constants::lambdaSpeedp/2.);
+  cout << "Qs=" << QsIn << endl;
+  for (int ik=0; ik<1000; ik++){
+   double k = ik*0.01;
+   //    double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc){
+   foutt << k << " " << Phit(k, 1., QsIn, mv, BK, 0.00001, 1, 0)  << endl;
+ }
 
 
     // Cuba's parameters for integration

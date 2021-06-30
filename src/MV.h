@@ -42,7 +42,21 @@ class MV{
         Phip_array[i] = new double[sizek];
       }
     }
+    else if (BK==1){
+      Phip_arrayBK = new double**[sizeA];
+      for (int i = 0; i < sizeA; i++) {
+        Phip_arrayBK[i] = new double*[sizek];
+        for (int j = 0; j < sizek; j++) {
+          Phip_arrayBK[i][j] = new double[sizey];
+        }
+      }
+    }
+    //for BK=2 initialize both arrays
     else{
+      Phip_array = new double*[sizeA];
+      for (int i = 0; i < sizeA; i++) {
+        Phip_array[i] = new double[sizek];
+      }        
       Phip_arrayBK = new double**[sizeA];
       for (int i = 0; i < sizeA; i++) {
         Phip_arrayBK[i] = new double*[sizek];
