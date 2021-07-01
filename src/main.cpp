@@ -50,16 +50,16 @@ namespace constants {
   //const double lambdaSpeed = 0.277;
   //const double x0 = 0.00005;
 
-  //  const double lambdaSpeedp = 0.277;
-  //const double lambdaSpeedA = 0.277;
-  //const double prefactor = 0.56;
+  const double lambdaSpeedp = 0.277;
+  const double lambdaSpeedA = 0.277;
+  const double prefactor = 0.46;
 
 
-  const double lambdaSpeedp = 0.17;
-  const double lambdaSpeedA = 0.17;
-  const double prefactor = 0.48;
-
+  //const double lambdaSpeedp = 0.17;
+  //const double lambdaSpeedA = 0.17;
+  //const double prefactor = 0.48;
   //const double prefactor = 0.7;
+
   const double roots = 8160.;
   const double ldme_singlet = 1.16/2./double(Nc); // GeV^3
   const double ldme_octet_s10 = 0.089; // +- 0.0098 GeV^3
@@ -70,12 +70,13 @@ namespace constants {
   const double sigma02 = 1.6/constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb  (16mb works for BK)
   const double rt2 =  (208./2.)*(2.*Bp*constants::hbarc*constants::hbarc)/constants::hbarc/constants::hbarc; // pi * Rt^2 with Rt = 4.9 fm
   const double bdep_p = sigma02*constants::hbarc*constants::hbarc/2./PI/(2.*Bp*constants::hbarc*constants::hbarc); //0.96 for Bp=4GeV^-2 //1.87; // Eq. 114 notes. We plug it in the MV.cpp
-  const double bdep_A = 2.21*bdep_p;// this is for Pb // Eq. 118 notes  
+  const double oomph = 2.21;
+  const double bdep_A = oomph*bdep_p;// this is for Pb // Eq. 118 notes  
   const double bindep_A = 0.67*bdep_A; // Eqs. 118 and 123 notes
   const double bdep_fluc_p = bdep_p; // Eq. 114 notes
   const double bdep_fluc_A = bdep_p; // same as for the proton
 
-  const double BKfraction = 1.; //fraction of BK (1- fraction of MV) in BK mode 2 for testing.
+  const double BKfraction = 0.; //fraction of BK (1- fraction of MV) in BK mode 2 for testing.
  
 }
 
@@ -248,7 +249,19 @@ double Phit(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, 
      }
   } 
   else if (BK==0){
-    return mv->Phit(k, TA, Qs);
+    if(useFluc==1){
+      return mv->Phit(k, TA, Qs);
+    }
+    else{
+      if(bdep==1){
+        TA = TA*constants::oomph;
+        return mv->Phit(k, TA, Qs);
+      }
+      else{
+        TA = TA*constants::oomph*0.67;  
+        return mv->Phit(k, TA, Qs);
+      }
+    }
   }
   else if (BK==2){
     if(useFluc==1){
@@ -259,12 +272,14 @@ double Phit(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, 
     else{
       if(bdep==1){
         double TABK = TA*constants::bdep_A;
-        double rv = constants::BKfraction*mv->PhitBK(k, TABK, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
+        double TAMV = TA*constants::oomph;
+        double rv = constants::BKfraction*mv->PhitBK(k, TABK, x) + (1.-constants::BKfraction)*mv->Phit(k, TAMV, Qs);
         return rv;
       }
       else{
         double TABK = TA*constants::bindep_A;  
-        double rv = constants::BKfraction*mv->PhitBK(k, TABK, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
+        double TAMV = TA*constants::oomph*0.67;
+        double rv = constants::BKfraction*mv->PhitBK(k, TABK, x) + (1.-constants::BKfraction)*mv->Phit(k, TAMV, Qs);
         return rv;
       }
     }
@@ -298,7 +313,19 @@ double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, i
     }
   } 
   else if (BK==0){
-    return mv->StF(k, TA, Qs);
+    if(useFluc==1){
+      return mv->StF(k, TA, Qs);
+    }
+    else{
+      if(bdep==1){
+        TA = TA*constants::oomph;
+        return mv->StF(k, TA, Qs);
+      }
+      else{
+        TA = TA*constants::oomph*0.67;  
+        return mv->StF(k, TA, Qs);
+      }
+    }
   }
   else if(BK==2){
     if(useFluc==1){
@@ -309,12 +336,14 @@ double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, i
     else{
       if(bdep==1){
         double TABK = TA*constants::bdep_A;
-        double rv = constants::BKfraction*mv->StFBK(k, TABK, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
+        double TAMV = TA*constants::oomph;
+        double rv = constants::BKfraction*mv->StFBK(k, TABK, x) + (1.-constants::BKfraction)*mv->StF(k, TAMV, Qs);
         return rv;
       }
       else{
         double TABK = TA*constants::bindep_A;
-        double rv = constants::BKfraction*mv->StFBK(k, TABK, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
+        double TAMV = TA*constants::oomph*0.67;
+        double rv = constants::BKfraction*mv->StFBK(k, TABK, x) + (1.-constants::BKfraction)*mv->StF(k, TAMV, Qs);
         return rv;
       }
     }
