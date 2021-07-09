@@ -1986,7 +1986,6 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
 
   double kscale = 30.;
   double pscale = 30.;
-  
 
   double lambda = static_cast<params*>(userdata)->lambda;
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
@@ -1996,7 +1995,14 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
- 
+
+    
+  double k = nobk*kscale;
+  double p = nobp*pscale+lambda;
+
+  double phi = 2.*constants::PI*nobphi;
+  double phik = 2.*constants::PI*nobphik;
+
   double xp = (nobp*pscale+lambda)*exp(Y)/constants::roots;
   double xA = (nobp*pscale+lambda)*exp(-Y)/constants::roots;
   double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
@@ -2012,13 +2018,13 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-    f = constants::alphas/constants::CF/(nobp*pscale+lambda)/(nobp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-      *Phip(nobk*kscale, 0, Qsp, sizeFactor, mv, BK, xp,bdep)
-      *Phit(sqrt((nobp*pscale+lambda)*(nobp*pscale+lambda) + nobk*nobk*kscale*kscale - 2.*(nobp*pscale+lambda)*nobk*kscale*cos((nobphi-nobphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc)
-      *2.*constants::PI*nobk*kscale*kscale  //kdkdphik
+    f = constants::alphas/constants::CF/p/p/pow((2*constants::PI*constants::PI),3.)
+      *Phip(k, 0, Qsp, sizeFactor, mv, BK, xp,bdep)*factorxp
+      *Phit(sqrt(p*p + k*k - 2.*p*k*cos(phi-phik)), TA, QsA, mv, BK, xA,bdep,useFluc)*factorxA
+      *2.*constants::PI*k*kscale  //kdkdphik
       *constants::sigma02  //R-integral
       *constants::PI*constants::rt2  // b-integral
-      *2.*constants::PI*pscale*(nobp*pscale+lambda); //pdpdphip
+      *2.*constants::PI*pscale*p; //pdpdphip
     //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   }
     return 1;
@@ -2067,7 +2073,6 @@ static int Gluons(const int *ndim, const cubareal xx[],
   double R = gR*Rscale;
   double b = gb*bscale;
 
-
   if (xp>1.){
     f = 0.;
   }
@@ -2084,7 +2089,8 @@ static int Gluons(const int *ndim, const cubareal xx[],
      *2.*constants::PI*kscale*k  //kdkdphik
      *2.*constants::PI*Rscale*R  //RdRdphiR
      *2.*constants::PI*bscale*b  //bdbdphib
-     *2.*constants::PI*pscale*p; //pdpdphip
+     *2.*constants::PI*pscale*p //pdpdphip
+     *factorxp*factorxA;
    //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   }
   return 0;
@@ -2156,6 +2162,81 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
   }
   
   return 1;
+}
+/////////////////////////////////////////////////////
+//////// b independent hadron cross section ///////////
+/////////////////////////////////////////////////////
+static int Hadrons_bindep(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define hnobk xx[0]
+#define hnobphik xx[1]
+#define hnobp xx[2]
+#define hnobphi xx[3]
+
+  double z = xx[4];
+  double mh = 0.3; //GeV
+
+  double kscale = 30.;
+  double pscale = 30.;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+  double lambda = static_cast<params*>(userdata)->lambda;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double Y = static_cast<params*>(userdata)->Y;
+  
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double phi = 2.*constants::PI*hnobphi;
+  double phik = 2.*constants::PI*hnobphik;
+
+  double k = hnobk*kscale;
+  double p = hnobp*pscale+lambda;
+
+  double eta = Y;
+  double pg = p/z;
+  
+  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  
+  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+  
+  double xp = pg*exp(yg)/constants::roots;
+  double xA = pg*exp(-yg)/constants::roots;
+
+  if (xp>1.){
+    f = 0.;
+  }
+  else if (xA>1.){
+    f = 0.;
+  }
+  else if (pg>30.){
+    f = 0.;
+  }    
+  else{
+    double factorxA = pow(1.-xA,4.);
+    double factorxp = pow(1.-xp,4.);
+    
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    
+    double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
+    
+    f = Dh/z/z*J* 
+      constants::alphas/constants::CF/pg/pg/pow((2.*constants::PI*constants::PI),3.)
+      *Phip(k, 0, Qsp, sizeFactor, mv, BK,xp,bdep)*factorxp
+      *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos(phi - phik)), TA, QsA, mv, BK, xA,bdep,useFluc)
+      *factorxA
+      *2.*constants::PI*kscale*k  //kdkdphik
+      *2.*constants::PI*pscale*p //pdpdphip
+      *constants::sigma02  //R-integral
+      *constants::PI*constants::rt2;  // b-integral
+    //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+  }
+  return 0;
 }
 
 /////////////////////////////////////////////////////
