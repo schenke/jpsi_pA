@@ -191,38 +191,44 @@ double PhipFluc(double k, double Tp, double Qs, double sizeFactor, MV *mv, int B
     return mv->PhipBKFluc(k, Tp, x);
   }
   else{
+    Tp = Tp * constants::bdep_fluc_p; // To convert MV b-indepedent to MV dependent
     return mv->PhipFluc(k, Tp, Qs, sizeFactor);
   }
 }
 
 double Phip(double k, double R, double Qs, double sizeFactor, MV *mv, int BK, double x, int bdep){
-  if(BK==1){
-    if(bdep==1){  
-        double bfactor = constants::bdep_p;  
-        return mv->PhipBK(k, R, sizeFactor,x, bfactor);
+  if(bdep==1){ // b-dependent
+    double bfactor = constants::bdep_p; 
+    if(BK==0){  // MV
+        return mv->Phip(k, R, sizeFactor,x, bfactor);
     }
-    else{
-        double bfactor = 1.0;
-        return mv->PhipBK(k, R, sizeFactor,x, bfactor);
+    else if(BK==1){ // BK
+        return mv->PhipBK(k, R, Qs, sizeFactor, bfactor);
     }
-  }
-  else if(BK==0){
-    return mv->Phip(k, R, Qs, sizeFactor);
-  }
-  else if(BK==2){
-    if(bdep==1){  
-      double bfactor = constants::bdep_p;  
-      double rv = constants::BKfraction*mv->PhipBK(k, R, sizeFactor,x, bfactor) + (1.-constants::BKfraction)*mv->Phip(k, R, Qs, sizeFactor);
+    else if (BK==2){
+      double rv = constants::BKfraction*mv->PhipBK(k, R, sizeFactor,x, bfactor) + (1.-constants::BKfraction)*mv->Phip(k, R, Qs, sizeFactor,bfactor);
       return rv;
+   }
+   else 
+    return 0;
+}
+ else if(bdep==0){ // b-independent
+    double bfactor = 1.0; 
+    if(BK==0){  // MV
+        return mv->Phip(k, R, sizeFactor,x, bfactor);
     }
-    else{
-      double bfactor = 1.0;
-      double rv = constants::BKfraction*mv->PhipBK(k, R, sizeFactor,x, bfactor) + (1.-constants::BKfraction)*mv->Phip(k, R, Qs, sizeFactor);
+    else if(BK==1){ // BK
+        return mv->PhipBK(k, R, Qs, sizeFactor, bfactor);
+    }
+    else if (BK==2){
+      double rv = constants::BKfraction*mv->PhipBK(k, R, sizeFactor,x, bfactor) + (1.-constants::BKfraction)*mv->Phip(k, R, Qs, sizeFactor,bfactor);
       return rv;
-    }
-  }
-  else
-    return 0.;
+   }
+   else 
+    return 0;
+}
+else 
+  return 0;
 }
 
 // Unintegrated gluon distribution for lead (Not revisited)
@@ -250,36 +256,35 @@ double Phit(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, 
   } 
   else if (BK==0){
     if(useFluc==1){
+      TA = TA*constants::bdep_fluc_A;
       return mv->Phit(k, TA, Qs);
     }
     else{
       if(bdep==1){
-        TA = TA*constants::oomph;
+        TA = TA*constants::bdep_A;
         return mv->Phit(k, TA, Qs);
       }
       else{
-        TA = TA*constants::oomph*0.67;  
+        TA = TA*constants::bindep_A;  
         return mv->Phit(k, TA, Qs);
       }
     }
   }
   else if (BK==2){
     if(useFluc==1){
-      double TABK = TA*constants::bdep_fluc_A;
-      double rv = constants::BKfraction*mv->PhitBK(k, TABK, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
+      TA = TA*constants::bdep_fluc_A;
+      double rv = constants::BKfraction*mv->PhitBK(k, TA, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
       return rv;
     }
     else{
       if(bdep==1){
-        double TABK = TA*constants::bdep_A;
-        double TAMV = TA*constants::oomph;
-        double rv = constants::BKfraction*mv->PhitBK(k, TABK, x) + (1.-constants::BKfraction)*mv->Phit(k, TAMV, Qs);
+        TA = TA*constants::bdep_A;
+        double rv = constants::BKfraction*mv->PhitBK(k, TA, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
         return rv;
       }
       else{
-        double TABK = TA*constants::bindep_A;  
-        double TAMV = TA*constants::oomph*0.67;
-        double rv = constants::BKfraction*mv->PhitBK(k, TABK, x) + (1.-constants::BKfraction)*mv->Phit(k, TAMV, Qs);
+        double TA = TA*constants::bindep_A;  
+        double rv = constants::BKfraction*mv->PhitBK(k, TA, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
         return rv;
       }
     }
@@ -314,36 +319,35 @@ double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, i
   } 
   else if (BK==0){
     if(useFluc==1){
+      TA = TA*constants::bdep_fluc_A;
       return mv->StF(k, TA, Qs);
     }
     else{
       if(bdep==1){
-        TA = TA*constants::oomph;
+        TA = TA*constants::bdep_A;
         return mv->StF(k, TA, Qs);
       }
       else{
-        TA = TA*constants::oomph*0.67;  
+        TA = TA*constants::bindep_A;  
         return mv->StF(k, TA, Qs);
       }
     }
   }
   else if(BK==2){
     if(useFluc==1){
-      double TABK = TA*constants::bdep_fluc_A;
-      double rv = constants::BKfraction*mv->StFBK(k, TABK, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
+      TA = TA*constants::bdep_fluc_A;
+      double rv = constants::BKfraction*mv->StFBK(k, TA, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
       return rv;
     }
     else{
       if(bdep==1){
-        double TABK = TA*constants::bdep_A;
-        double TAMV = TA*constants::oomph;
-        double rv = constants::BKfraction*mv->StFBK(k, TABK, x) + (1.-constants::BKfraction)*mv->StF(k, TAMV, Qs);
+        double TA = TA*constants::bdep_A;
+        double rv = constants::BKfraction*mv->StFBK(k, TA, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
         return rv;
       }
       else{
-        double TABK = TA*constants::bindep_A;
-        double TAMV = TA*constants::oomph*0.67;
-        double rv = constants::BKfraction*mv->StFBK(k, TABK, x) + (1.-constants::BKfraction)*mv->StF(k, TAMV, Qs);
+        double TA = TA*constants::bindep_A;
+        double rv = constants::BKfraction*mv->StFBK(k, TA, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
         return rv;
       }
     }
