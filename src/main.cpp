@@ -2170,7 +2170,7 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
 /////////////////////////////////////////////////////
 //////// b independent hadron cross section ///////////
 /////////////////////////////////////////////////////
-static int Hadrons_bindep(const int *ndim, const cubareal xx[],
+static int HadronsNoB(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define hnobk xx[0]
@@ -2562,7 +2562,7 @@ int main(int argc, char *argv[]) {
          << "\n Number of events = " << Nevents 
          << "\n NRQCD on(1)/off(0) = " << NRQCD 
          << "\n BK on(1)/off(0) = " << BK
-         << "\n MVe initial consition = " << BKMVe 
+         << "\n MVe initial condition = " << BKMVe 
          << "\n b dependence on(1)/off(0) = " << bdep
          << "\n Y_g = " << Yg
          << "\n YJPsi1 = " << YJPsi1
@@ -2721,6 +2721,16 @@ int main(int argc, char *argv[]) {
                 &neval, &fail, integral, error, prob);
         gresult = (double)integral[0];
         gerror = (double)error[0];
+
+        NDIM = 5;
+        llVegas(NDIM, NCOMP, HadronsNoB, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        hresult = (double)integral[0];
+        herror = (double)error[0];
+
         
         if(NRQCD==1){
           //    cout << "Using NRQCD"  << endl;
