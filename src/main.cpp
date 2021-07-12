@@ -40,8 +40,8 @@ namespace constants {
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3; // there is an alphas defined in MV.cpp as well - make sure they are the same
-  const double Bp = 4.; // == R_p = 0.558 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
-  const double Bq = 0.4; // size of hot spots
+  const double Bp = 3.; // == R_p = 0.558 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
+  const double Bq = 0.3; // size of hot spots
   const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
@@ -67,7 +67,7 @@ namespace constants {
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
 
   //  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
-  const double sigma02 = 1.6/constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb  (16mb works for BK)
+  const double sigma02 = 1.3/constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb  (16mb works for BK)
   const double rt2 =  (208./2.)*(2.*Bp*constants::hbarc*constants::hbarc)/constants::hbarc/constants::hbarc; // pi * Rt^2 with Rt = 4.9 fm
   const double bdep_p = sigma02*constants::hbarc*constants::hbarc/2./PI/(2.*Bp*constants::hbarc*constants::hbarc); //0.96 for Bp=4GeV^-2 //1.87; // Eq. 114 notes. We plug it in the MV.cpp
   const double oomph = 2.21;
