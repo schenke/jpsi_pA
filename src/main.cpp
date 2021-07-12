@@ -283,7 +283,7 @@ double Phit(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, 
         return rv;
       }
       else{
-        double TA = TA*constants::bindep_A;  
+        TA = TA*constants::bindep_A;  
         double rv = constants::BKfraction*mv->PhitBK(k, TA, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
         return rv;
       }
@@ -341,12 +341,12 @@ double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, i
     }
     else{
       if(bdep==1){
-        double TA = TA*constants::bdep_A;
+        TA = TA*constants::bdep_A;
         double rv = constants::BKfraction*mv->StFBK(k, TA, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
         return rv;
       }
       else{
-        double TA = TA*constants::bindep_A;
+        TA = TA*constants::bindep_A;
         double rv = constants::BKfraction*mv->StFBK(k, TA, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
         return rv;
       }
