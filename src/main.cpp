@@ -200,10 +200,10 @@ double Phip(double k, double R, double Qs, double sizeFactor, MV *mv, int BK, do
   if(bdep==1){ // b-dependent
     double bfactor = constants::bdep_p; 
     if(BK==0){  // MV
-        return mv->Phip(k, R, sizeFactor,x, bfactor);
+        return mv->Phip(k, R, Qs, sizeFactor, bfactor);
     }
     else if(BK==1){ // BK
-        return mv->PhipBK(k, R, Qs, sizeFactor, bfactor);
+        return mv->PhipBK(k, R, sizeFactor,x, bfactor);
     }
     else if (BK==2){
       double rv = constants::BKfraction*mv->PhipBK(k, R, sizeFactor,x, bfactor) + (1.-constants::BKfraction)*mv->Phip(k, R, Qs, sizeFactor,bfactor);
@@ -215,10 +215,10 @@ double Phip(double k, double R, double Qs, double sizeFactor, MV *mv, int BK, do
  else if(bdep==0){ // b-independent
     double bfactor = 1.0; 
     if(BK==0){  // MV
-        return mv->Phip(k, R, sizeFactor,x, bfactor);
+        return mv->Phip(k, R, Qs, sizeFactor, bfactor);
     }
     else if(BK==1){ // BK
-        return mv->PhipBK(k, R, Qs, sizeFactor, bfactor);
+        return mv->PhipBK(k, R, sizeFactor,x, bfactor);
     }
     else if (BK==2){
       double rv = constants::BKfraction*mv->PhipBK(k, R, sizeFactor,x, bfactor) + (1.-constants::BKfraction)*mv->Phip(k, R, Qs, sizeFactor,bfactor);
