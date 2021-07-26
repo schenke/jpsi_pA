@@ -68,14 +68,14 @@ namespace constants {
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
 
   //  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
-  const double sigma02 = 1.2/constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb  (16mb works for BK)
-  const double rt2 =  (1.69/constants::hbarc/constants::hbarc)*PI*pow(A,1./3.); // size of the nucleus, from 1503.07772
-  const double bdep_p = sigma02/2./PI/(2*Bp); //0.96 for Bp=4GeV^-2 //1.87; // Eq. 114 notes. We plug it in the MV.cpp
+  const double sigma02 = 0.7/constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb  (16mb works for BK)
+  const double rt2 =  (1.69/constants::hbarc/constants::hbarc)*pow(A,2./3.);
+  const double bdep_p = sigma02/2./PI/Bp; //0.96 for Bp=4GeV^-2 //1.87; // Eq. 114 notes. We plug it in the MV.cpp
   const double oomph = 2.21;
   const double bdep_A = oomph*bdep_p;// this is for Pb 
   //  const double bindep_A = 1./(oomph*(1.69/constants::hbarc/constants::hbarc)/pow(A,1./3.)/2./Bp)*bdep_A; // assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
   const double bindep_A = pow(A,1./3.)*sigma02/PI/(1.69/constants::hbarc/constants::hbarc); // assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
-  const double bdep_fluc_p = bdep_p; 
+  const double bdep_fluc_p = bdep_p;
   const double bdep_fluc_A = bdep_p; // same as for the proton
 
   const double BKfraction = 0.; //fraction of BK (1- fraction of MV) in BK mode 2 for testing.
