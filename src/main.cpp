@@ -40,9 +40,9 @@ namespace constants {
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3; // there is an alphas defined in MV.cpp as well - make sure they are the same
-  const double Bp = 3.; // == R_p = 0.558 fm // there is a Bp defined in MV.cpp as well - make sure they are the same
+  const double Bp = 4.; // !!!! <==== there is a Bp defined in MV.cpp as well - make sure they are the same || use 4 for non-fluc, 3 for fluc
   const double Bq = 0.3; // size of hot spots
-  const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
+  //  const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
   const double mJPsi = 3.096916;
@@ -68,13 +68,13 @@ namespace constants {
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
 
   //  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
-  const double sigma02 = 0.7/constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb  (16mb works for BK)
-  const double rt2 =  (1.69/constants::hbarc/constants::hbarc)*pow(A,2./3.);
-  const double bdep_p = sigma02/2./PI/Bp; //0.96 for Bp=4GeV^-2 //1.87; // Eq. 114 notes. We plug it in the MV.cpp
-  const double oomph = 2.21;
+  const double sigma02 = 0.9/constants::hbarc /constants::hbarc; 
+  const double rt2 =  pow(5.5,2.)/constants::hbarc/constants::hbarc;//(1.69/constants::hbarc/constants::hbarc)*pow(A,2./3.);// assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
+  const double bdep_p = sigma02/2./PI/Bp;
+  const double oomph = 2.21; //for Pb
   const double bdep_A = oomph*bdep_p;// this is for Pb 
   //  const double bindep_A = 1./(oomph*(1.69/constants::hbarc/constants::hbarc)/pow(A,1./3.)/2./Bp)*bdep_A; // assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
-  const double bindep_A = pow(A,1./3.)*sigma02/PI/(1.69/constants::hbarc/constants::hbarc); // assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
+  const double bindep_A = A*sigma02/PI/rt2; 
   const double bdep_fluc_p = bdep_p;
   const double bdep_fluc_A = bdep_p; // same as for the proton
 
@@ -1651,8 +1651,10 @@ static int JPsiIntegrandAllNob(const int *ndim, const cubareal xx[],
       /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
       *Phip(k1, 0., Qsp, sizeFactor, mv, BK,xp,bdep)*factorxp/(k1*k1)*H*J
       *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(k,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
-      *2.*constants::PI*constants::Bp
-      *2.*constants::PI*constants::Bt
+      *constants::sigma02
+      *constants::PI*constants::rt2
+      //*2.*constants::PI*constants::Bp
+      //*2.*constants::PI*constants::Bt
       *PT*pscale*2.*constants::PI
       *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
       *qtildescale
