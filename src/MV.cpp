@@ -8,7 +8,6 @@ namespace constants {
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3;
-  const double Bp = 4.;
 }
 
 
@@ -231,9 +230,9 @@ double MV::PhipBKFluc(double k, double Tp, double x){
   return k*k*constants::Nc/4./constants::alphas*result;
 }
 
-double MV::PhipBK(double k, double R, double sizeFactor, double x, double bfactor){
+double MV::PhipBK(double k, double R, double sizeFactor, double x, double bfactor, double Bp){
   
-  double A = bfactor*constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor)); // Eq. 114 notes. 
+  double A = bfactor*constants::CA/4./constants::CF*exp(-R*R/2./(Bp*sizeFactor)); // Eq. 114 notes. 
    
   int iA = int(A/deltaA); 
   int ik = int((k+0.01)/deltak);
@@ -268,9 +267,9 @@ double MV::PhipBK(double k, double R, double sizeFactor, double x, double bfacto
 }
 
 
-double MV::Phip(double k, double R, double Qs, double sizeFactor, double bfactor){
+double MV::Phip(double k, double R, double Qs, double sizeFactor, double bfactor, double Bp){
 
-  double A = bfactor*constants::CA/4./constants::CF*exp(-R*R/2./(constants::Bp*sizeFactor))*Qs*Qs; // Eq. 114 notes.
+  double A = bfactor*constants::CA/4./constants::CF*exp(-R*R/2./(Bp*sizeFactor))*Qs*Qs; // Eq. 114 notes.
   
   int iA = int(A/deltaA); 
   int ik = int((k+0.01)/deltak);

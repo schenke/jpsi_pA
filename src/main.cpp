@@ -40,8 +40,8 @@ namespace constants {
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
   const double alphas = 0.3; // there is an alphas defined in MV.cpp as well - make sure they are the same
-  const double Bp = 4.; // !!!! <==== there is a Bp defined in MV.cpp as well - make sure they are the same || use 4 for non-fluc, 3 for fluc
-  const double Bq = 0.3; // size of hot spots
+  //  const double Bp = 4.; // !!!! <==== there is a Bp defined in MV.cpp as well - make sure they are the same || use 4 for non-fluc, 3 for fluc
+  //  const double Bq = 0.3; // size of hot spots
   //  const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
   const double mD = 1.864;
   const double mc = 1.275; //vary? 1.4?
@@ -55,7 +55,6 @@ namespace constants {
   const double lambdaSpeedA = 0.277;
   const double prefactor = 0.5;
 
-
   //const double lambdaSpeedp = 0.17;
   //const double lambdaSpeedA = 0.17;
   //const double prefactor = 0.48;
@@ -67,19 +66,17 @@ namespace constants {
   const double ldme_octet_s13 = 0.0030; // +- 0.00012 GeV^3
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
 
-  //  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
-  const double sigma02 = 0.9/constants::hbarc /constants::hbarc; 
-  const double rt2 =  pow(5.5,2.)/constants::hbarc/constants::hbarc;//(1.69/constants::hbarc/constants::hbarc)*pow(A,2./3.);// assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
-  const double bdep_p = sigma02/2./PI/Bp;
-  const double oomph = 2.21; //for Pb
-  const double bdep_A = oomph*bdep_p;// this is for Pb 
-  //  const double bindep_A = 1./(oomph*(1.69/constants::hbarc/constants::hbarc)/pow(A,1./3.)/2./Bp)*bdep_A; // assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
-  const double bindep_A = A*sigma02/PI/rt2; 
-  const double bdep_fluc_p = bdep_p;
-  const double bdep_fluc_A = bdep_p; // same as for the proton
-
-  const double BKfraction = 0.; //fraction of BK (1- fraction of MV) in BK mode 2 for testing.
- 
+  // //  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
+  // const double sigma02 = 0.9/constants::hbarc /constants::hbarc; 
+  // const double rt2 =  pow(5.5,2.)/constants::hbarc/constants::hbarc;//(1.69/constants::hbarc/constants::hbarc)*pow(A,2./3.);// assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
+  // const double bdep_p = sigma02/2./PI/Bp;
+  // const double oomph = 2.21; //for Pb
+  // const double bdep_A = oomph*bdep_p;// this is for Pb 
+  // //  const double bindep_A = 1./(oomph*(1.69/constants::hbarc/constants::hbarc)/pow(A,1./3.)/2./Bp)*bdep_A; // assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
+  // const double bindep_A = A*sigma02/PI/rt2; 
+  // const double bdep_fluc_p = bdep_p;
+  // const double bdep_fluc_A = bdep_p; // same as for the proton
+  const double BKfraction = 0.; //fraction of BK (1- fraction of MV) in BK mode 2 for testing. 
 }
 
 // Parameters that need to be passed to the integrand
@@ -104,6 +101,19 @@ struct params {
   int BK;
   int useFluc;
   int bdep;
+
+  //----
+
+  double Bp;
+  double Bq;
+  double sigma02;
+  double rt2;
+  double bdep_p;
+  double bdep_A;
+  double bindep_A;
+  double bdep_fluc_p;
+  double bdep_fluc_A;
+
 };
 
 // Kinematic variables for ICEM
@@ -180,96 +190,96 @@ double returnTA(double R, TAInt *TAclass){
 return TAclass->returnTA(R);
 }
 
-// Unintegrated gluon distribution for the proton in GBW
-double PhipGBW(double k, double R, double Qs){
-  return constants::CF*k*k*constants::Nc*constants::PI/constants::alphas/constants::CA/Qs/Qs*exp(R*R/(2.*constants::Bp))
-    *exp(-constants::CF*exp(R*R/(2.*constants::Bp))*k*k/(constants::CA*Qs*Qs));
-}
+// // Unintegrated gluon distribution for the proton in GBW
+// double PhipGBW(double k, double R, double Qs){
+//   return constants::CF*k*k*constants::Nc*constants::PI/constants::alphas/constants::CA/Qs/Qs*exp(R*R/(2.*constants::Bp))
+//     *exp(-constants::CF*exp(R*R/(2.*constants::Bp))*k*k/(constants::CA*Qs*Qs));
+// }
 
 // choose between MV and BK 
-double PhipFluc(double k, double Tp, double Qs, double sizeFactor, MV *mv, int BK, double x){
+double PhipFluc(double k, double Tp, double Qs, double sizeFactor, MV *mv, int BK, double x, double bdep_fluc_p){
   if(BK==1){
-    Tp = Tp * constants::bdep_fluc_p; // To convert BK b-indepedent to BK dependent
+    Tp = Tp * bdep_fluc_p; // To convert BK b-indepedent to BK dependent
     return mv->PhipBKFluc(k, Tp, x);
   }
   else{
-    Tp = Tp * constants::bdep_fluc_p; // To convert MV b-indepedent to MV dependent
+    Tp = Tp * bdep_fluc_p; // To convert MV b-indepedent to MV dependent
     return mv->PhipFluc(k, Tp, Qs, sizeFactor);
   }
 }
 
-double Phip(double k, double R, double Qs, double sizeFactor, MV *mv, int BK, double x, int bdep){
+double Phip(double k, double R, double Qs, double sizeFactor, MV *mv, int BK, double x, int bdep, double bdep_p, double Bp){
   double bfactor = 1.; 
   if(bdep==1) // b-dependent
-    bfactor = constants::bdep_p; 
+    bfactor = bdep_p; 
  
   if(BK==0){  // MV
-    return mv->Phip(k, R, Qs, sizeFactor, bfactor);
+    return mv->Phip(k, R, Qs, sizeFactor, bfactor, Bp);
   }
   else if(BK==1){ // BK
-    return mv->PhipBK(k, R, sizeFactor,x, bfactor);
+    return mv->PhipBK(k, R, sizeFactor,x, bfactor, Bp);
   }
   else if (BK==2){
-    double rv = constants::BKfraction*mv->PhipBK(k, R, sizeFactor,x, bfactor) + (1.-constants::BKfraction)*mv->Phip(k, R, Qs, sizeFactor,bfactor);
+    double rv = constants::BKfraction*mv->PhipBK(k, R, sizeFactor,x, bfactor, Bp) + (1.-constants::BKfraction)*mv->Phip(k, R, Qs, sizeFactor,bfactor, Bp);
     return rv;
   }
   else 
     return 0;
 }
 
-// Unintegrated gluon distribution for lead (Not revisited)
-double PhitGBW(double k, double TA, double Qs){
-  return constants::PI*k*k*constants::Nc/constants::alphas*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA))/(constants::CA*Qs*Qs*TA);
-}
+// // Unintegrated gluon distribution for lead (Not revisited)
+// double PhitGBW(double k, double TA, double Qs){
+//   return constants::PI*k*k*constants::Nc/constants::alphas*constants::CF*exp(-constants::CF*k*k/(constants::CA*Qs*Qs*TA))/(constants::CA*Qs*Qs*TA);
+// }
 
 // choose between BK and MV
-double Phit(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc){
+double Phit(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc, double bindep_A, double bdep_A, double bdep_fluc_A){
   if(BK==1){
       if(useFluc==1){
-        TA = TA*constants::bdep_fluc_A;
+        TA = TA*bdep_fluc_A;
         return mv->PhitBK(k, TA, x);
       }
       else{
         if(bdep==1){
-            TA = TA*constants::bdep_A;
+            TA = TA*bdep_A;
             return mv->PhitBK(k, TA, x);
         }
         else{
-            TA = TA*constants::bindep_A;  
+            TA = TA*bindep_A;  
             return mv->PhitBK(k, TA, x);
         }
      }
   } 
   else if (BK==0){
     if(useFluc==1){
-      TA = TA*constants::bdep_fluc_A;
+      TA = TA*bdep_fluc_A;
       return mv->Phit(k, TA, Qs);
     }
     else{
       if(bdep==1){
-        TA = TA*constants::bdep_A;
+        TA = TA*bdep_A;
         return mv->Phit(k, TA, Qs);
       }
       else{
-        TA = TA*constants::bindep_A;  
+        TA = TA*bindep_A;  
         return mv->Phit(k, TA, Qs);
       }
     }
   }
   else if (BK==2){
     if(useFluc==1){
-      TA = TA*constants::bdep_fluc_A;
+      TA = TA*bdep_fluc_A;
       double rv = constants::BKfraction*mv->PhitBK(k, TA, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
       return rv;
     }
     else{
       if(bdep==1){
-        TA = TA*constants::bdep_A;
+        TA = TA*bdep_A;
         double rv = constants::BKfraction*mv->PhitBK(k, TA, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
         return rv;
       }
       else{
-        TA = TA*constants::bindep_A;  
+        TA = TA*bindep_A;  
         double rv = constants::BKfraction*mv->PhitBK(k, TA, x) + (1.-constants::BKfraction)*mv->Phit(k, TA, Qs);
         return rv;
       }
@@ -286,53 +296,53 @@ double StFGBW(double k, double TA, double Qs){
 } 
 
 // choose between MV and BK 
-double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc){
+double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc, double bindep_A, double bdep_A, double bdep_fluc_A){
   if(BK==1){
     if(useFluc==1){
-      TA = TA*constants::bdep_fluc_A;
+      TA = TA*bdep_fluc_A;
       return mv->StFBK(k, TA, x);
     }
     else{
       if(bdep==1){
-        TA = TA*constants::bdep_A;
+        TA = TA*bdep_A;
         return mv->StFBK(k, TA, x);
       }
       else{
-        TA = TA*constants::bindep_A;
+        TA = TA*bindep_A;
         return mv->StFBK(k, TA, x);
       }
     }
   } 
   else if (BK==0){
     if(useFluc==1){
-      TA = TA*constants::bdep_fluc_A;
+      TA = TA*bdep_fluc_A;
       return mv->StF(k, TA, Qs);
     }
     else{
       if(bdep==1){
-        TA = TA*constants::bdep_A;
+        TA = TA*bdep_A;
         return mv->StF(k, TA, Qs);
       }
       else{
-        TA = TA*constants::bindep_A;  
+        TA = TA*bindep_A;  
         return mv->StF(k, TA, Qs);
       }
     }
   }
   else if(BK==2){
     if(useFluc==1){
-      TA = TA*constants::bdep_fluc_A;
+      TA = TA*bdep_fluc_A;
       double rv = constants::BKfraction*mv->StFBK(k, TA, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
       return rv;
     }
     else{
       if(bdep==1){
-        TA = TA*constants::bdep_A;
+        TA = TA*bdep_A;
         double rv = constants::BKfraction*mv->StFBK(k, TA, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
         return rv;
       }
       else{
-        TA = TA*constants::bindep_A;
+        TA = TA*bindep_A;
         double rv = constants::BKfraction*mv->StFBK(k, TA, x) + (1.-constants::BKfraction)*mv->StF(k, TA, Qs);
         return rv;
       }
@@ -369,6 +379,14 @@ static int JPsiIntegrandNRQCDCsNob(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double Bp = static_cast<params*>(userdata)->Bp;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -422,10 +440,10 @@ static int JPsiIntegrandNRQCDCsNob(const int *ndim, const cubareal xx[],
     }
     else{
      f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-        *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_cs
-        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
-        *constants::sigma02
-        *constants::PI*constants::rt2
+       *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_cs
+       *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
+        *sigma02
+        *constants::PI*rt2
         *p*pscale*2.*constants::PI
         *k*kscale*2.*constants::PI
         *k1*kscale*2.*constants::PI
@@ -442,7 +460,6 @@ static int JPsiIntegrandNRQCDCsNob(const int *ndim, const cubareal xx[],
   }
   return 0;
 } 
-
 
 static int JPsiIntegrandNRQCDCoNob(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
@@ -463,6 +480,14 @@ static int JPsiIntegrandNRQCDCoNob(const int *ndim, const cubareal xx[],
   int useFluc = static_cast<params*>(userdata)->useFluc;
 
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -512,10 +537,10 @@ static int JPsiIntegrandNRQCDCoNob(const int *ndim, const cubareal xx[],
     double myTA = 1.;
  
     f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-        *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_co
-        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
-        *constants::sigma02
-        *constants::PI*constants::rt2
+      *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
+        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
+        *sigma02
+        *constants::PI*rt2
         *p*pscale*2.*constants::PI
         *k*kscale*2.*constants::PI
         *k1*kscale*2.*constants::PI; 
@@ -555,6 +580,14 @@ static int JPsiIntegrandNRQCDCsNobNoPT(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -608,12 +641,12 @@ static int JPsiIntegrandNRQCDCsNobNoPT(const int *ndim, const cubareal xx[],
   }
   else{
     f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_cs
-      *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA
-      *StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA
-      *StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
-      *constants::sigma02
-      *constants::PI*constants::rt2
+      *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_cs
+      *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
+      *StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
+      *StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
+      *sigma02
+      *constants::PI*rt2
       *p*2.*constants::PI
       *k*kscale*2.*constants::PI
       *k1*kscale*2.*constants::PI
@@ -648,6 +681,14 @@ static int JPsiIntegrandNRQCDCoNobNoPT(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -697,10 +738,10 @@ static int JPsiIntegrandNRQCDCoNobNoPT(const int *ndim, const cubareal xx[],
     double myTA = 1.;
    
     f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-        *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_co
-        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
-        *constants::sigma02
-        *constants::PI*constants::rt2
+      *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
+        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
+        *sigma02
+        *constants::PI*rt2
         *p*2.*constants::PI
         *k*kscale*2.*constants::PI
         *k1*kscale*2.*constants::PI; 
@@ -748,6 +789,14 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   int useFluc = static_cast<params*>(userdata)->useFluc;
 
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -809,8 +858,8 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   }
   else{
     f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_cs
-      *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
+      *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_cs
+      *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
       *R*Rscale*2.*constants::PI
       *b*bscale*2.*constants::PI
       *p*pscale*2.*constants::PI
@@ -855,6 +904,14 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   int useFluc = static_cast<params*>(userdata)->useFluc;
 
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -910,8 +967,8 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
     double myTA = returnTA(Rminusb,TAclass); 
     
     f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_co
-      *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
+      *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
+      *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
       *R*Rscale*2.*constants::PI
       *b*bscale*2.*constants::PI
       *p*pscale*2.*constants::PI
@@ -959,6 +1016,14 @@ static int JPsiIntegrandNRQCDCsNoPT(const int *ndim, const cubareal xx[],
   int useFluc = static_cast<params*>(userdata)->useFluc;
 
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -1019,8 +1084,8 @@ static int JPsiIntegrandNRQCDCsNoPT(const int *ndim, const cubareal xx[],
     }
     else{
         f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-        *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_cs
-        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc)*factorxA)
+          *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_cs
+        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
         *R*Rscale*2.*constants::PI
         *b*bscale*2.*constants::PI
         *p*2.*constants::PI
@@ -1063,6 +1128,14 @@ static int JPsiIntegrandNRQCDCoNoPT(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -1118,8 +1191,8 @@ static int JPsiIntegrandNRQCDCoNoPT(const int *ndim, const cubareal xx[],
     double myTA = returnTA(Rminusb,TAclass); 
   
      f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-        *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep)*factorxp/(k1*k1)*H_co
-        *(StF(k,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
+       *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
+        *(StF(k,myTA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,myTA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
         *R*Rscale*2.*constants::PI
         *b*bscale*2.*constants::PI
         *p*2.*constants::PI
@@ -1166,6 +1239,14 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -1225,8 +1306,8 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
     else
       {
         f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-          *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_cs
-          *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(kprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
+          *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p)*factorxp/(k1*k1)*H_cs
+          *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(kprime,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
           *Rscale*Rscale
           *p*pscale*2.*constants::PI
           *k*kscale*2.*constants::PI
@@ -1267,6 +1348,14 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -1324,8 +1413,8 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   else
     {
       f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-        *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_co
-        *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
+        *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p)*factorxp/(k1*k1)*H_co
+        *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
         *Rscale*Rscale
         *p*pscale*2.*constants::PI
         *k*kscale*2.*constants::PI
@@ -1369,6 +1458,14 @@ static int JPsiIntegrandNRQCDCsFlucNoPT(const int *ndim, const cubareal xx[],
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -1429,8 +1526,8 @@ static int JPsiIntegrandNRQCDCsFlucNoPT(const int *ndim, const cubareal xx[],
   else
     {
       f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-        *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_cs
-        *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(kprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
+        *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p)*factorxp/(k1*k1)*H_cs
+        *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(kprime,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
         *Rscale*Rscale
         *p*2.*constants::PI
         *k*kscale*2.*constants::PI
@@ -1470,6 +1567,14 @@ static int JPsiIntegrandNRQCDCoFlucNoPT(const int *ndim, const cubareal xx[],
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -1527,8 +1632,8 @@ static int JPsiIntegrandNRQCDCoFlucNoPT(const int *ndim, const cubareal xx[],
   else
     {
       f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-        *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H_co
-        *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(pminuskminusk1,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
+        *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p)*factorxp/(k1*k1)*H_co
+        *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
         *Rscale*Rscale
         *p*2.*constants::PI
         *k*kscale*2.*constants::PI
@@ -1569,6 +1674,14 @@ static int JPsiIntegrandAllNob(const int *ndim, const cubareal xx[],
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -1649,10 +1762,10 @@ static int JPsiIntegrandAllNob(const int *ndim, const cubareal xx[],
 
     f = constants::alphas*double(constants::Nc)*double(constants::Nc)
       /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, 0., Qsp, sizeFactor, mv, BK,xp,bdep)*factorxp/(k1*k1)*H*J
-      *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(k,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
-      *constants::sigma02
-      *constants::PI*constants::rt2
+      *Phip(k1, 0., Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp)*factorxp/(k1*k1)*H*J
+      *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(k,myTA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
+      *sigma02
+      *constants::PI*rt2
       //*2.*constants::PI*constants::Bp
       //*2.*constants::PI*constants::Bt
       *PT*pscale*2.*constants::PI
@@ -1709,6 +1822,14 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -1793,8 +1914,8 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
 
     f = constants::alphas*double(constants::Nc)*double(constants::Nc)
       /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, R, Qsp, sizeFactor, mv, BK,xp,bdep)*factorxp/(k1*k1)*H*J
-      *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA, bdep,useFluc)*factorxA*StF(k,myTA,QsA,mv, BK, xA,bdep,useFluc)*factorxA)
+      *Phip(k1, R, Qsp, sizeFactor, mv, BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H*J
+      *(StF(pplusqminusk1minusk,myTA,QsA,mv, BK, xA, bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(k,myTA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
       *R*Rscale*2.*constants::PI
       *b*bscale*2.*constants::PI
       *PT*pscale*2.*constants::PI
@@ -1847,6 +1968,14 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+ 
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -1937,8 +2066,8 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
   f = constants::alphas*double(constants::Nc)*double(constants::Nc)
     /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
-    *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp/(k1*k1)*H*J
-    *(StF(pplusqminusk1minusk,TA,QsA,mv, BK, xA,bdep,useFluc)*factorxA*StF(k,TA,QsA,mv,BK,xA,bdep,useFluc))*factorxA
+    *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p)*factorxp/(k1*k1)*H*J
+    *(StF(pplusqminusk1minusk,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(k,TA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A))*factorxA
     *Rscale*Rscale
     *PT*pscale*2.*constants::PI
     *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
@@ -1988,6 +2117,13 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
 
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
     
   double k = nobk*kscale;
   double p = nobp*pscale+lambda;
@@ -2011,11 +2147,11 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
   }
   else {
     f = constants::alphas/constants::CF/p/p/pow((2*constants::PI*constants::PI),3.)
-      *Phip(k, 0, Qsp, sizeFactor, mv, BK, xp,bdep)*factorxp
-      *Phit(sqrt(p*p + k*k - 2.*p*k*cos(phi-phik)), TA, QsA, mv, BK, xA,bdep,useFluc)*factorxA
+      *Phip(k, 0, Qsp, sizeFactor, mv, BK, xp,bdep, bdep_p, Bp)*factorxp
+      *Phit(sqrt(p*p + k*k - 2.*p*k*cos(phi-phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
       *2.*constants::PI*k*kscale  //kdkdphik
-      *constants::sigma02  //R-integral
-      *constants::PI*constants::rt2  // b-integral
+      *sigma02  //R-integral
+      *constants::PI*rt2  // b-integral
       *2.*constants::PI*pscale*p; //pdpdphip
     //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   }
@@ -2048,7 +2184,15 @@ static int Gluons(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
-  
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
+ 
   double xp = (gp*pscale+lambda)*exp(Y)/constants::roots;
   double xA = (gp*pscale+lambda)*exp(-Y)/constants::roots;
   double factorxA = pow(1.-xA,4.);
@@ -2077,7 +2221,7 @@ static int Gluons(const int *ndim, const cubareal xx[],
 
    double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
    f = constants::alphas/constants::CF/(p)/(p)/pow((2.*constants::PI*constants::PI),3.)
-     *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep)*Phit(sqrt((p)*(p) + k*k - 2.*p*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc)
+     *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep, bdep_p,Bp)*Phit(sqrt((p)*(p) + k*k - 2.*p*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)
      *2.*constants::PI*kscale*k  //kdkdphik
      *2.*constants::PI*Rscale*R  //RdRdphiR
      *2.*constants::PI*bscale*b  //bdbdphib
@@ -2118,6 +2262,14 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
   double Y = static_cast<params*>(userdata)->Y;
 
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -2145,8 +2297,8 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = constants::alphas/constants::CF/(fgp*pscale+lambda)/(fgp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
-      *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp
-      *Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc)*factorxA
+      *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p)*factorxp
+      *Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
       *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
       *Rscale*Rscale  //dRxdRy
       //    *bscale*bscale  //bdxdby
@@ -2178,6 +2330,14 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
   
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
+
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
 
@@ -2219,13 +2379,13 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
     
     f = Dh/z/z*J* 
       constants::alphas/constants::CF/pg/pg/pow((2.*constants::PI*constants::PI),3.)
-      *Phip(k, 0, Qsp, sizeFactor, mv, BK,xp,bdep)*factorxp
-      *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos(phi - phik)), TA, QsA, mv, BK, xA,bdep,useFluc)
+      *Phip(k, 0, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp)*factorxp
+      *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos(phi - phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)
       *factorxA
       *2.*constants::PI*kscale*k  //kdkdphik
       *2.*constants::PI*pscale*p //pdpdphip
-      *constants::sigma02  //R-integral
-      *constants::PI*constants::rt2;  // b-integral
+      *sigma02  //R-integral
+      *constants::PI*rt2;  // b-integral
     //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   }
   return 0;
@@ -2260,7 +2420,15 @@ static int Hadrons(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
-  
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
+ 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
 
@@ -2305,8 +2473,8 @@ static int Hadrons(const int *ndim, const cubareal xx[],
     
     f = Dh/z/z*J* 
       constants::alphas/constants::CF/pg/pg/pow((2.*constants::PI*constants::PI),3.)
-      *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep)*factorxp
-      *Phit(sqrt((pg)*(pg) + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc)
+      *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp)*factorxp
+      *Phit(sqrt((pg)*(pg) + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)
       *factorxA
       *2.*constants::PI*kscale*k  //kdkdphik
       *2.*constants::PI*Rscale*R  //RdRdphiR
@@ -2347,6 +2515,14 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
   double eta = Y;
   double Qsp=0.;
   double QsA=0.;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
 
   int BK = static_cast<params*>(userdata)->BK;
   int bdep = static_cast<params*>(userdata)->bdep;
@@ -2392,8 +2568,8 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh/z/z*J* 
       constants::alphas/constants::CF/(pg)/(pg)/pow((2*constants::PI*constants::PI),3.)
-      *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp)*factorxp
-      *Phit(sqrt(pg*pg + fgk*fgk*kscale*kscale - 2.*pg*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc)*factorxA
+      *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p)*factorxp
+      *Phit(sqrt(pg*pg + fgk*fgk*kscale*kscale - 2.*pg*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
       *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
       *Rscale*Rscale  //dRxdRy
       //    *bscale*bscale  //bdxdby
@@ -2421,6 +2597,18 @@ int main(int argc, char *argv[]) {
   double YJPsi1 = 2.73;
   double YJPsi2 = -3.71;
   int xsec = 0;
+  double Bp = 4.; // GeV^-2
+  double Bq = 0.3;
+  double sigma02In = 9.; // mb
+  double RA = 5.5; // fm
+  const double oomph = 2.21; //for Pb
+
+  // initialize MPI
+  MPI_Init(&argc, &argv);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank); // get current process id
+  MPI_Comm_size(MPI_COMM_WORLD, &size); // get number of processes
+
+  params data;
 
   std::vector <std::string> sources;
   std::string destination;
@@ -2524,8 +2712,44 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--sigma02") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        sigma02In = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--sigma02 is sigma_0/2 in [mb], this option requires one argument, a double >0" << std::endl;
+        return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "--RA") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        RA = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--RA is the radius of the target nucleus in fm; this option requires one argument, a double >0" << std::endl;
+        return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "--Bp") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        Bp = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--Bp is the size of the proton in GeV^(-2); this option requires one argument, a double >0" << std::endl;
+        return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "--Bq") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        Bq = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--Bq is the size of a hotspot in GeV^(-2); this option requires one argument, a double >0" << std::endl;
+        return 1;
+      }  
+    }
     else if (std::string(argv[i]) == "-?") {
-      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1)" << endl;
+      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0.], --RA [>0.], --Bp [>0.], --Bq [>0.])" << endl;
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
         i++;
         exit(0);
@@ -2534,18 +2758,24 @@ int main(int argc, char *argv[]) {
       }  
     }
   }
-    
-  // initialize MPI
-  MPI_Init(&argc, &argv);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank); // get current process id
-  MPI_Comm_size(MPI_COMM_WORLD, &size); // get number of processes
-  
+
+  data.Bp=Bp;
+  data.Bq=Bq;
+  data.sigma02 = sigma02In/10./constants::hbarc/constants::hbarc; 
+  data.rt2 =  pow(RA,2.)/constants::hbarc/constants::hbarc;//(1.69/constants::hbarc/constants::hbarc)*pow(A,2./3.);// assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
+  data.bdep_p = data.sigma02/2./constants::PI/data.Bp;
+  data.bdep_A = oomph*data.bdep_p;// this is for Pb 
+  //  const double bindep_A = 1./(oomph*(1.69/constants::hbarc/constants::hbarc)/pow(A,1./3.)/2./Bp)*bdep_A; // assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
+  data.bindep_A = constants::A*data.sigma02/constants::PI/data.rt2; 
+  data.bdep_fluc_p = data.bdep_p;
+  data.bdep_fluc_A = data.bdep_p; // same as for the proton
+
   int h5Flag = 0;
   pretty_ostream messenger;
   
   
   if (rank==0){
-    cout << "Options: read dipole from file yes(1)/no(0)= " << readTable 
+    cout << "Options: \n read dipole from file yes(1)/no(0)= " << readTable 
          << "\n fluctuations on(1)/off(0) = " << useFluc 
          << "\n Number of events = " << Nevents 
          << "\n NRQCD on(1)/off(0) = " << NRQCD 
@@ -2557,8 +2787,19 @@ int main(int argc, char *argv[]) {
          << "\n YJPsi2 = " << YJPsi2 
          << "\n cross section mode on(1)/off(0) = " << xsec 
          << endl;
+    cout << " sigma02 = " << sigma02In << " mb" << endl;
+    cout << " sigma02 = " << data.sigma02 << " GeV^(-2)" << endl;
+    cout << " RA = " << RA << " fm" << endl;
+    cout << " rt2 (from RA) = " << data.rt2 << " GeV^(-2)" << endl;
+    cout << " Bp = " << data.Bp << " GeV^(-2)" << endl;
+    cout << " Bq = " << data.Bq << " GeV^(-2)" << endl;
+    cout << " bdep_p = " << data.bdep_p << endl;
+    cout << " bdep_A = " << data.bdep_A << endl;
+    cout << " bindep_A = " << data.bindep_A << endl;
+
     messenger.flush("info");
   }
+
   
   long int seed = time(NULL)+rank*100000;
   //long int seed = 1;
@@ -2574,7 +2815,7 @@ int main(int argc, char *argv[]) {
   Glauber *glauber;
   glauber = new Glauber(Glauber_param);
   glauber->init(random);
-  glauber->makeNuclei(random, constants::Bp, constants::Bq);
+  glauber->makeNuclei(random, data.Bp, data.Bq);
 
   TAInt *TAclass;
   TAclass = new TAInt();
@@ -2613,23 +2854,23 @@ int main(int argc, char *argv[]) {
   }
 
 
-  //test Phit
+ //  //test Phit
  
-  stringstream strfilenamet;
-  strfilenamet << "Phit.dat";
-  string filenamet;
-  filenamet = strfilenamet.str();
-  fstream foutt(filenamet.c_str(), ios::out);
-  double QsIn = constants::prefactor*pow(constants::x0/0.00001,constants::lambdaSpeedp/2.);
-  cout << "Qs=" << QsIn << endl;
-  for (int ik=0; ik<1000; ik++){
-   double k = ik*0.01;
-   //    double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc){
-   foutt << k << " " << Phit(k, 1., QsIn, mv, BK, 0.00001, 1, 0)  << endl;
- }
+ //  stringstream strfilenamet;
+ //  strfilenamet << "Phit.dat";
+ //  string filenamet;
+ //  filenamet = strfilenamet.str();
+ //  fstream foutt(filenamet.c_str(), ios::out);
+ //  double QsIn = constants::prefactor*pow(constants::x0/0.00001,constants::lambdaSpeedp/2.);
+ //  //  cout << "Qs=" << QsIn << endl;
+ //  for (int ik=0; ik<1000; ik++){
+ //   double k = ik*0.01;
+ //   //    double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, int useFluc){
+ //   foutt << k << " " << Phit(k, 1., QsIn, mv, BK, 0.00001, 1, 0)  << endl;
+ // }
 
 
-    // Cuba's parameters for integration
+  // Cuba's parameters for integration
   int NDIM = 9;
   int NCOMP = 1;
   const long long int NVEC = 1;
@@ -2659,7 +2900,6 @@ int main(int argc, char *argv[]) {
 
   cubareal integral[NCOMP], error[NCOMP], prob[NCOMP];
 
-  params data;
 
   double gresult = 0.;
   double gerror = 0.;
@@ -2699,8 +2939,8 @@ int main(int argc, char *argv[]) {
     cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl; 
     if(bdep == 0){
       cout << "b-independent results"  << endl;
-      for(int i=0; i<11;i++){
-        data.Y = -5.+i;
+      for(int i=0; i<9;i++){
+        data.Y = -4.+i;
         NDIM = 4;
         llVegas(NDIM, NCOMP, GluonsNoB, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
@@ -2763,8 +3003,8 @@ int main(int argc, char *argv[]) {
     else{
       cout << "b-dependent results"  << endl;
       
-      for(int i=0; i<11;i++){
-        data.Y = -5.+i;
+      for(int i=0; i<9;i++){
+        data.Y = -4.+i;
         
         NDIM = 8;
         llVegas(NDIM, NCOMP, Gluons, &data, NVEC,
@@ -2835,12 +3075,12 @@ int main(int argc, char *argv[]) {
   }
   
   else{
-    cout << "Fluctuating b results"  << endl; 
+    cout << "Fluctuating results"  << endl; 
     int ni=0;
     while (ni<Nevents){
       // Run Vegas integration with fluctuations
       // Make a new target
-      glauber->makeNuclei(random, constants::Bp, constants::Bq);
+      glauber->makeNuclei(random, data.Bp, data.Bq);
       
       // Sample b
       double bmin = 0.;
@@ -2855,7 +3095,7 @@ int main(int argc, char *argv[]) {
       data.by = b*sin(phib);
       data.Y = Yg;
 
-      cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
+      //      cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
       
       // do hadrons next (one more (z) integral)
       NDIM = 7;
@@ -2909,7 +3149,7 @@ int main(int argc, char *argv[]) {
         
       
       if(NRQCD==1){
-        cout << "Using NRQCD"  << endl;
+        //        cout << "Using NRQCD"  << endl;
         
         data.Y = YJPsi1; //forward
          
@@ -2969,7 +3209,7 @@ int main(int argc, char *argv[]) {
       }
       
       else{
-        cout << "Using ICEM"  << endl;    
+        //cout << "Using ICEM"  << endl;    
  
         data.Y = YJPsi1; //forward
          
@@ -3002,7 +3242,8 @@ int main(int argc, char *argv[]) {
       }
       
       stringstream strfilename;
-      strfilename << "output_g_" << rank << ".dat";
+      strfilename << "output_g_Yg" << Yg << "_" << rank << ".dat";
+      //strfilename << "output_g_" << rank << ".dat";
       string filename;
       filename = strfilename.str();
       fstream fout(filename.c_str(), ios::app);
@@ -3015,7 +3256,8 @@ int main(int argc, char *argv[]) {
       fout.close();
 
       stringstream strfilenameh;
-      strfilenameh << "output_h_" << rank << ".dat";
+      strfilenameh << "output_h_Yg" << Yg << "_" << rank << ".dat";
+      //strfilenameh << "output_h_" << rank << ".dat";
       string filenameh;
       filenameh = strfilenameh.str();
       fstream fouth(filenameh.c_str(), ios::app);
