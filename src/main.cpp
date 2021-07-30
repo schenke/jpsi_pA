@@ -557,19 +557,20 @@ static int JPsiIntegrandNRQCDCoNob(const int *ndim, const cubareal xx[],
 }
 
 //////////////////////////////////////////////////////////
-///// b-independent J/Psi cross section for pt spectrum //
+///// b-independent J/Psi cross section for pt spectrum
+///// Sum of color singlet + color octet //
 /////////////////////////////////////////////////////////
 
-static int JPsiIntegrandNRQCDCsNobNoPT(const int *ndim, const cubareal xx[],
+static int JPsiIntegrandNRQCDNobNoPT(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-#define nobptcs4k xx[0]
-#define nobptcs4phik xx[1]
-#define nobptcs4k1 xx[2]
-#define nobptcs4phik1 xx[3]
-#define nobptcs4kprime xx[4]
-#define nobptcs4phikprime xx[5]
-#define nobptcs4phip xx[6]
+#define nobpt4k xx[0]
+#define nobpt4phik xx[1]
+#define nobpt4k1 xx[2]
+#define nobpt4phik1 xx[3]
+#define nobpt4kprime xx[4]
+#define nobpt4phikprime xx[5]
+#define nobpt4phip xx[6]
 
 
   double kscale = 30.;
@@ -595,14 +596,14 @@ static int JPsiIntegrandNRQCDCsNobNoPT(const int *ndim, const cubareal xx[],
   double m = constants::mc;//static_cast<params*>(userdata)->m;
 
   // scale the integration variables  
-  double p = PT;
-  double phip = nobptcs4phip*2.*constants::PI;
-  double k = nobptcs4k*kscale;
-  double phik = nobptcs4phik*2.*constants::PI;
-  double k1 = nobptcs4k1*kscale;
-  double phik1 = nobptcs4phik1*2.*constants::PI;
-  double kprime = nobptcs4kprime*kscale;
-  double phikprime = nobptcs4phikprime*2.*constants::PI;
+  double p = PT; // don't scale pT 
+  double phip = nobpt4phip*2.*constants::PI;
+  double k = nobpt4k*kscale;
+  double phik = nobpt4phik*2.*constants::PI;
+  double k1 = nobpt4k1*kscale;
+  double phik1 = nobpt4phik1*2.*constants::PI;
+  double kprime = nobpt4kprime*kscale;
+  double phikprime = nobpt4phikprime*2.*constants::PI;
   
   double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
   double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
@@ -635,22 +636,36 @@ static int JPsiIntegrandNRQCDCsNobNoPT(const int *ndim, const cubareal xx[],
   double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
  
   double myTA = 1.;
- 
-  if(pminuskminusk1minuskprime>30.){
-    f=0.;
-  }
-  else{
-    f = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_cs
+
+  double singlet = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_cs
       *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
       *StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
       *StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
       *sigma02
       *constants::PI*rt2
-      *p*2.*constants::PI
       *k*kscale*2.*constants::PI
       *k1*kscale*2.*constants::PI
       *kprime*kscale*2.*constants::PI; 
+  
+  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+      +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+      +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
+  
+  double pminuskminusk1x = px-kx-k1x;
+  double pminuskminusk1y = py-ky-k1y;
+  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
+                                    +pminuskminusk1y*pminuskminusk1y);
+
+  double octet = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
+        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
+        *sigma02
+        *constants::PI*rt2
+        *k*kscale*2.*constants::PI
+        *k1*kscale*2.*constants::PI; 
+
+    f = (singlet + octet)*p*2.*constants::PI;
     // scaled momenta above (in PT)
     // last rows are scaling of integration measures:
     // d2R
@@ -659,25 +674,35 @@ static int JPsiIntegrandNRQCDCsNobNoPT(const int *ndim, const cubareal xx[],
     // d2k
     // d2k1
     // d2kprime
-   }
+  
   }
   return 0;
 } 
 
-static int JPsiIntegrandNRQCDCoNobNoPT(const int *ndim, const cubareal xx[],
+/////////////////////////////////////////////
+///// b-independent J/Psi Mean pt calculation
+///// Sum of color singlet + color octet //
+//////////////////////////////////////////
+
+// Numerator
+static int JPsiIntegrandNRQCDNobAvPtNum(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-#define nobptco4k xx[0]
-#define nobptco4phik xx[1]
-#define nobptco4k1 xx[2]
-#define nobptco4phik1 xx[3]
-#define nobptco4phip xx[4]
+#define nobavpt4k xx[0]
+#define nobavpt4phik xx[1]
+#define nobavpt4k1 xx[2]
+#define nobavpt4phik1 xx[3]
+#define nobavpt4kprime xx[4]
+#define nobavpt4phikprime xx[5]
+#define nobavpt4p xx[6]
+#define nobavpt4phip xx[7]
+
 
   double kscale = 30.;
+  double pscale = 30.;
 
   int BK = static_cast<params*>(userdata)->BK;
   double Y = static_cast<params*>(userdata)->Y;
-  double PT = static_cast<params*>(userdata)->PT;
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
@@ -696,67 +721,210 @@ static int JPsiIntegrandNRQCDCoNobNoPT(const int *ndim, const cubareal xx[],
   double m = constants::mc;//static_cast<params*>(userdata)->m;
 
   // scale the integration variables  
-  double p = PT;
-  double phip = nobptco4phip*2.*constants::PI;
-  double k = nobptco4k*kscale;
-  double phik = nobptco4phik*2.*constants::PI;
-  double k1 = nobptco4k1*kscale;
-  double phik1 = nobptco4phik1*2.*constants::PI;
+  double p = nobavpt4p*pscale; 
+  double phip = nobavpt4phip*2.*constants::PI;
+  double k = nobavpt4k*kscale;
+  double phik = nobavpt4phik*2.*constants::PI;
+  double k1 = nobavpt4k1*kscale;
+  double phik1 = nobavpt4phik1*2.*constants::PI;
+  double kprime = nobavpt4kprime*kscale;
+  double phikprime = nobavpt4phikprime*2.*constants::PI;
   
   double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
   double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
   
-  //!!
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
   if (xp>1.){
     f = 0;
   }
-
   else if (xA>1.){
     f= 0;
   }
   else {
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   // get sums of vectors
-    double px = p*cos(phip); 
-    double py = p*sin(phip);
-    double kx = k*cos(phik);
-    double ky = k*sin(phik);
-    double k1x = k1*cos(phik1);
-    double k1y = k1*sin(phik1);
-    double pminuskminusk1x = px-kx-k1x;
-    double pminuskminusk1y = py-ky-k1y;
-    double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
-                                    +pminuskminusk1y*pminuskminusk1y);
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double kprimex = kprime*cos(phikprime);
+  double kprimey = kprime*sin(phikprime);
+  double pminuskminusk1minuskprimex = px-kx-k1x-kprimex;
+  double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
+  double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
+                                    +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
   
-    double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
-                +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
+  double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
  
-    double myTA = 1.;
-   
-    f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
-      *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
+  double myTA = 1.;
+
+  
+  double pminuskminusk1x = px-kx-k1x;
+  double pminuskminusk1y = py-ky-k1y;
+  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
+                                    +pminuskminusk1y*pminuskminusk1y);
+
+  double singlet = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep,bdep_p,Bp)*factorxp/(k1*k1)*H_cs
+      *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
+      *StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
+      *StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
+      *sigma02
+      *constants::PI*rt2
+      *k*kscale*2.*constants::PI
+      *k1*kscale*2.*constants::PI
+      *kprime*kscale*2.*constants::PI; 
+  
+  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+      +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+      +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
+
+  double octet = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
         *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
         *sigma02
         *constants::PI*rt2
-        *p*2.*constants::PI
         *k*kscale*2.*constants::PI
         *k1*kscale*2.*constants::PI; 
-  // scaled momenta above (in PT)
-  // last rows are scaling of integration measures:
-  // d2R
-  // d2b
-  // pdphip
-  // d2k
-  // d2k1
-   
+
+  f = (singlet + octet)*p*p*pscale*2.*constants::PI;
+    // scaled momenta above (in PT)
+    // last rows are scaling of integration measures:
+    // d2R
+    // d2b
+    // pd^2p
+    // d2k
+    // d2k1
+    // d2kprime
+  
   }
   return 0;
-}
+} 
 
+// Denominator
+static int JPsiIntegrandNRQCDNobAvPtDen(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define nobavptden4k xx[0]
+#define nobavptden4phik xx[1]
+#define nobavptden4k1 xx[2]
+#define nobavptden4phik1 xx[3]
+#define nobavptden4kprime xx[4]
+#define nobavptden4phikprime xx[5]
+#define nobavptden4p xx[6]
+#define nobavptden4phip xx[7]
+
+
+  double kscale = 30.;
+  double pscale = 30.;
+
+  int BK = static_cast<params*>(userdata)->BK;
+  double Y = static_cast<params*>(userdata)->Y;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables  
+  double p = nobavptden4p*pscale; 
+  double phip = nobavptden4phip*2.*constants::PI;
+  double k = nobavptden4k*kscale;
+  double phik = nobavptden4phik*2.*constants::PI;
+  double k1 = nobavptden4k1*kscale;
+  double phik1 = nobavptden4phik1*2.*constants::PI;
+  double kprime = nobavptden4kprime*kscale;
+  double phikprime = nobavptden4phikprime*2.*constants::PI;
+  
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
+  if (xp>1.){
+    f = 0;
+  }
+  else if (xA>1.){
+    f= 0;
+  }
+  else {
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double kprimex = kprime*cos(phikprime);
+  double kprimey = kprime*sin(phikprime);
+  double pminuskminusk1minuskprimex = px-kx-k1x-kprimex;
+  double pminuskminusk1minuskprimey = py-ky-k1y-kprimey;
+  double pminuskminusk1minuskprime = sqrt(pminuskminusk1minuskprimex*pminuskminusk1minuskprimex
+                                    +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
+  
+  double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
+ 
+  double myTA = 1.;
+
+
+  double singlet = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_cs
+      *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
+      *StF(kprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
+      *StF(pminuskminusk1minuskprime,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
+      *sigma02
+      *constants::PI*rt2
+      *k*kscale*2.*constants::PI
+      *k1*kscale*2.*constants::PI
+      *kprime*kscale*2.*constants::PI; 
+  
+  double pminuskminusk1x = px-kx-k1x;
+  double pminuskminusk1y = py-ky-k1y;
+  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
+                                    +pminuskminusk1y*pminuskminusk1y);
+
+  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+      +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+      +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
+
+  double octet = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
+        *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
+        *sigma02
+        *constants::PI*rt2
+        *k*kscale*2.*constants::PI
+        *k1*kscale*2.*constants::PI; 
+
+  f = (singlet + octet)*p*pscale*2.*constants::PI;
+    // scaled momenta above (in PT)
+    // last rows are scaling of integration measures:
+    // d2R
+    // d2b
+    // pd^2p
+    // d2k
+    // d2k1
+    // d2kprime
+  
+  }
+  return 0;
+} 
 //////////////////////////////////////////////////
 ///// b-dependent J/Psi cross section ///////////
 /////////////////////////////////////////////////
@@ -2919,6 +3087,15 @@ int main(int argc, char *argv[]) {
   double JPsi2result2 = 0.;
   double JPsi2error2 = 0.;
 
+  double meanPtresult_num = 0;
+  double meanPterror_num = 0;
+
+  double meanPtresult_den = 0;
+  double meanPterror_den = 0;
+
+  double meanPtresult = 0;
+  double meanPterror = 0;
+
   data.useFluc = useFluc;
   data.bdep = bdep;
   data.BK = BK;
@@ -2983,6 +3160,29 @@ int main(int argc, char *argv[]) {
           
           JPsi2result = JPsi2result_cs + JPsi2result_co;
           JPsi2error = JPsi2error_cs + JPsi2error_co;
+
+          // Code to compute the mean pT
+          // NDIM = 8;
+          // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtNum, &data, NVEC,
+          //         EPSREL, EPSABS, VERBOSE, SEED,
+          //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+          //         GRIDNO, NULL, NULL,
+          //         &neval, &fail, integral, error, prob);
+
+          // meanPtresult_num= (double)integral[0];
+          // meanPterror_num = (double)error[0];
+
+          // NDIM = 8;
+          // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtDen, &data, NVEC,
+          //         EPSREL, EPSABS, VERBOSE, SEED,
+          //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+          //         GRIDNO, NULL, NULL,
+          //         &neval, &fail, integral, error, prob);
+
+          // meanPtresult_den = (double)integral[0];
+          // meanPterror_den = (double)error[0];
+
+
         }
         else{
           //cout << "Using ICEM"  << endl;    
