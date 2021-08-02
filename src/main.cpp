@@ -2793,6 +2793,94 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
 }
 
 /////////////////////////////////////////////////////
+//////// b independent hadron <pt> ///////////
+/////////////////////////////////////////////////////
+
+// Numerator 
+
+static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define hnobavptnumk xx[0]
+#define hnobavptnumphik xx[1]
+#define hnobavptnump xx[2]
+#define hnobavptnumphi xx[3]
+
+  double z = xx[4];
+  double mh = 0.3; //GeV
+
+  double kscale = 30.;
+  double pscale = 30.;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+  double lambda = static_cast<params*>(userdata)->lambda;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double Y = static_cast<params*>(userdata)->Y;
+  
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double phi = 2.*constants::PI*hnobavptnumphi;
+  double phik = 2.*constants::PI*hnobavptnumphik;
+
+  double k = hnobavptnumk*kscale;
+  double p = hnobavptnump*pscale+lambda;
+
+  double eta = Y;
+  double pg = p/z;
+  
+  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  
+  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+  
+  double xp = pg*exp(yg)/constants::roots;
+  double xA = pg*exp(-yg)/constants::roots;
+
+  if (xp>1.){
+    f = 0.;
+  }
+  else if (xA>1.){
+    f = 0.;
+  }
+  else if (pg>30.){
+    f = 0.;
+  }    
+  else{
+    double factorxA = pow(1.-xA,4.);
+    double factorxp = pow(1.-xp,4.);
+    
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    
+    double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
+    
+    f = Dh/z/z*J* 
+      constants::alphas/constants::CF/pg/pg/pow((2.*constants::PI*constants::PI),3.)
+      *Phip(k, 0, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp)*factorxp
+      *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos(phi - phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)
+      *factorxA
+      *2.*constants::PI*kscale*k  //kdkdphik
+      *2.*constants::PI*pscale*p*p //p^2dpdphip
+      *sigma02  //R-integral
+      *constants::PI*rt2;  // b-integral
+    //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+  }
+  return 0;
+}
+
+
+/////////////////////////////////////////////////////
 //////// b dependent hadron cross section ///////////
 /////////////////////////////////////////////////////
 
@@ -2881,6 +2969,100 @@ static int Hadrons(const int *ndim, const cubareal xx[],
       *2.*constants::PI*Rscale*R  //RdRdphiR
       *2.*constants::PI*bscale*b  //bdbdphib
       *2.*constants::PI*pscale*p; //pdpdphip
+    //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+  }
+  return 0;
+}
+
+/////////////////////////////////////////////
+//////// b dependent hadron <pt> ///////////
+////////////////////////////////////////////
+
+static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define havptnumk xx[0]
+#define havptnumphik xx[1]
+#define havptnumR xx[2]
+#define havptnumphiR xx[3]
+#define havptnumb xx[4]
+#define havptnumphib xx[5]
+#define havptnumphi xx[6]
+#define havptnump xx[7]
+
+  double z = xx[8];
+  double mh = 0.3; //GeV
+
+  double kscale = 30.;
+  double pscale = 30.;
+  double Rscale = 2./constants::hbarc;
+  double bscale = 12./constants::hbarc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+  double lambda = static_cast<params*>(userdata)->lambda;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double Y = static_cast<params*>(userdata)->Y;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
+ 
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double phi = 2.*constants::PI*havptnumphi;
+  double phik = 2.*constants::PI*havptnumphik;
+  double phiR = 2.*constants::PI*havptnumphiR;
+  double phib = 2.*constants::PI*havptnumphib;
+  double k = havptnumk*kscale;
+  double p = havptnump*pscale+lambda;
+  double R = havptnumR*Rscale;
+  double b = havptnumb*bscale;
+
+  double eta = Y;
+  double pg = p/z;
+  
+  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  
+  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+  
+  double xp = pg*exp(yg)/constants::roots;
+  double xA = pg*exp(-yg)/constants::roots;
+
+  if (xp>1.){
+    f = 0.;
+  }
+  else if (xA>1.){
+    f = 0.;
+  }
+  else if (pg>30.){
+    f = 0.;
+  }    
+  else{
+    double factorxA = pow(1.-xA,4.);
+    double factorxp = pow(1.-xp,4.);
+    
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    
+    double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
+    
+    f = Dh/z/z*J* 
+      constants::alphas/constants::CF/pg/pg/pow((2.*constants::PI*constants::PI),3.)
+      *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp)*factorxp
+      *Phit(sqrt((pg)*(pg) + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)
+      *factorxA
+      *2.*constants::PI*kscale*k  //kdkdphik
+      *2.*constants::PI*Rscale*R  //RdRdphiR
+      *2.*constants::PI*bscale*b  //bdbdphib
+      *2.*constants::PI*pscale*p*p; //p^2dpdphip
     //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   }
   return 0;
@@ -3307,6 +3489,10 @@ int main(int argc, char *argv[]) {
 
   double hresult = 0.;
   double herror = 0.;
+  
+  double hmeanPt = 0;
+  double hmeanPtresult_error = 0;
+  double hmeanPtresult_num = 0;
 
   double JPsi2result = 0.;
   double JPsi2error = 0.;
@@ -3326,8 +3512,7 @@ int main(int argc, char *argv[]) {
   double meanPtresult_den = 0;
   double meanPterror_den = 0;
 
-  double meanPtresult = 0;
-  double meanPterror = 0;
+  double Jpsi2meanPtresult = 0;
 
   data.useFluc = useFluc;
   data.bdep = bdep;
@@ -3350,27 +3535,7 @@ int main(int argc, char *argv[]) {
     if(bdep == 0){
       cout << "b-independent results"  << endl;
         // Code to compute the mean pT
-         NDIM = 8;
-         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtNum, &data, NVEC,
-                 EPSREL, EPSABS, VERBOSE, SEED,
-                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                 GRIDNO, NULL, NULL,
-                 &neval, &fail, integral, error, prob);
-
-         meanPtresult_num= (double)integral[0];
-         meanPterror_num = (double)error[0];
-
-         NDIM = 8;
-         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtDen, &data, NVEC,
-                 EPSREL, EPSABS, VERBOSE, SEED,
-                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                 GRIDNO, NULL, NULL,
-                 &neval, &fail, integral, error, prob);
-
-         meanPtresult_den = (double)integral[0];
-         meanPterror_den = (double)error[0];
-
-      cout << meanPtresult_num/meanPtresult_den << endl;
+      
       for(int i=0; i<9;i++){
         data.Y = -4.+i;
         NDIM = 4;
@@ -3390,7 +3555,17 @@ int main(int argc, char *argv[]) {
                 &neval, &fail, integral, error, prob);
         hresult = (double)integral[0];
         herror = (double)error[0];
+        
+        NDIM = 5;
+        llVegas(NDIM, NCOMP, HadronsNoBAvPtNum, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        hmeanPtresult_num = (double)integral[0];
+        hmeanPtresult_error = (double)error[0];
 
+        hmeanPt = hmeanPtresult_num/hresult;
         
         if(NRQCD==1){
           //    cout << "Using NRQCD"  << endl;
@@ -3416,7 +3591,27 @@ int main(int argc, char *argv[]) {
           JPsi2result = JPsi2result_cs + JPsi2result_co;
           JPsi2error = JPsi2error_cs + JPsi2error_co;
 
+          NDIM = 8;
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtNum, &data, NVEC,
+                 EPSREL, EPSABS, VERBOSE, SEED,
+                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                 GRIDNO, NULL, NULL,
+                 &neval, &fail, integral, error, prob);
 
+         meanPtresult_num= (double)integral[0];
+         meanPterror_num = (double)error[0];
+
+          NDIM = 8;
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtDen, &data, NVEC,
+                 EPSREL, EPSABS, VERBOSE, SEED,
+                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                 GRIDNO, NULL, NULL,
+                 &neval, &fail, integral, error, prob);
+
+         meanPtresult_den = (double)integral[0];
+         meanPterror_den = (double)error[0];
+
+         Jpsi2meanPtresult = meanPtresult_num/meanPtresult_den;
 
         }
         else{
@@ -3431,8 +3626,8 @@ int main(int argc, char *argv[]) {
           JPsi2error = (double)error[0];  
         }
         cout << data.Y << " " << setprecision(10) << gresult << " " << gerror << " " 
-             << hresult << " " << herror << " " << JPsi2result
-             << " " << JPsi2error << endl;
+             << hresult << " " << herror << " " << hmeanPt << " " << JPsi2result
+             << " " << JPsi2error << " " << Jpsi2meanPtresult << endl;
       }
     }
     else{
@@ -3461,6 +3656,17 @@ int main(int argc, char *argv[]) {
         hresult = (double)integral[0];
         herror = (double)error[0];
         //cout <<  std::setprecision(8) << hresult << endl;
+
+        NDIM = 9;
+        llVegas(NDIM, NCOMP, HadronsAvPtNum, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        hmeanPtresult_num = (double)integral[0];
+        hmeanPtresult_error = (double)error[0];
+
+        hmeanPt = hmeanPtresult_num/hresult;
         
         if(NRQCD==1){
           //cout << "Using NRQCD"  << endl;
@@ -3486,6 +3692,28 @@ int main(int argc, char *argv[]) {
           JPsi2result = JPsi2result_cs + JPsi2result_co;
           JPsi2error = JPsi2error_cs + JPsi2error_co;
 
+          NDIM = 12;
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtNum, &data, NVEC,
+                 EPSREL, EPSABS, VERBOSE, SEED,
+                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                 GRIDNO, NULL, NULL,
+                 &neval, &fail, integral, error, prob);
+
+         meanPtresult_num= (double)integral[0];
+         meanPterror_num = (double)error[0];
+
+          NDIM = 12;
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtDen, &data, NVEC,
+                 EPSREL, EPSABS, VERBOSE, SEED,
+                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                 GRIDNO, NULL, NULL,
+                 &neval, &fail, integral, error, prob);
+
+         meanPtresult_den = (double)integral[0];
+         meanPterror_den = (double)error[0];
+
+         Jpsi2meanPtresult = meanPtresult_num/meanPtresult_den;
+ 
           //          cout << data.Y << " " << gresult << " " << hresult << " " << JPsi2result_cs+JPsi2result_co << endl;
         }
         else{
@@ -3501,8 +3729,8 @@ int main(int argc, char *argv[]) {
           //cout << data.Y << " " << gresult << " " << hresult << " " << JPsi2result << endl;
         }
         cout << data.Y << " " << setprecision(10) << gresult << " " << gerror << " " 
-             << hresult << " " << herror << " " << JPsi2result
-             << " " << JPsi2error << endl;
+             << hresult << " " << herror << " " << hmeanPt << "  " << JPsi2result
+             << " " << JPsi2error << " " << Jpsi2meanPtresult << endl;
   
       }
     }
