@@ -529,7 +529,12 @@ static int JPsiIntegrandNRQCDCoNob(const int *ndim, const cubareal xx[],
     double pminuskminusk1y = py-ky-k1y;
     double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
                                     +pminuskminusk1y*pminuskminusk1y);
-  
+    
+    if(pminuskminusk1>30.){
+    f=0.;
+  }
+  else
+    {
     double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
@@ -551,7 +556,7 @@ static int JPsiIntegrandNRQCDCoNob(const int *ndim, const cubareal xx[],
   // d2p
   // d2k
   // d2k1
-   
+    }
   }
   return 0;
 }
@@ -656,7 +661,12 @@ static int JPsiIntegrandNRQCDNobNoPT(const int *ndim, const cubareal xx[],
   double pminuskminusk1y = py-ky-k1y;
   double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
                                     +pminuskminusk1y*pminuskminusk1y);
-
+  
+  if(pminuskminusk1>30. || pminuskminusk1minuskprime > 30.){
+    f=0.;
+  }
+  else
+    {
   double octet = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
         *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
@@ -674,7 +684,7 @@ static int JPsiIntegrandNRQCDNobNoPT(const int *ndim, const cubareal xx[],
     // d2k
     // d2k1
     // d2kprime
-  
+    }
   }
   return 0;
 } 
@@ -767,7 +777,12 @@ static int JPsiIntegrandNRQCDNobAvPtNum(const int *ndim, const cubareal xx[],
   double pminuskminusk1y = py-ky-k1y;
   double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
                                     +pminuskminusk1y*pminuskminusk1y);
-
+  
+  if(pminuskminusk1>30. || pminuskminusk1minuskprime > 30.){
+    f=0.;
+  }
+  else
+    {
   double singlet = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep,bdep_p,Bp)*factorxp/(k1*k1)*H_cs
       *(StF(k,myTA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA
@@ -800,7 +815,7 @@ static int JPsiIntegrandNRQCDNobAvPtNum(const int *ndim, const cubareal xx[],
     // d2k
     // d2k1
     // d2kprime
-  
+    }
   }
   return 0;
 } 
@@ -882,7 +897,22 @@ static int JPsiIntegrandNRQCDNobAvPtDen(const int *ndim, const cubareal xx[],
   double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
  
   double myTA = 1.;
-
+  
+  double pminuskminusk1x = px-kx-k1x;
+  double pminuskminusk1y = py-ky-k1y;
+  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
+                                    +pminuskminusk1y*pminuskminusk1y);
+  
+  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
+      +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
+      +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
+  
+  
+  if(pminuskminusk1>30. || pminuskminusk1minuskprime > 30.){
+    f=0.;
+  }
+  else
+    {
 
   double singlet = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_cs
@@ -894,15 +924,6 @@ static int JPsiIntegrandNRQCDNobAvPtDen(const int *ndim, const cubareal xx[],
       *k*kscale*2.*constants::PI
       *k1*kscale*2.*constants::PI
       *kprime*kscale*2.*constants::PI; 
-  
-  double pminuskminusk1x = px-kx-k1x;
-  double pminuskminusk1y = py-ky-k1y;
-  double pminuskminusk1 = sqrt(pminuskminusk1x*pminuskminusk1x
-                                    +pminuskminusk1y*pminuskminusk1y);
-
-  double H_co = constants::ldme_octet_s10*nrqcd::octets10(p, phip, k1, phik1, k, phik,m)
-      +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
-      +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
 
   double octet = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
     *Phip(k1, 0., Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
@@ -921,7 +942,7 @@ static int JPsiIntegrandNRQCDNobAvPtDen(const int *ndim, const cubareal xx[],
     // d2k
     // d2k1
     // d2kprime
-  
+    }
   }
   return 0;
 } 
@@ -1133,6 +1154,11 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
       +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
     
     double myTA = returnTA(Rminusb,TAclass); 
+    if(pminuskminusk1>30.){
+    f=0.;
+  }
+  else
+    {
     
     f = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
       *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
@@ -1149,7 +1175,7 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
     // d2p
     // d2k
     // d2k1
-    
+    }
   }
   return 0;
 } 
@@ -1267,7 +1293,11 @@ static int JPsiIntegrandNRQCDNoPT(const int *ndim, const cubareal xx[],
                 +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
  
-    
+    if(pminuskminusk1>30. || pminuskminusk1minuskprime > 30.){
+    f=0.;
+  }
+  else
+    {
     double octet = constants::alphas/(pow(2.*constants::PI,7.)*(double(constants::Nc)*double(constants::Nc)-1.))
        *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep, bdep_p, Bp)*factorxp/(k1*k1)*H_co
         *(StF(k,myTA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,myTA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
@@ -1286,6 +1316,7 @@ static int JPsiIntegrandNRQCDNoPT(const int *ndim, const cubareal xx[],
     // d2k
     // d2k1
     // d2kprime
+    }
    }
   return 0;
 } 
@@ -1395,6 +1426,12 @@ static int JPsiIntegrandNRQCDAvPtNum(const int *ndim, const cubareal xx[],
                                     +pminuskminusk1minuskprimey*pminuskminusk1minuskprimey);
     double phi_pminuskminusk1minuskprime = atan2(pminuskminusk1minuskprimey,pminuskminusk1minuskprimex);
 
+    if(pminuskminusk1>30. || pminuskminusk1minuskprime > 30.){
+    f=0.;
+    }
+    else
+    {
+
     double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
 
     double singlet = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
@@ -1426,6 +1463,7 @@ static int JPsiIntegrandNRQCDAvPtNum(const int *ndim, const cubareal xx[],
   // pd2p
   // d2k
   // d2k1
+    }
    
   }
   return 0;
@@ -1499,7 +1537,7 @@ static int JPsiIntegrandNRQCDAvPtDen(const int *ndim, const cubareal xx[],
   else if (xA>1.){
     f = 0;
   }
-  else {
+  else{
     double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
     double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     // get sums of vectors
@@ -1532,6 +1570,12 @@ static int JPsiIntegrandNRQCDAvPtDen(const int *ndim, const cubareal xx[],
     double phi_pminuskminusk1minuskprime = atan2(pminuskminusk1minuskprimey,pminuskminusk1minuskprimex);
 
     double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
+    
+  if(pminuskminusk1>30. || pminuskminusk1minuskprime > 30.){
+    f=0.;
+  }
+  else
+    {
 
     double singlet = constants::alphas/(pow(2.*constants::PI,9.)*(double(constants::Nc)*double(constants::Nc)-1.))
       *Phip(k1, R, Qsp, sizeFactor,mv,BK,xp,bdep,bdep_p,Bp)*factorxp/(k1*k1)*H_cs
@@ -1562,6 +1606,7 @@ static int JPsiIntegrandNRQCDAvPtDen(const int *ndim, const cubareal xx[],
   // pd2p
   // d2k
   // d2k1
+    }
    
   }
   return 0;
@@ -3304,6 +3349,28 @@ int main(int argc, char *argv[]) {
     cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl; 
     if(bdep == 0){
       cout << "b-independent results"  << endl;
+        // Code to compute the mean pT
+         NDIM = 8;
+         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtNum, &data, NVEC,
+                 EPSREL, EPSABS, VERBOSE, SEED,
+                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                 GRIDNO, NULL, NULL,
+                 &neval, &fail, integral, error, prob);
+
+         meanPtresult_num= (double)integral[0];
+         meanPterror_num = (double)error[0];
+
+         NDIM = 8;
+         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtDen, &data, NVEC,
+                 EPSREL, EPSABS, VERBOSE, SEED,
+                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                 GRIDNO, NULL, NULL,
+                 &neval, &fail, integral, error, prob);
+
+         meanPtresult_den = (double)integral[0];
+         meanPterror_den = (double)error[0];
+
+      cout << meanPtresult_num/meanPtresult_den << endl;
       for(int i=0; i<9;i++){
         data.Y = -4.+i;
         NDIM = 4;
@@ -3349,26 +3416,6 @@ int main(int argc, char *argv[]) {
           JPsi2result = JPsi2result_cs + JPsi2result_co;
           JPsi2error = JPsi2error_cs + JPsi2error_co;
 
-          // Code to compute the mean pT
-          // NDIM = 8;
-          // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtNum, &data, NVEC,
-          //         EPSREL, EPSABS, VERBOSE, SEED,
-          //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-          //         GRIDNO, NULL, NULL,
-          //         &neval, &fail, integral, error, prob);
-
-          // meanPtresult_num= (double)integral[0];
-          // meanPterror_num = (double)error[0];
-
-          // NDIM = 8;
-          // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtDen, &data, NVEC,
-          //         EPSREL, EPSABS, VERBOSE, SEED,
-          //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-          //         GRIDNO, NULL, NULL,
-          //         &neval, &fail, integral, error, prob);
-
-          // meanPtresult_den = (double)integral[0];
-          // meanPterror_den = (double)error[0];
 
 
         }
