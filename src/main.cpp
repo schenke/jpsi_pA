@@ -2793,6 +2793,90 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
 }
 
 /////////////////////////////////////////////////////
+//////// b independent hadron pt spectrum ///////////
+/////////////////////////////////////////////////////
+
+static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define hnobnoptk xx[0]
+#define hnobnoptphik xx[1]
+#define hnobnoptphi xx[2]
+
+  double z = xx[3];
+  double mh = 0.3; //GeV
+
+  double kscale = 30.;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+  double lambda = static_cast<params*>(userdata)->lambda;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double Y = static_cast<params*>(userdata)->Y;
+  double PT = static_cast<params*>(userdata)->PT;
+  
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double phi = 2.*constants::PI*hnobnoptphi;
+  double phik = 2.*constants::PI*hnobnoptphik;
+
+  double k = hnobnoptk*kscale;
+  double p = PT;
+
+  double eta = Y;
+  double pg = p/z;
+  
+  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  
+  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+  
+  double xp = pg*exp(yg)/constants::roots;
+  double xA = pg*exp(-yg)/constants::roots;
+
+  if (xp>1.){
+    f = 0.;
+  }
+  else if (xA>1.){
+    f = 0.;
+  }
+  else if (pg>30.){
+    f = 0.;
+  }    
+  else{
+    double factorxA = pow(1.-xA,4.);
+    double factorxp = pow(1.-xp,4.);
+    
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    
+    double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
+    
+    f = Dh/z/z*J* 
+      constants::alphas/constants::CF/pg/pg/pow((2.*constants::PI*constants::PI),3.)
+      *Phip(k, 0, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp)*factorxp
+      *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos(phi - phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)
+      *factorxA
+      *2.*constants::PI*kscale*k  //kdkdphik
+      *2.*constants::PI*p //pdphip
+      *sigma02  //R-integral
+      *constants::PI*rt2;  // b-integral
+    //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+  }
+  return 0;
+}
+
+/////////////////////////////////////////////////////
 //////// b independent hadron <pt> ///////////
 /////////////////////////////////////////////////////
 
@@ -2887,14 +2971,14 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
 static int Hadrons(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
-#define gk xx[0]
-#define gphik xx[1]
-#define gR xx[2]
-#define gphiR xx[3]
-#define gb xx[4]
-#define gphib xx[5]
-#define gphi xx[6]
-#define gp xx[7]
+#define hk xx[0]
+#define hphik xx[1]
+#define hR xx[2]
+#define hphiR xx[3]
+#define hb xx[4]
+#define hphib xx[5]
+#define hphi xx[6]
+#define hp xx[7]
 
   double z = xx[8];
   double mh = 0.3; //GeV
@@ -2921,14 +3005,14 @@ static int Hadrons(const int *ndim, const cubareal xx[],
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
 
-  double phi = 2.*constants::PI*gphi;
-  double phik = 2.*constants::PI*gphik;
-  double phiR = 2.*constants::PI*gphiR;
-  double phib = 2.*constants::PI*gphib;
-  double k = gk*kscale;
-  double p = gp*pscale+lambda;
-  double R = gR*Rscale;
-  double b = gb*bscale;
+  double phi = 2.*constants::PI*hphi;
+  double phik = 2.*constants::PI*hphik;
+  double phiR = 2.*constants::PI*hphiR;
+  double phib = 2.*constants::PI*hphib;
+  double k = hk*kscale;
+  double p = hp*pscale+lambda;
+  double R = hR*Rscale;
+  double b = hb*bscale;
 
   double eta = Y;
   double pg = p/z;
@@ -2969,6 +3053,99 @@ static int Hadrons(const int *ndim, const cubareal xx[],
       *2.*constants::PI*Rscale*R  //RdRdphiR
       *2.*constants::PI*bscale*b  //bdbdphib
       *2.*constants::PI*pscale*p; //pdpdphip
+    //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+  }
+  return 0;
+}
+
+/////////////////////////////////////////////////////
+//////// b dependent hadron pt spectrum ///////////
+/////////////////////////////////////////////////////
+
+static int HadronsNoPt(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define hnoptk xx[0]
+#define hnoptphik xx[1]
+#define hnoptR xx[2]
+#define hnoptphiR xx[3]
+#define hnoptb xx[4]
+#define hnoptphib xx[5]
+#define hnoptphi xx[6]
+
+  double z = xx[7];
+  double mh = 0.3; //GeV
+
+  double kscale = 30.;
+  double Rscale = 2./constants::hbarc;
+  double bscale = 12./constants::hbarc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+  double lambda = static_cast<params*>(userdata)->lambda;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double Y = static_cast<params*>(userdata)->Y;
+  double PT = static_cast<params*>(userdata)->PT;
+
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
+ 
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+
+  double phi = 2.*constants::PI*hnoptphi;
+  double phik = 2.*constants::PI*hnoptphik;
+  double phiR = 2.*constants::PI*hnoptphiR;
+  double phib = 2.*constants::PI*hnoptphib;
+  double k = hnoptk*kscale;
+  double p = PT;
+  double R = hnoptR*Rscale;
+  double b = hnoptb*bscale;
+
+  double eta = Y;
+  double pg = p/z;
+  
+  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  
+  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+  
+  double xp = pg*exp(yg)/constants::roots;
+  double xA = pg*exp(-yg)/constants::roots;
+
+  if (xp>1.){
+    f = 0.;
+  }
+  else if (xA>1.){
+    f = 0.;
+  }
+  else if (pg>30.){
+    f = 0.;
+  }    
+  else{
+    double factorxA = pow(1.-xA,4.);
+    double factorxp = pow(1.-xp,4.);
+    
+    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    
+    double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
+    
+    f = Dh/z/z*J* 
+      constants::alphas/constants::CF/pg/pg/pow((2.*constants::PI*constants::PI),3.)
+      *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp)*factorxp
+      *Phit(sqrt((pg)*(pg) + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)
+      *factorxA
+      *2.*constants::PI*kscale*k  //kdkdphik
+      *2.*constants::PI*Rscale*R  //RdRdphiR
+      *2.*constants::PI*bscale*b  //bdbdphib
+      *2.*constants::PI*p; //pdphip
     //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
   }
   return 0;
@@ -3529,12 +3706,23 @@ int main(int argc, char *argv[]) {
   data.protonSizeFactor = 1.;
 
   data.Y = Yg;
+  
 
   if(useFluc == 0){
     cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl; 
     if(bdep == 0){
       cout << "b-independent results"  << endl;
-        // Code to compute the mean pT
+        // Code to compute the pt spectrum
+       
+       //for (int nip=0; nip<=npoints; nip++){ 
+        //   data.PT= pow(10,ptmin + nip*step);
+         //  NDIM = 4;
+       //  llVegas(NDIM, NCOMP, HadronsNoBNoPt, &data, NVEC,
+       //         EPSREL, EPSABS, VERBOSE, SEED,
+        //        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+        //        GRIDNO, NULL, NULL,
+        //        &neval, &fail, integral, error, prob);
+      //}
       
       for(int i=0; i<9;i++){
         data.Y = -4.+i;
@@ -3632,6 +3820,18 @@ int main(int argc, char *argv[]) {
     }
     else{
       cout << "b-dependent results"  << endl;
+
+      // Code to compute the pt spectrum
+       
+       //for (int nip=0; nip<=npoints; nip++){ 
+        //   data.PT= pow(10,ptmin + nip*step);
+         //  NDIM = 8;
+       //  llVegas(NDIM, NCOMP, HadronsNoPt, &data, NVEC,
+       //         EPSREL, EPSABS, VERBOSE, SEED,
+        //        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+        //        GRIDNO, NULL, NULL,
+        //        &neval, &fail, integral, error, prob);
+      //}
       
       for(int i=0; i<9;i++){
         data.Y = -4.+i;
