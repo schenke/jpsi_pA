@@ -3522,7 +3522,7 @@ int main(int argc, char *argv[]) {
   data.pe = 0.; // dummy for now
   data.k = 0.;  // dummy for now
   data.m = 0.;
-  data.lambda = 0.05; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
+  data.lambda = 0.15; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
   data.mv = mv; // MV class
   data.TAclass = TAclass; // TA class
   data.glauberClass = glauber; // Glauber class
