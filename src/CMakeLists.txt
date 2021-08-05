@@ -7,6 +7,7 @@ set (SOURCES
     Parameters.cpp
     MV.cpp
     nrqcd.cpp
+    kkp.cpp
 )
 
 set(CompileFlags "")

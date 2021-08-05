@@ -26,6 +26,7 @@
 #include "MV.h"
 #include "Glauber.h"
 #include "nrqcd.h"
+#include "kkp.h"
 
 #define _SECURE_SCL 0
 #define _HAS_ITERATOR_DEBUGGING 0
@@ -3111,8 +3112,10 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
   double pg = p/z;
   
   double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
-  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   
+  double Dh = kkp::KKPFragmentation(7, 1, z, 2., gluon);
+
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                       /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
@@ -3822,17 +3825,21 @@ int main(int argc, char *argv[]) {
       cout << "b-dependent results"  << endl;
 
       // Code to compute the pt spectrum
-       
-       //for (int nip=0; nip<=npoints; nip++){ 
-        //   data.PT= pow(10,ptmin + nip*step);
-         //  NDIM = 8;
-       //  llVegas(NDIM, NCOMP, HadronsNoPt, &data, NVEC,
-       //         EPSREL, EPSABS, VERBOSE, SEED,
-        //        MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        //        GRIDNO, NULL, NULL,
-        //        &neval, &fail, integral, error, prob);
-      //}
+      int npoints = 10;
+      for (int nip=0; nip<=npoints; nip++){ 
+        //       data.PT= pow(10,ptmin + nip*step);
+        data.PT= 0.1 + (nip*(1.-0.1));
+        NDIM = 8;
+        llVegas(NDIM, NCOMP, HadronsNoPt, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        cout << data.PT << " " << (double)integral[0] << endl;
+      }
       
+      cout << " -- -- -- -- -- -- -- -- --" << endl;
+
       for(int i=0; i<9;i++){
         data.Y = -4.+i;
         
