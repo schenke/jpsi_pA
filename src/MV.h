@@ -87,12 +87,12 @@ class MV{
   
   void computePhip();
   void computePhipBK(int BKMVe);
-  double Phip(double k, double R, double Qs, double sizeFactor, double bfactor, double Bp);
-  double PhipFluc(double k, double Tp, double Qs, double sizeFactor);
-  double PhipBKFluc(double k, double Tp, double x);
-  double PhipBK(double k, double R, double sizeFactor, double x, double bfactor, double Bp);
-  double Phit(double k, double TA, double Qs);
-  double PhitBK(double k, double TA, double x);
+  double Phip(double k, double R, double Qs, double sizeFactor, double bfactor, double Bp, double alphas);
+  double PhipFluc(double k, double Tp, double Qs, double sizeFactor, double alphas);
+  double PhipBKFluc(double k, double Tp, double x, double alphas);
+  double PhipBK(double k, double R, double sizeFactor, double x, double bfactor, double Bp, double alphas);
+  double Phit(double k, double TA, double Qs, double alphas);
+  double PhitBK(double k, double TA, double x, double alphas);
   double StF(double k, double TA, double Qs);
   double StFBK(double k, double TA, double x);
   int writeTable();

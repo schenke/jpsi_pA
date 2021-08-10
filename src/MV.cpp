@@ -162,7 +162,7 @@ void MV::computePhipBK(int BKMVe){
 
 
 
-double MV::PhipFluc(double k, double Tp, double Qs, double sizeFactor){
+double MV::PhipFluc(double k, double Tp, double Qs, double sizeFactor, double alphas){
 
   double A = constants::CA/4./constants::CF*Tp*Qs*Qs;
   
@@ -185,11 +185,11 @@ double MV::PhipFluc(double k, double Tp, double Qs, double sizeFactor){
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik+1] + (A/deltaA-double(iA))*Phip_array[iA+1][ik+1];
   double result = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
   //cout << "Phip=" << result << endl;
-  return k*k*constants::Nc/4./constants::alphas*result;
+  return k*k*constants::Nc/4./alphas*result;
 }
 
 
-double MV::PhipBKFluc(double k, double Tp, double x){
+double MV::PhipBKFluc(double k, double Tp, double x, double alphas){
 
   double A = constants::CA/4./constants::CF*Tp;
   
@@ -227,10 +227,10 @@ double MV::PhipBKFluc(double k, double Tp, double x){
   double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
 
   //cout << "Phip=" << result << endl;
-  return k*k*constants::Nc/4./constants::alphas*result;
+  return k*k*constants::Nc/4./alphas*result;
 }
 
-double MV::PhipBK(double k, double R, double sizeFactor, double x, double bfactor, double Bp){
+double MV::PhipBK(double k, double R, double sizeFactor, double x, double bfactor, double Bp, double alphas){
   
   double A = bfactor*constants::CA/4./constants::CF*exp(-R*R/2./(Bp*sizeFactor)); // Eq. 114 notes. 
    
@@ -263,11 +263,11 @@ double MV::PhipBK(double k, double R, double sizeFactor, double x, double bfacto
   double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
 
   //cout << "Phip=" << result << endl;
-  return k*k*constants::Nc/4./constants::alphas*result;
+  return k*k*constants::Nc/4./alphas*result;
 }
 
 
-double MV::Phip(double k, double R, double Qs, double sizeFactor, double bfactor, double Bp){
+double MV::Phip(double k, double R, double Qs, double sizeFactor, double bfactor, double Bp, double alphas){
 
   double A = bfactor*constants::CA/4./constants::CF*exp(-R*R/2./(Bp*sizeFactor))*Qs*Qs; // Eq. 114 notes.
   
@@ -290,12 +290,12 @@ double MV::Phip(double k, double R, double Qs, double sizeFactor, double bfactor
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik+1] + (A/deltaA-double(iA))*Phip_array[iA+1][ik+1];
   double result = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
   //cout << "Phip=" << result << endl;
-  return k*k*constants::Nc/4./constants::alphas*result;
+  return k*k*constants::Nc/4./alphas*result;
 }
 
 
 
-double MV::Phit(double k, double TA, double Qs){
+double MV::Phit(double k, double TA, double Qs, double alphas){
 
   double A = constants::CA/4./constants::CF*TA*Qs*Qs;
   
@@ -317,11 +317,11 @@ double MV::Phit(double k, double TA, double Qs){
   double Phip1 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik] + (A/deltaA-double(iA))*Phip_array[iA+1][ik];
   double Phip2 = (double(iA+1)-(A/deltaA))*Phip_array[iA][ik+1] + (A/deltaA-double(iA))*Phip_array[iA+1][ik+1];
   double result = (double(ik+1)-((k+0.01)/deltak))*Phip1 + ((k+0.01)/deltak-double(ik))*Phip2;
-  return k*k*constants::Nc/4./constants::alphas*result;
+  return k*k*constants::Nc/4./alphas*result;
 }
 
 
-double MV::PhitBK(double k, double TA, double x){
+double MV::PhitBK(double k, double TA, double x, double alphas){
   
   double A = constants::CA/4./constants::CF*TA; 
   int iA = int(A/deltaA); 
@@ -357,7 +357,7 @@ double MV::PhitBK(double k, double TA, double x){
   double result = (double(iy+1)-y/deltay)*result1 + (y/deltay-double(iy))*result2;
 
   //cout << "Phip=" << result << endl;
-  return k*k*constants::Nc/4./constants::alphas*result;
+  return k*k*constants::Nc/4./alphas*result;
 }
 
 
@@ -505,7 +505,7 @@ int MV::writeTableBK(int BKMVe){
   delete val1;
   
   if (Outfile1.good() == false) {
-    std::cerr << "Error -- binary output of MV Table failed."
+    std::cerr << "Error -- binary output of BK Table failed."
               << std::endl;
     return 0;
   }
