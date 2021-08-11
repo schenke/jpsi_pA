@@ -36,7 +36,7 @@ void display_logo();
 
 namespace constants {
   const double PI = 3.14159265358979323846;
-  const int Nc = 3;
+  const double Nc = 3.;
   const double hbarc = 0.1973269804;
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
@@ -44,9 +44,10 @@ namespace constants {
   //  const double Bp = 4.; // !!!! <==== there is a Bp defined in MV.cpp as well - make sure they are the same || use 4 for non-fluc, 3 for fluc
   //  const double Bq = 0.3; // size of hot spots
   //  const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
-  const double mD = 1.864;
-  const double mc = 1.275; //vary? 1.4?
+  const double mD = 1.867;
+  //const double mc = 1.275; //vary? 1.4?
   const double mJPsi = 3.096916;
+  const double mc = mJPsi/2.; 
   const double x0 = 0.000041;
   const double A = 208.;
   //const double lambdaSpeed = 0.277;
@@ -62,10 +63,19 @@ namespace constants {
   //const double prefactor = 0.7;
 
   const double roots = 8160.;
-  const double ldme_singlet = 1.16/2./double(Nc); // GeV^3
-  const double ldme_octet_s10 = 0.089; // +- 0.0098 GeV^3
-  const double ldme_octet_s13 = 0.0030; // +- 0.00012 GeV^3
-  const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5]
+  const double ldme_singlet = 1.16/2./Nc; // GeV^3
+  //const double ldme_singlet = 1.32; // GeV^3 arXiv:1009.5662
+  // const double ldme_octet_s10 = 0.089; // +- 0.0098 GeV^3 //1201.2675
+  //const double ldme_octet_s13 = 0.0030; // +- 0.0012 GeV^3 //1201.2675.
+  //const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5] //1201.2675.
+
+  const double ldme_octet_s10 = 0.0792; // lower limit
+  const double ldme_octet_s13 = 0.0018; // lower limit
+  const double ldme_octet_p3j = 0.0035*mc*mc; // lower limit
+ 
+ //const double ldme_octet_s10 = 0.045; // +/- 0.0072 GeV^3 // arXiv:1009.5662
+  //const double ldme_octet_s13 = 0.00312; // +- 0.00093 GeV^3 // arXiv:1009.5662 
+  //const double ldme_octet_p3j = -0.0121; // (+- 0.0035 GeV^5) [GeV^5] // arXiv:1009.5662
 
   // //  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
   // const double sigma02 = 0.9/constants::hbarc /constants::hbarc; 
@@ -360,7 +370,7 @@ double StF(double k, double TA, double Qs, MV *mv, int BK, double x, int bdep, i
 ///// b-independent J/Psi cross section ///////////
 //////////////////////////////////////////////////
 
-static int JPsiIntegrandNRQCDCsNob(const int *ndim, const cubareal xx[],
+static int JPsiIntegrandNRQCDCsNoB(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define nobcs4k xx[0]
@@ -464,7 +474,7 @@ static int JPsiIntegrandNRQCDCsNob(const int *ndim, const cubareal xx[],
   return 0;
 } 
 
-static int JPsiIntegrandNRQCDCoNob(const int *ndim, const cubareal xx[],
+static int JPsiIntegrandNRQCDCoNoB(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define nobco4k xx[0]
@@ -570,7 +580,7 @@ static int JPsiIntegrandNRQCDCoNob(const int *ndim, const cubareal xx[],
 ///// Sum of color singlet + color octet //
 /////////////////////////////////////////////////////////
 
-static int JPsiIntegrandNRQCDNobNoPT(const int *ndim, const cubareal xx[],
+static int JPsiIntegrandNRQCDNoBNoPt(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define nobpt4k xx[0]
@@ -700,7 +710,7 @@ static int JPsiIntegrandNRQCDNobNoPT(const int *ndim, const cubareal xx[],
 //////////////////////////////////////////
 
 // Numerator
-static int JPsiIntegrandNRQCDNobAvPtNum(const int *ndim, const cubareal xx[],
+static int JPsiIntegrandNRQCDNoBAvPtNum(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define nobavpt4k xx[0]
@@ -827,7 +837,7 @@ static int JPsiIntegrandNRQCDNobAvPtNum(const int *ndim, const cubareal xx[],
 } 
 
 // Denominator
-static int JPsiIntegrandNRQCDNobAvPtDen(const int *ndim, const cubareal xx[],
+static int JPsiIntegrandNRQCDNoBAvPtDen(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define nobavptden4k xx[0]
@@ -2072,7 +2082,7 @@ static int JPsiIntegrandNRQCDCoFlucNoPT(const int *ndim, const cubareal xx[],
 ///// b-independent J/Psi cross section ///////////
 ///////////////////////////////////////////////////
 
-static int JPsiIntegrandAllNob(const int *ndim, const cubareal xx[],
+static int JPsiIntegrandAllNoB(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define nobqqqtilde xx[0]
@@ -2578,6 +2588,69 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
     return 1;
 }
 
+
+static int GluonsNoBNoPt(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define nobnoptk xx[0]
+#define nobnoptphik xx[1]
+#define nobnoptphi xx[2]
+
+  double kscale = 30.;
+  double pscale = 30.;
+
+  double lambda = static_cast<params*>(userdata)->lambda;
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double Y = static_cast<params*>(userdata)->Y;
+
+  double alphas = static_cast<params*>(userdata)->alphas;
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double Bp = static_cast<params*>(userdata)->Bp;
+  double PT = static_cast<params*>(userdata)->PT;
+    
+  double k = nobnoptk*kscale;
+  double p = PT;
+
+  double phi = 2.*constants::PI*nobnoptphi;
+  double phik = 2.*constants::PI*nobnoptphik;
+
+  double xp = (p)*exp(Y)/constants::roots;
+  double xA = (p)*exp(-Y)/constants::roots;
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+
+  double TA = 1.; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
+  if (xp>1.){
+    f = 0;
+  }
+  else if (xA>1.){
+    f= 0;
+  }
+  else {
+    f = alphas/constants::CF/(p*p+0.4*0.4)/pow((2*constants::PI*constants::PI),3.)
+      *Phip(k, 0, Qsp, sizeFactor, mv, BK, xp,bdep, bdep_p, Bp, alphas)*factorxp
+      *Phit(sqrt(p*p + k*k - 2.*p*k*cos(phi-phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
+      *2.*constants::PI*k*kscale  //kdkdphik
+      *sigma02  //R-integral
+      *constants::PI*rt2  // b-integral
+      *2.*constants::PI*p; //p dphip
+    //scaled phi (and dphi) to 2 pi phi etc. (as integral is always over unit cube) 
+  }
+    return 1;
+}
+
 //////////////////////////////////////////////////
 ///// b-dependent gluons cross section ///////////
 //////////////////////////////////////////////////
@@ -2614,10 +2687,6 @@ static int Gluons(const int *ndim, const cubareal xx[],
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
   double Bp = static_cast<params*>(userdata)->Bp;
  
-  double xp = (gp*pscale+lambda)*exp(Y)/constants::roots;
-  double xA = (gp*pscale+lambda)*exp(-Y)/constants::roots;
-  double factorxA = pow(1.-xA,4.);
-  double factorxp = pow(1.-xp,4.);
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
 
@@ -2629,6 +2698,11 @@ static int Gluons(const int *ndim, const cubareal xx[],
   double p = gp*pscale+lambda;
   double R = gR*Rscale;
   double b = gb*bscale;
+
+  double xp = (p)*exp(Y)/constants::roots;
+  double xA = (p)*exp(-Y)/constants::roots;
+  double factorxA = pow(1.-xA,4.);
+  double factorxp = pow(1.-xp,4.);
 
   if (xp>1.){
     f = 0.;
@@ -2779,8 +2853,9 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
   double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
   double Tp = returnTp2D(Rx,Ry,glauberClass);
 
-  double xp = (fgp*pscale+lambda)*exp(Y)/constants::roots;
-  double xA = (fgp*pscale+lambda)*exp(-Y)/constants::roots;
+  double p = fgp*pscale+lambda;
+  double xp = p*exp(Y)/constants::roots;
+  double xA = p*exp(-Y)/constants::roots;
   
   double factorxA = pow(1.-xA,4.);
   double factorxp = pow(1.-xp,4.);
@@ -2796,7 +2871,7 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
     double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
-    f = alphas/constants::CF/(fgp*pscale+lambda)/(fgp*pscale+lambda)/pow((2*constants::PI*constants::PI),3.)
+    f = alphas/constants::CF/(p*p+0.4*0.4)/pow((2*constants::PI*constants::PI),3.)
       *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
       *Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
       *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
@@ -2852,7 +2927,8 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
   double pg = p/z;
   
   double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
-  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                       /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
@@ -2878,8 +2954,8 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
     
     double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
     
-    f = Dh/z/z*J* 
-      alphas/constants::CF/pg/pg/pow((2.*constants::PI*constants::PI),3.)
+    f = Dh*J* 
+      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.) //!!
       *Phip(k, 0, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos(phi - phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -2937,7 +3013,8 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
   double pg = p/z;
   
   double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
-  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                       /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
@@ -2963,8 +3040,8 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
     
     double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
     
-    f = Dh/z/z*J* 
-      alphas/constants::CF/pg/pg/pow((2.*constants::PI*constants::PI),3.)
+    f = Dh*J* 
+      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.)
       *Phip(k, 0, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos(phi - phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -3025,7 +3102,8 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
   double pg = p/z;
   
   double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
-  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                       /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
@@ -3051,8 +3129,8 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
     
     double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
     
-    f = Dh/z/z*J*
-      alphas/constants::CF/pg/pg/pow((2.*constants::PI*constants::PI),3.)
+    f = Dh*J*
+      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.)
       *Phip(k, 0, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos(phi - phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -3121,7 +3199,8 @@ static int Hadrons(const int *ndim, const cubareal xx[],
   double pg = p/z;
   
   double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
-  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                       /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
@@ -3147,8 +3226,8 @@ static int Hadrons(const int *ndim, const cubareal xx[],
     
     double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
     
-    f = Dh/z/z*J* 
-      alphas/constants::CF/(pg*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.)//!!
+    f = Dh*J* 
+      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.)//!!
       *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt((pg)*(pg) + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -3218,6 +3297,7 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
   double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
 
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO   
+  //  double Dh = kkp::KKPFragmentation(7, 1, z, pg, gluon);
   double Dh = kkp::KKPFragmentation(7, 1, z, pg, gluon);
 
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
@@ -3247,8 +3327,18 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
    // if(k>p) //!! cutoff
    //   f=0.;
    // else
-    f = Dh/z/z*J*
-      alphas/constants::CF/(pg*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.) //!!
+    // f = Dh/z/z*J*
+    //   alphas/constants::CF/(pg*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.) //!!
+    //   *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
+    //   *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA, bdep, useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
+    //   *factorxA
+    //   *2.*constants::PI*kscale*k  //kdkdphik
+    //   *2.*constants::PI*Rscale*R  //RdRdphiR
+    //   *2.*constants::PI*bscale*b  //bdbdphib
+    //   *2.*constants::PI*p; //pdphip
+
+    f = Dh*J*
+      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.) //!!
       *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA, bdep, useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -3316,7 +3406,8 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
   double pg = p/z;
   
   double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
-  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  //double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                       /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
@@ -3342,8 +3433,8 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
     
     double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
     
-    f = Dh/z/z*J*
-      alphas/constants::CF/(pg*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.)//!!
+    f = Dh*J*
+      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.)//!!
       *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt((pg)*(pg) + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -3414,7 +3505,8 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
   double pg = p/z;
   
   double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
-  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))/((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
@@ -3438,8 +3530,8 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
     QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
-    f = Dh/z/z*J* 
-      alphas/constants::CF/(pg)/(pg)/pow((2*constants::PI*constants::PI),3.)
+    f = Dh*J* 
+      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2*constants::PI*constants::PI),3.)
       *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
       *Phit(sqrt(pg*pg + fgk*fgk*kscale*kscale - 2.*pg*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
       *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
@@ -3838,11 +3930,11 @@ int main(int argc, char *argv[]) {
     cout << "For b integrated results obtained in this mode (no fluctuations) all results are cross sections, that need to be divided by the total inelastic cross section (in p+Pb) to get particle numbers." << endl; 
     if(bdep == 0){
       cout << "b-independent results"  << endl;
-        // Code to compute the pt spectrum
-         // Code to compute the pt spectrum
-      int npoints = 10;
+ 
+      // Code to compute the pt spectrum
+      int npoints = 20;
       
-      for (int nip=0; nip<=npoints; nip++){ 
+      for (int nip=0; nip<npoints; nip++){ 
         //       data.PT= pow(10,ptmin + nip*step);   
         data.PT= 0.1 + (nip*0.5);
         NDIM = 4;
@@ -3852,12 +3944,28 @@ int main(int argc, char *argv[]) {
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
         hresult = (double)integral[0];
+        NDIM = 7;
+        llVegas(NDIM, NCOMP, GluonsNoBNoPt, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        gresult = (double)integral[0];
+        NDIM = 11;
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNoBNoPt, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        JPsi2result = (double)integral[0];
         
-        cout << data.PT << " " << hresult << " " << 0 << endl;
+        cout << data.PT << " " << hresult << " " << gresult << " " << JPsi2result << endl;
       }
       
       cout << " -- -- -- -- -- -- -- -- --" << endl;
-    
+
+
+
        //for (int nip=0; nip<=npoints; nip++){ 
         //   data.PT= pow(10,ptmin + nip*step);
          //  NDIM = 4;
@@ -3912,7 +4020,7 @@ int main(int argc, char *argv[]) {
         if(NRQCD==1){
           //    cout << "Using NRQCD"  << endl;
           NDIM = 8;
-          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsNob, &data, NVEC,
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsNoB, &data, NVEC,
                   EPSREL, EPSABS, VERBOSE, SEED,
                   MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                   GRIDNO, NULL, NULL,
@@ -3922,7 +4030,7 @@ int main(int argc, char *argv[]) {
           JPsi2error_cs = (double)error[0];    
           
           NDIM = 6;
-          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoNob, &data, NVEC,
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoNoB, &data, NVEC,
                   EPSREL, EPSABS, VERBOSE, SEED,
                   MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                   GRIDNO, NULL, NULL,
@@ -3934,7 +4042,7 @@ int main(int argc, char *argv[]) {
           JPsi2error = JPsi2error_cs + JPsi2error_co;
 
           NDIM = 8;
-          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtNum, &data, NVEC,
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNoBAvPtNum, &data, NVEC,
                  EPSREL, EPSABS, VERBOSE, SEED,
                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                  GRIDNO, NULL, NULL,
@@ -3944,7 +4052,7 @@ int main(int argc, char *argv[]) {
          meanPterror_num = (double)error[0];
 
           NDIM = 8;
-          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNobAvPtDen, &data, NVEC,
+          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNoBAvPtDen, &data, NVEC,
                  EPSREL, EPSABS, VERBOSE, SEED,
                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                  GRIDNO, NULL, NULL,
@@ -3959,7 +4067,7 @@ int main(int argc, char *argv[]) {
         else{
           //cout << "Using ICEM"  << endl;    
           NDIM = 8;
-          llVegas(NDIM, NCOMP, JPsiIntegrandAllNob, &data, NVEC,
+          llVegas(NDIM, NCOMP, JPsiIntegrandAllNoB, &data, NVEC,
                   EPSREL, EPSABS, VERBOSE, SEED,
                   MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                   GRIDNO, NULL, NULL,
@@ -3976,11 +4084,11 @@ int main(int argc, char *argv[]) {
       cout << "b-dependent results"  << endl;
 
       // Code to compute the pt spectrum
-      int npoints = 10;
+      int npoints = 20;
       
       for (int nip=0; nip<npoints; nip++){ 
         //       data.PT= pow(10,ptmin + nip*step);   
-        data.PT= 0.1 + (nip*1.);
+        data.PT= 0.1 + (nip*0.5);
         NDIM = 8;
         llVegas(NDIM, NCOMP, HadronsNoPt, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
@@ -3995,8 +4103,15 @@ int main(int argc, char *argv[]) {
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
         gresult = (double)integral[0];
+        NDIM = 11;
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDNoPT, &data, NVEC,
+                EPSREL, EPSABS, VERBOSE, SEED,
+                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                GRIDNO, NULL, NULL,
+                &neval, &fail, integral, error, prob);
+        JPsi2result = (double)integral[0];
         
-        cout << data.PT << " " << hresult << " " << gresult << endl;
+        cout << data.PT << " " << hresult << " " << gresult << " " << JPsi2result << endl;
       }
       
       cout << " -- -- -- -- -- -- -- -- --" << endl;
