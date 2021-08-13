@@ -3298,7 +3298,7 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
 
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO   
   //  double Dh = kkp::KKPFragmentation(7, 1, z, pg, gluon);
-  double Dh = kkp::KKPFragmentation(7, 1, z, pg, gluon);
+  double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
 
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                       /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
@@ -3457,8 +3457,6 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
 
  #define z xx[6] 
 
-  double Kch = 1.; //irrelevant for the ratio
-  double sigmainel = 1.; //irrelevant for the ratio
   double mh = 0.3; //GeV
 
   double kscale = 30.;
@@ -3467,6 +3465,7 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
   double bscale = 24./constants::hbarc;
   double Rx = fgRx*Rscale-Rscale/2.;
   double Ry = fgRy*Rscale-Rscale/2.;
+  double k = fgk*kscale;
 
   double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
@@ -3532,9 +3531,9 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh*J* 
       alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2*constants::PI*constants::PI),3.)
-      *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
-      *Phit(sqrt(pg*pg + fgk*fgk*kscale*kscale - 2.*pg*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
-      *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
+      *PhipFluc(k, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
+      *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
+      *2.*constants::PI*k*kscale  //kdkdphik
       *Rscale*Rscale  //dRxdRy
       //    *bscale*bscale  //bdxdby
       *2.*constants::PI*pscale*p; //pdpdphip
@@ -4228,7 +4227,8 @@ int main(int argc, char *argv[]) {
   }
   
   else{
-    cout << "Fluctuating results"  << endl; 
+    if (rank==0)
+      cout << "Fluctuating results"  << endl; 
     int ni=0;
     while (ni<Nevents){
       // Run Vegas integration with fluctuations
@@ -4424,7 +4424,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  cout << " - - - - - - - - - - - - - - - - - " << endl; 
+  if(rank==0)
+    cout << " - - - - - - - - - - - - - - - - - " << endl; 
   delete Glauber_param;
   delete random;
   delete mv;
@@ -4436,5 +4437,3 @@ int main(int argc, char *argv[]) {
   return 1;
 
 }
-
-// TODO: introduce the observable that we want to compute as another option in the command line?

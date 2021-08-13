@@ -22,13 +22,13 @@ class MV{
   static double BKMVeintegrandForList(double z, void * params);
   double ** Phip_array;
   double *** Phip_arrayBK;
-  int sizeA=3200;
+  int sizeA=6400;
   int sizek=1000;
   int sizey=18;
-  double deltaA=1./80.;
+  double deltaA=1./60.;
   double deltak=1./10.;
   double deltay=1.;
-  //  double deltaA=1./8.;
+  //double deltaA=1./8.;
   //double deltak=1./10.;
   //double deltay=1.;
   int BK=0;
