@@ -42,7 +42,7 @@ struct Nucleon
 class Glauber{
 
  public:
-  Glauber(Parameters *inParam);
+  Glauber(Parameters *inParam, double inwidth);
   ~Glauber();
 
   typedef double (*ptr_func)(double);

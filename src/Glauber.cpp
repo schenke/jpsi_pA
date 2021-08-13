@@ -2,13 +2,13 @@
 
 using namespace std;
 
-Glauber::Glauber(Parameters *inParam)
+Glauber::Glauber(Parameters *inParam, double inwidth)
 {
   //  param = new Parameters();
   param = inParam; 
   gslRan = gsl_rng_alloc (gsl_rng_taus);
   numberOfQuarks = 3;
-  width = 0.5;
+  width = inwidth;
 }
 
 // destructor

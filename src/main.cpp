@@ -3565,6 +3565,7 @@ int main(int argc, char *argv[]) {
   double Bq = 0.3;
   double sigma02In = 9.; // mb
   double RA = 5.5; // fm
+  double width = 0.5; // Qs fluctutation sigma
   const double oomph = 2.21; //for Pb
 
   // initialize MPI
@@ -3721,6 +3722,15 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--Qswidth") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        width = atof(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--Qswidth is the width of the Qs fluctuation distribution; this option requires one argument, a double >0" << std::endl;
+        return 1;
+      }  
+    }
     else if (std::string(argv[i]) == "-?") {
       cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0.], --RA [>0.], --Bp [>0.], --Bq [>0.], --alphas [>0.])" << endl;
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
@@ -3769,6 +3779,7 @@ int main(int argc, char *argv[]) {
     cout << " rt2 (from RA) = " << data.rt2 << " GeV^(-2)" << endl;
     cout << " Bp = " << data.Bp << " GeV^(-2)" << endl;
     cout << " Bq = " << data.Bq << " GeV^(-2)" << endl;
+    cout << " Qswidth = " << width << endl;
     cout << " bdep_p = " << data.bdep_p << endl;
     cout << " bdep_A = " << data.bdep_A << endl;
     cout << " bindep_A = " << data.bindep_A << endl;
@@ -3789,7 +3800,7 @@ int main(int argc, char *argv[]) {
   random->init_genrand64(seed);
   
   Glauber *glauber;
-  glauber = new Glauber(Glauber_param);
+  glauber = new Glauber(Glauber_param, width);
   glauber->init(random);
   glauber->makeNuclei(random, data.Bp, data.Bq);
 
