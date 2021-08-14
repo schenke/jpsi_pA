@@ -40,7 +40,6 @@ namespace constants {
   const double hbarc = 0.1973269804;
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
-  const double alphas = 0.3; // there is an alphas defined in MV.cpp as well - make sure they are the same
   //  const double Bp = 4.; // !!!! <==== there is a Bp defined in MV.cpp as well - make sure they are the same || use 4 for non-fluc, 3 for fluc
   //  const double Bq = 0.3; // size of hot spots
   //  const double Bt = 1061; // == R_t = 1.1 * A^{1/3} fm ~6.5 fm
@@ -65,13 +64,13 @@ namespace constants {
   const double roots = 8160.;
   const double ldme_singlet = 1.16/2./Nc; // GeV^3
   //const double ldme_singlet = 1.32; // GeV^3 arXiv:1009.5662
-  // const double ldme_octet_s10 = 0.089; // +- 0.0098 GeV^3 //1201.2675
-  //const double ldme_octet_s13 = 0.0030; // +- 0.0012 GeV^3 //1201.2675.
-  //const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5] //1201.2675.
+  const double ldme_octet_s10 = 0.089; // +- 0.0098 GeV^3 //1201.2675
+  const double ldme_octet_s13 = 0.0030; // +- 0.0012 GeV^3 //1201.2675.
+  const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5] //1201.2675.
 
-  const double ldme_octet_s10 = 0.0792; // lower limit
-  const double ldme_octet_s13 = 0.0018; // lower limit
-  const double ldme_octet_p3j = 0.0035*mc*mc; // lower limit
+  //const double ldme_octet_s10 = 0.0792; // lower limit
+  //const double ldme_octet_s13 = 0.0018; // lower limit
+  //const double ldme_octet_p3j = 0.0035*mc*mc; // lower limit
  
  //const double ldme_octet_s10 = 0.045; // +/- 0.0072 GeV^3 // arXiv:1009.5662
   //const double ldme_octet_s13 = 0.00312; // +- 0.00093 GeV^3 // arXiv:1009.5662 
@@ -2931,7 +2930,7 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) - 0.465;
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3017,7 +3016,7 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) - 0.465;
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3106,7 +3105,7 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) - 0.465;
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3203,7 +3202,7 @@ static int Hadrons(const int *ndim, const cubareal xx[],
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) - 0.465;
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3301,7 +3300,7 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
 
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) - 0.465;
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3410,7 +3409,7 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) - 0.465;
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3507,7 +3506,8 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
-  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))/((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) - 0.465;
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
