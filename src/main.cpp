@@ -3748,7 +3748,13 @@ int main(int argc, char *argv[]) {
   data.Bq=Bq;
   data.sigma02 = sigma02In/10./constants::hbarc/constants::hbarc; 
   data.rt2 =  pow(RA,2.)/constants::hbarc/constants::hbarc;//(1.69/constants::hbarc/constants::hbarc)*pow(A,2./3.);// assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
-  data.bdep_p = data.sigma02/2./constants::PI/data.Bp;
+  if(useFluc == 0){
+    data.bdep_p = data.sigma02/2./constants::PI/data.Bp;
+  }
+  else{
+    data.bdep_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq);
+  }
+
   data.bdep_A = oomph*data.bdep_p;// this is for Pb 
   //  const double bindep_A = 1./(oomph*(1.69/constants::hbarc/constants::hbarc)/pow(A,1./3.)/2./Bp)*bdep_A; // assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
   data.bindep_A = constants::A*data.sigma02/constants::PI/data.rt2; 
@@ -4309,7 +4315,7 @@ int main(int argc, char *argv[]) {
       // Print the result
       gresult = (double)integral[0];
       gerror = (double)error[0];
-      printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
+      //      printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);
         
       
       if(NRQCD==1){
