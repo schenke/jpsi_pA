@@ -71,7 +71,7 @@ class Parameters
 
   //bools
   bool readParameter(string parameter);
-  void setParameters();
+  void setParameters(string Target);
 
   //longs
   void setSeed(long x){seed=x;}

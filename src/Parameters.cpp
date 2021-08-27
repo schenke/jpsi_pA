@@ -47,7 +47,7 @@ bool Parameters::readParameter(string parameter)
 }
 
 // set parameters using defaults and the input file
-void Parameters::setParameters()
+void Parameters::setParameters(string Target)
 {
   vector<string> parameters;
   stringstream convert;
@@ -61,8 +61,8 @@ void Parameters::setParameters()
   setProjectile("p");     
   if(readParameter("Projectile")) setProjectile(temp);
  
-  setTarget("Pb");         
-  if(readParameter("Target")) setTarget(temp);
+  setTarget(Target);         
+  //  if(readParameter("Target")) setTarget(temp);
   
   setb(0.);                
   if(readParameter("b")){ convert<<temp; convert >> doubleParameter; setb(doubleParameter); 
@@ -186,8 +186,8 @@ void Parameters::setParameters()
   // cout << "------------------------------------------------------------------------------------------------" << endl;
   // cout << "| Parameters: " << endl;
   // cout << "------------------------------------------------------------------------------------------------" << endl;
-  // cout << setw(45) << left << "| Projectile: " << setw(20) << getProjectile() << setw(45) << " | (default p)" << endl;
-  // cout << setw(45) << left << "| Target: " << setw(20) << getTarget() << setw(45) << " | (default Pb)" << endl;
+  cout << setw(45) << left << "| Projectile: " << setw(20) << getProjectile() << setw(45) << " | (default p)" << endl;
+  cout << setw(45) << left << "| Target: " << setw(20) << getTarget() << setw(45) << " | (default Pb)" << endl;
   // convert << getb() << " fm";
   // cout << setw(45) << left << "| b: " << setw(20) << convert.str() << setw(45) << " | (default 0 fm)" << endl; convert.str(""); convert.clear();
   // cout << setw(45) << left << "| Gaussian Wounding: " << setw(20) << getGaussianWounding() << setw(45) << " | 0: off, 1: on (default 0)" << endl;

@@ -3660,6 +3660,8 @@ int main(int argc, char *argv[]) {
   double YJPsi2 = -3.71;
   int xsec = 0;
   double alphas = 0.3;
+  string Target="Pb";
+  double bmax = 10.;
   double Bp = 4.; // GeV^-2
   double Bq = 0.3;
   double sigma02In = 9.; // mb
@@ -3839,8 +3841,26 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--Target") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        Target = argv[i]; // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--Target selects the target nucleus, default is 'Pb'" << std::endl;
+        return 1;
+      }  
+    }
+    else if (std::string(argv[i]) == "--bmax") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        bmax = atof(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--bmax maximal impact parameter in [fm]; this option requires one argument, a double >0" << std::endl;
+        return 1;
+      }  
+    }
     else if (std::string(argv[i]) == "-?") {
-      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0.], --RA [>0.], --Bp [>0.], --Bq [>0.], --alphas [>0.])" << endl;
+      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0.], --RA [>0.], --Bp [>0.], --Bq [>0.], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0.])" << endl;
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
         i++;
         exit(0);
@@ -3887,6 +3907,8 @@ int main(int argc, char *argv[]) {
          << "\n cross section mode on(1)/off(0) = " << xsec 
          << "\n print pT spectrum (fluc. case) = " << dopt
          << endl;
+    cout << " Target = " << Target << endl;
+    cout << " bmax = " << bmax << " fm" << endl;
     cout << " alphas = " << alphas << endl;
     cout << " sigma02 = " << sigma02In << " mb" << endl;
     cout << " sigma02 = " << data.sigma02 << " GeV^(-2)" << endl;
@@ -3908,7 +3930,7 @@ int main(int argc, char *argv[]) {
   
   Parameters *Glauber_param;
   Glauber_param = new Parameters();
-  Glauber_param->setParameters();
+  Glauber_param->setParameters(Target);
   
   Random *random;
   random = new Random();
@@ -4364,7 +4386,6 @@ int main(int argc, char *argv[]) {
       
       // Sample b
       double bmin = 0.;
-      double bmax = 10.;
       
       double xb =
         random->genrand64_real1(); // uniformly distributed random variable
