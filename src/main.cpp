@@ -4008,6 +4008,7 @@ int main(int argc, char *argv[]) {
 
   double hresult = 0.;
   double herror = 0.;
+  double hresultpt = 0.;
   
   double hmeanPt = 0;
   double hmeanPterror_num = 0;
@@ -4434,7 +4435,7 @@ int main(int argc, char *argv[]) {
                   MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                   GRIDNO, NULL, NULL,
                   &neval, &fail, integral, error, prob);
-          hresult = (double)integral[0];
+          hresultpt = (double)integral[0];
           NDIM = 9;
           llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFlucNoPT, &data, NVEC,
                   EPSREL, EPSABS, VERBOSE, SEED,
@@ -4450,8 +4451,8 @@ int main(int argc, char *argv[]) {
                   &neval, &fail, integral, error, prob);
           JPsi2result_co = (double)integral[0];
           
-          cout << data.PT << " " << hresult << " " << JPsi2result_cs+JPsi2result_co << endl;
-          fouthpt << std::scientific << setprecision(5) << data.PT << " " << hresult << " " << JPsi2result_cs+JPsi2result_co << endl;
+          cout << data.PT << " " << hresultpt << " " << JPsi2result_cs+JPsi2result_co << endl;
+          fouthpt << std::scientific << setprecision(5) << data.PT << " " << hresultpt << " " << JPsi2result_cs+JPsi2result_co << endl;
         }
         fouthpt.close();
       }
