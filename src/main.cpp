@@ -112,7 +112,8 @@ struct params {
   int bdep;
 
   //----
-
+  
+  double mIR;
   double alphas;
   double Bp;
   double Bq;
@@ -754,8 +755,8 @@ static int JPsiIntegrandNRQCDNoBAvPtNum(const int *ndim, const cubareal xx[],
   double kprime = nobavpt4kprime*kscale;
   double phikprime = nobavpt4phikprime*2.*constants::PI;
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -867,6 +868,7 @@ static int JPsiIntegrandNRQCDNoBAvPtDen(const int *ndim, const cubareal xx[],
   double Bp = static_cast<params*>(userdata)->Bp;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+
   MV *mv = static_cast<params*>(userdata)->mv;
 
   double m = constants::mc;//static_cast<params*>(userdata)->m;
@@ -881,8 +883,8 @@ static int JPsiIntegrandNRQCDNoBAvPtDen(const int *ndim, const cubareal xx[],
   double kprime = nobavptden4kprime*kscale;
   double phikprime = nobavptden4phikprime*2.*constants::PI;
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -1022,8 +1024,8 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   double phiR = csphiR*2*constants::PI;
   double phib = csphib*2*constants::PI;
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -1136,8 +1138,8 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   double phiR = cophiR*2*constants::PI;
   double phib = cophib*2*constants::PI;
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
   
   
   double factorxp = pow(1.-xp,4.);
@@ -1257,8 +1259,8 @@ static int JPsiIntegrandNRQCDNoPT(const int *ndim, const cubareal xx[],
   double phiR = noptphiR*2*constants::PI;
   double phib = noptphib*2*constants::PI;
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -1400,8 +1402,8 @@ static int JPsiIntegrandNRQCDAvPtNum(const int *ndim, const cubareal xx[],
   double phiR = avptnumphiR*2*constants::PI;
   double phib = avptnumphib*2*constants::PI;
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
   
   
   double factorxp = pow(1.-xp,4.);
@@ -1544,8 +1546,8 @@ static int JPsiIntegrandNRQCDAvPtDen(const int *ndim, const cubareal xx[],
   double phiR = avptdenphiR*2*constants::PI;
   double phib = avptdenphib*2*constants::PI;
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
   
   
   double factorxp = pow(1.-xp,4.);
@@ -2606,6 +2608,7 @@ static int GluonsNoBNoPt(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
+  double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -2638,7 +2641,7 @@ static int GluonsNoBNoPt(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-    f = alphas/constants::CF/(p*p+0.4*0.4)/pow((2*constants::PI*constants::PI),3.)
+    f = alphas/constants::CF/(p*p+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
       *Phip(k, 0, Qsp, sizeFactor, mv, BK, xp,bdep, bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt(p*p + k*k - 2.*p*k*cos(phi-phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
       *2.*constants::PI*k*kscale  //kdkdphik
@@ -2676,6 +2679,7 @@ static int Gluons(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
+  double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -2715,7 +2719,7 @@ static int Gluons(const int *ndim, const cubareal xx[],
 
    double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
 
-   f = alphas/constants::CF/(p*p+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.) //!!
+   f = alphas/constants::CF/(p*p+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.) //!!
      *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep, bdep_p,Bp, alphas)
      *Phit(sqrt((p)*(p) + k*k - 2.*p*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
        *2.*constants::PI*kscale*k  //kdkdphik
@@ -2749,6 +2753,7 @@ static int GluonsNoPt(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
+  double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -2791,7 +2796,7 @@ static int GluonsNoPt(const int *ndim, const cubareal xx[],
    // if(k>p) //!! cutoff
    //   f=0.;
    // else
-   f = alphas/constants::CF/(p*p+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.)//!!
+   f = alphas/constants::CF/(p*p+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.)//!!
        *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep, bdep_p,Bp, alphas)
        *Phit(sqrt(p*p + k*k - 2.*p*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
        *2.*constants::PI*kscale*k  //kdkdphik
@@ -2833,6 +2838,7 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
   double lambda = static_cast<params*>(userdata)->lambda;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
   double Y = static_cast<params*>(userdata)->Y;
+  double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -2870,7 +2876,7 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
     double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
-    f = alphas/constants::CF/(p*p+0.4*0.4)/pow((2*constants::PI*constants::PI),3.)
+    f = alphas/constants::CF/(p*p+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
       *PhipFluc(fgk*kscale, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
       *Phit(sqrt((fgp*pscale+lambda)*(fgp*pscale+lambda) + fgk*fgk*kscale*kscale - 2.*(fgp*pscale+lambda)*fgk*kscale*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
       *2.*constants::PI*fgk*kscale*kscale  //kdkdphik
@@ -2902,7 +2908,8 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
   int BK = static_cast<params*>(userdata)->BK;
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
-  double Y = static_cast<params*>(userdata)->Y;
+  double Y = static_cast<params*>(userdata)->Y;  
+  double mIR = static_cast<params*>(userdata)->mIR;
   
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -2962,7 +2969,7 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
     double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
     
     f = Dh*J* 
-      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.) //!!
+      alphas/constants::CF/(z*pg*z*pg+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.) //!!
       *Phip(k, 0, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos(phi - phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -2997,6 +3004,7 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
   double PT = static_cast<params*>(userdata)->PT;
+  double mIR = static_cast<params*>(userdata)->mIR;
   
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -3054,7 +3062,7 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
     double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
     
     f = Dh*J* 
-      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.)
+      alphas/constants::CF/(z*pg*z*pg+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.)
       *Phip(k, 0, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos(phi - phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -3092,6 +3100,7 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
+  double mIR = static_cast<params*>(userdata)->mIR;
   
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -3149,7 +3158,7 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
     double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
     
     f = Dh*J*
-      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.)
+      alphas/constants::CF/(z*pg*z*pg+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.)
       *Phip(k, 0, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos(phi - phik)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -3191,7 +3200,8 @@ static int Hadrons(const int *ndim, const cubareal xx[],
   int BK = static_cast<params*>(userdata)->BK;
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
-  double Y = static_cast<params*>(userdata)->Y;
+  double Y = static_cast<params*>(userdata)->Y;  
+  double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -3252,7 +3262,7 @@ static int Hadrons(const int *ndim, const cubareal xx[],
     double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
     
     f = Dh*J*
-      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.)//!!
+      alphas/constants::CF/(z*pg*z*pg+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.)//!!
       *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt((pg)*(pg) + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -3294,6 +3304,7 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
   double PT = static_cast<params*>(userdata)->PT;
+  double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -3369,7 +3380,7 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
     //   *2.*constants::PI*p; //pdphip
 
     f = Dh*J*
-      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.) //!!
+      alphas/constants::CF/(z*pg*z*pg+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.) //!!
       *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA, bdep, useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -3411,6 +3422,7 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
   int bdep = static_cast<params*>(userdata)->bdep;
   int useFluc = static_cast<params*>(userdata)->useFluc;
   double Y = static_cast<params*>(userdata)->Y;
+  double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -3471,7 +3483,7 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
     double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
     
     f = Dh*J*
-      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2.*constants::PI*constants::PI),3.)//!!
+      alphas/constants::CF/(z*pg*z*pg+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.)//!!
       *Phip(k, R, Qsp, sizeFactor, mv, BK,xp,bdep,bdep_p, Bp, alphas)*factorxp
       *Phit(sqrt((pg)*(pg) + k*k - 2.*pg*k*cos((phi - phik))), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)
       *factorxA
@@ -3513,6 +3525,7 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
   double eta = Y;
   double Qsp=0.;
   double QsA=0.;
+  double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -3574,7 +3587,7 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh*J*
-      alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2*constants::PI*constants::PI),3.)
+      alphas/constants::CF/(z*pg*z*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
       *PhipFluc(k, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
       *2.*constants::PI*k*kscale  //kdkdphik
@@ -3615,6 +3628,7 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
   double eta = Y;
   double Qsp=0.;
   double QsA=0.;
+  double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
@@ -3676,7 +3690,7 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh*J* 
-      alphas/constants::CF/(zfnpt*pg*zfnpt*pg+0.4*0.4)/pow((2*constants::PI*constants::PI),3.)
+      alphas/constants::CF/(zfnpt*pg*zfnpt*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
       *PhipFluc(k, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
       *2.*constants::PI*k*kscale  //kdkdphik
@@ -3717,6 +3731,7 @@ int main(int argc, char *argv[]) {
   double RA = 5.5; // fm
   double width = 0.5; // Qs fluctutation sigma
   const double oomph = 2.21; //for Pb
+  double mIR=0.4;
 
   // initialize MPI
   MPI_Init(&argc, &argv);
@@ -3908,8 +3923,17 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--mIR") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        mIR = atof(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--mIR is IR regulator mass in [GeV] for the gluons and hadrons; this option requires one argument, a double >0" << std::endl;
+        return 1;
+      }  
+    }
     else if (std::string(argv[i]) == "-?") {
-      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0.], --RA [>0.], --Bp [>0.], --Bq [>0.], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0.])" << endl;
+      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0.], --RA [>0.], --Bp [>0.], --Bq [>0.], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0.], --mIR [>0.])" << endl;
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
         i++;
         exit(0);
@@ -3939,7 +3963,7 @@ int main(int argc, char *argv[]) {
   glauber->makeNuclei(random, data.Bp, data.Bq);
   double A = glauber->getA();
 
-
+  data.mIR=mIR;
   data.alphas=alphas;
   data.Bp=Bp;
   data.Bq=Bq;
@@ -3978,6 +4002,7 @@ int main(int argc, char *argv[]) {
          << endl;
     cout << " Target = " << Target << endl;
     cout << " A = " << A << endl;
+    cout << " mIR = " << mIR << " GeV" << endl;
     cout << " bmax = " << bmax << " fm" << endl;
     cout << " alphas = " << alphas << endl;
     cout << " sigma02 = " << sigma02In << " mb" << endl;
