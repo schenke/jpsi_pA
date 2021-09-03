@@ -48,7 +48,6 @@ namespace constants {
   const double mJPsi = 3.096916;
   const double mc = mJPsi/2.; 
   const double x0 = 0.000041;
-  const double A = 208.;
   //const double lambdaSpeed = 0.277;
   //const double x0 = 0.00005;
 
@@ -124,7 +123,7 @@ struct params {
   double bindep_A;
   double bdep_fluc_p;
   double bdep_fluc_A;
-
+  double A;
 };
 
 // Kinematic variables for ICEM
@@ -2913,6 +2912,8 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
   double Bp = static_cast<params*>(userdata)->Bp;
+  double A = static_cast<params*>(userdata)->A;
+
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -2930,9 +2931,15 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
-  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
-  
+  double yg;
+  if (A==208)
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  else
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+
+
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
 
@@ -2999,6 +3006,7 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
   double Bp = static_cast<params*>(userdata)->Bp;
+  double A = static_cast<params*>(userdata)->A;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -3016,8 +3024,13 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
-  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  double yg;
+  if (A==208)
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  else
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3088,6 +3101,7 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
   double Bp = static_cast<params*>(userdata)->Bp;
+  double A = static_cast<params*>(userdata)->A;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -3105,8 +3119,13 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
-  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  double yg;
+  if (A==208)
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  else
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3182,6 +3201,7 @@ static int Hadrons(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
   double Bp = static_cast<params*>(userdata)->Bp;
+  double A = static_cast<params*>(userdata)->A;
  
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -3202,8 +3222,13 @@ static int Hadrons(const int *ndim, const cubareal xx[],
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
-  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  double yg;
+  if (A==208)
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  else
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3278,6 +3303,7 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
   double Bp = static_cast<params*>(userdata)->Bp;
+  double A = static_cast<params*>(userdata)->A;
  
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -3300,8 +3326,13 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
   //  double Dh = kkp::KKPFragmentation(7, 1, z, pg, gluon);
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
 
-  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  double yg;
+  if (A==208)
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  else
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3389,6 +3420,7 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
   double Bp = static_cast<params*>(userdata)->Bp;
+  double A = static_cast<params*>(userdata)->A;
  
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -3409,8 +3441,13 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
   //double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
-  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  double yg;
+  if (A==208)
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  else
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3485,6 +3522,7 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double A = static_cast<params*>(userdata)->A;
 
   int BK = static_cast<params*>(userdata)->BK;
   int bdep = static_cast<params*>(userdata)->bdep;
@@ -3507,8 +3545,13 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
-  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  double yg;
+  if (A==208)
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  else
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3530,7 +3573,7 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
     QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
-    f = Dh*J* 
+    f = Dh*J*
       alphas/constants::CF/(z*pg*z*pg+0.4*0.4)/pow((2*constants::PI*constants::PI),3.)
       *PhipFluc(k, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
@@ -3581,6 +3624,7 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  double A = static_cast<params*>(userdata)->A;
 
   int BK = static_cast<params*>(userdata)->BK;
   int bdep = static_cast<params*>(userdata)->bdep;
@@ -3603,8 +3647,13 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
   //  double Dh = 6.05*pow(zfnpt,-0.714)*pow(1.-zfnpt,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, zfnpt, p, gluon);
   
-  double yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                      /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  double yg;
+  if (A==208)
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  else
+    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/constants::roots;
   double xA = pg*exp(-yg)/constants::roots;
@@ -3871,6 +3920,26 @@ int main(int argc, char *argv[]) {
   }
 
 
+
+  Parameters *Glauber_param;
+  Glauber_param = new Parameters();
+  Glauber_param->setParameters(Target);
+  
+  
+  long int seed = time(NULL)+rank*100000;
+  //long int seed = 1;
+    
+  Random *random;
+  random = new Random();
+  random->init_genrand64(seed);
+  
+  Glauber *glauber;
+  glauber = new Glauber(Glauber_param, width);
+  glauber->init(random);
+  glauber->makeNuclei(random, data.Bp, data.Bq);
+  double A = glauber->getA();
+
+
   data.alphas=alphas;
   data.Bp=Bp;
   data.Bq=Bq;
@@ -3885,7 +3954,7 @@ int main(int argc, char *argv[]) {
 
   data.bdep_A = oomph*data.bdep_p;// this is for Pb 
   //  const double bindep_A = 1./(oomph*(1.69/constants::hbarc/constants::hbarc)/pow(A,1./3.)/2./Bp)*bdep_A; // assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
-  data.bindep_A = constants::A*data.sigma02/constants::PI/data.rt2; 
+  data.bindep_A = A*data.sigma02/constants::PI/data.rt2; 
   data.bdep_fluc_p = data.bdep_p;
   data.bdep_fluc_A = data.bdep_p; // same as for the proton
 
@@ -3908,6 +3977,7 @@ int main(int argc, char *argv[]) {
          << "\n print pT spectrum (fluc. case) = " << dopt
          << endl;
     cout << " Target = " << Target << endl;
+    cout << " A = " << A << endl;
     cout << " bmax = " << bmax << " fm" << endl;
     cout << " alphas = " << alphas << endl;
     cout << " sigma02 = " << sigma02In << " mb" << endl;
@@ -3925,21 +3995,6 @@ int main(int argc, char *argv[]) {
   }
 
   
-  long int seed = time(NULL)+rank*100000;
-  //long int seed = 1;
-  
-  Parameters *Glauber_param;
-  Glauber_param = new Parameters();
-  Glauber_param->setParameters(Target);
-  
-  Random *random;
-  random = new Random();
-  random->init_genrand64(seed);
-  
-  Glauber *glauber;
-  glauber = new Glauber(Glauber_param, width);
-  glauber->init(random);
-  glauber->makeNuclei(random, data.Bp, data.Bq);
 
   TAInt *TAclass;
   TAclass = new TAInt();
@@ -4071,6 +4126,7 @@ int main(int argc, char *argv[]) {
   data.TAclass = TAclass; // TA class
   data.glauberClass = glauber; // Glauber class
   data.protonSizeFactor = 1.;
+  data.A = A;
 
   data.Y = Yg;  
 

@@ -167,6 +167,11 @@ void Glauber::init(Random *random)
   //  int rank = MPI::COMM_WORLD.Get_rank(); //number of current processor
 } 
 
+int Glauber::getA()
+{
+  return Target.A;
+}
+
 void Glauber::makeNuclei(Random *random, double Bp, double Bq)
 {
   int Nx = param->getOutputNumberOfTransverseCells();
