@@ -4493,8 +4493,8 @@ int main(int argc, char *argv[]) {
       printf("Hadrons (fluc): %.8f +- %.8f\t\n", hresult, herror);
       
       if(xsec == 1){
-        if(hresult<0.1){
-          cout << "Hadron number < 0.1, skipping event" << endl;
+        if(hresult<0.5){
+          cout << "Hadron number < 0.5, skipping event" << endl;
           exit(0);
         }
         else{
@@ -4511,9 +4511,9 @@ int main(int argc, char *argv[]) {
         }
       }
 
-
-      if(hresult<0.1){
-        cout << "Hadron number < 0.1, skipping event" << endl;
+      // the data (at least in pp) requires at least one charged particle track in |eta|<1. (https://arxiv.org/pdf/1202.2816.pdf)
+      if(hresult<0.5){
+        cout << "Hadron number < 0.5, skipping event" << endl;
         continue;
       }
 
