@@ -60,7 +60,7 @@ namespace constants {
   //const double prefactor = 0.48;
   //const double prefactor = 0.7;
 
-  const double roots = 8160.;
+  //const double roots = 8160.;
   const double ldme_singlet = 1.16/2./Nc; // GeV^3
   //const double ldme_singlet = 1.32; // GeV^3 arXiv:1009.5662
   const double ldme_octet_s10 = 0.089; // +- 0.0098 GeV^3 //1201.2675
@@ -393,6 +393,7 @@ static int JPsiIntegrandNRQCDCsNoB(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double Bp = static_cast<params*>(userdata)->Bp;
@@ -416,8 +417,8 @@ static int JPsiIntegrandNRQCDCsNoB(const int *ndim, const cubareal xx[],
   double kprime = nobcs4kprime*kscale;
   double phikprime = nobcs4phikprime*2.*constants::PI;
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -495,6 +496,7 @@ static int JPsiIntegrandNRQCDCoNoB(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -516,8 +518,8 @@ static int JPsiIntegrandNRQCDCoNoB(const int *ndim, const cubareal xx[],
   double k1 = nobco4k1*kscale;
   double phik1 = nobco4phik1*2.*constants::PI;
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/roots;
   
   //!!
   double factorxp = pow(1.-xp,4.);
@@ -602,6 +604,7 @@ static int JPsiIntegrandNRQCDNoBNoPt(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -625,8 +628,8 @@ static int JPsiIntegrandNRQCDNoBNoPt(const int *ndim, const cubareal xx[],
   double kprime = nobpt4kprime*kscale;
   double phikprime = nobpt4phikprime*2.*constants::PI;
   
-  double xp = sqrt(4*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4*m*m+p*p)*exp(-Y)/roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -733,6 +736,7 @@ static int JPsiIntegrandNRQCDNoBAvPtNum(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -756,8 +760,8 @@ static int JPsiIntegrandNRQCDNoBAvPtNum(const int *ndim, const cubareal xx[],
   double kprime = nobavpt4kprime*kscale;
   double phikprime = nobavpt4phikprime*2.*constants::PI;
   
-  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -860,6 +864,7 @@ static int JPsiIntegrandNRQCDNoBAvPtDen(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -884,8 +889,8 @@ static int JPsiIntegrandNRQCDNoBAvPtDen(const int *ndim, const cubareal xx[],
   double kprime = nobavptden4kprime*kscale;
   double phikprime = nobavptden4phikprime*2.*constants::PI;
   
-  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -998,6 +1003,7 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -1025,8 +1031,8 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
   double phiR = csphiR*2*constants::PI;
   double phib = csphib*2*constants::PI;
   
-  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -1114,6 +1120,7 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -1139,8 +1146,8 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
   double phiR = cophiR*2*constants::PI;
   double phib = cophib*2*constants::PI;
   
-  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   
   double factorxp = pow(1.-xp,4.);
@@ -1233,6 +1240,7 @@ static int JPsiIntegrandNRQCDNoPT(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -1260,8 +1268,8 @@ static int JPsiIntegrandNRQCDNoPT(const int *ndim, const cubareal xx[],
   double phiR = noptphiR*2*constants::PI;
   double phib = noptphib*2*constants::PI;
   
-  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -1376,6 +1384,7 @@ static int JPsiIntegrandNRQCDAvPtNum(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -1403,8 +1412,8 @@ static int JPsiIntegrandNRQCDAvPtNum(const int *ndim, const cubareal xx[],
   double phiR = avptnumphiR*2*constants::PI;
   double phib = avptnumphib*2*constants::PI;
   
-  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   
   double factorxp = pow(1.-xp,4.);
@@ -1520,6 +1529,7 @@ static int JPsiIntegrandNRQCDAvPtDen(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -1547,8 +1557,8 @@ static int JPsiIntegrandNRQCDAvPtDen(const int *ndim, const cubareal xx[],
   double phiR = avptdenphiR*2*constants::PI;
   double phib = avptdenphib*2*constants::PI;
   
-  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   
   double factorxp = pow(1.-xp,4.);
@@ -1665,6 +1675,7 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -1691,8 +1702,8 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   double kprime = fcs4kprime*kscale;
   double phikprime = fcs4phikprime*2.*constants::PI;
   
-  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -1774,6 +1785,7 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
+  double roots = static_cast<params*>(userdata)->roots;
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
@@ -1799,8 +1811,8 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   double k1 = fco4k1*kscale;
   double phik1 = fco4phik1*2.*constants::PI;
   
-  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -1887,6 +1899,7 @@ static int JPsiIntegrandNRQCDCsFlucNoPT(const int *ndim, const cubareal xx[],
   double by=static_cast<params*>(userdata)->by/constants::hbarc;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
+  double roots = static_cast<params*>(userdata)->roots;
   double alphas = static_cast<params*>(userdata)->alphas;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
@@ -1914,8 +1927,8 @@ static int JPsiIntegrandNRQCDCsFlucNoPT(const int *ndim, const cubareal xx[],
   double kprime = noptfcs4kprime*kscale;
   double phikprime = noptfcs4phikprime*2.*constants::PI;
   
-  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -1998,6 +2011,7 @@ static int JPsiIntegrandNRQCDCoFlucNoPT(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -2022,8 +2036,8 @@ static int JPsiIntegrandNRQCDCoFlucNoPT(const int *ndim, const cubareal xx[],
   double k1 = noptfco4k1*kscale;
   double phik1 = noptfco4phik1*2.*constants::PI;
   
-  double xp = sqrt(4.*m*m+p*p)*exp(Y)/constants::roots;
-  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/constants::roots;
+  double xp = sqrt(4.*m*m+p*p)*exp(Y)/roots;
+  double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -2105,6 +2119,7 @@ static int JPsiIntegrandAllNoB(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -2165,8 +2180,8 @@ static int JPsiIntegrandAllNoB(const int *ndim, const cubareal xx[],
   double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
   double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
 
-  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
-  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
+  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/roots;
+  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/roots;
 
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
@@ -2253,6 +2268,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -2318,8 +2334,8 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
   double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
   double Rminusb = sqrt(R*R+b*b-2.*R*b*cos(phiR-phib));
   
-  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
-  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
+  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/roots;
+  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/roots;
 
   
   double factorxp = pow(1.-xp,4.);
@@ -2400,6 +2416,7 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
  
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -2444,8 +2461,8 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double yp = out.yp;
   double yq = out.yq;
 
-  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/constants::roots;
-  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/constants::roots;
+  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/roots;
+  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/roots;
 
 
   if (xp>1.){
@@ -2549,6 +2566,7 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
   double Y = static_cast<params*>(userdata)->Y;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -2563,8 +2581,8 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
   double phi = 2.*constants::PI*nobphi;
   double phik = 2.*constants::PI*nobphik;
 
-  double xp = (nobp*pscale+lambda)*exp(Y)/constants::roots;
-  double xA = (nobp*pscale+lambda)*exp(-Y)/constants::roots;
+  double xp = (nobp*pscale+lambda)*exp(Y)/roots;
+  double xA = (nobp*pscale+lambda)*exp(-Y)/roots;
   double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
   double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
@@ -2612,6 +2630,7 @@ static int GluonsNoBNoPt(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -2627,8 +2646,8 @@ static int GluonsNoBNoPt(const int *ndim, const cubareal xx[],
   double phi = 2.*constants::PI*nobnoptphi;
   double phik = 2.*constants::PI*nobnoptphik;
 
-  double xp = (p)*exp(Y)/constants::roots;
-  double xA = (p)*exp(-Y)/constants::roots;
+  double xp = (p)*exp(Y)/roots;
+  double xA = (p)*exp(-Y)/roots;
   double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
   double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
@@ -2683,6 +2702,7 @@ static int Gluons(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -2703,8 +2723,8 @@ static int Gluons(const int *ndim, const cubareal xx[],
   double R = gR*Rscale;
   double b = gb*bscale;
 
-  double xp = (p)*exp(Y)/constants::roots;
-  double xA = (p)*exp(-Y)/constants::roots;
+  double xp = (p)*exp(Y)/roots;
+  double xA = (p)*exp(-Y)/roots;
   double factorxA = pow(1.-xA,4.);
   double factorxp = pow(1.-xp,4.);
 
@@ -2757,6 +2777,7 @@ static int GluonsNoPt(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -2766,8 +2787,8 @@ static int GluonsNoPt(const int *ndim, const cubareal xx[],
   double Bp = static_cast<params*>(userdata)->Bp;
   double PT = static_cast<params*>(userdata)->PT;
  
-  double xp = (PT)*exp(Y)/constants::roots;
-  double xA = (PT)*exp(-Y)/constants::roots;
+  double xp = (PT)*exp(Y)/roots;
+  double xA = (PT)*exp(-Y)/roots;
   double factorxA = pow(1.-xA,4.);
   double factorxp = pow(1.-xp,4.);
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
@@ -2842,6 +2863,7 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -2860,8 +2882,8 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
   double Tp = returnTp2D(Rx,Ry,glauberClass);
 
   double p = fgp*pscale+lambda;
-  double xp = p*exp(Y)/constants::roots;
-  double xA = p*exp(-Y)/constants::roots;
+  double xp = p*exp(Y)/roots;
+  double xA = p*exp(-Y)/roots;
   
   double factorxA = pow(1.-xA,4.);
   double factorxp = pow(1.-xp,4.);
@@ -2913,6 +2935,7 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
   
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -2948,8 +2971,8 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
                  /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
 
 
-  double xp = pg*exp(yg)/constants::roots;
-  double xA = pg*exp(-yg)/constants::roots;
+  double xp = pg*exp(yg)/roots;
+  double xA = pg*exp(-yg)/roots;
 
   if (xp>1.){
     f = 0.;
@@ -3008,6 +3031,7 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
   
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -3041,8 +3065,8 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
     yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                  /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
-  double xp = pg*exp(yg)/constants::roots;
-  double xA = pg*exp(-yg)/constants::roots;
+  double xp = pg*exp(yg)/roots;
+  double xA = pg*exp(-yg)/roots;
 
   if (xp>1.){
     f = 0.;
@@ -3104,6 +3128,7 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
   
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -3137,8 +3162,8 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
     yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                  /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
-  double xp = pg*exp(yg)/constants::roots;
-  double xA = pg*exp(-yg)/constants::roots;
+  double xp = pg*exp(yg)/roots;
+  double xA = pg*exp(-yg)/roots;
 
   if (xp>1.){
     f = 0.;
@@ -3205,6 +3230,7 @@ static int Hadrons(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -3241,8 +3267,8 @@ static int Hadrons(const int *ndim, const cubareal xx[],
     yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                  /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
-  double xp = pg*exp(yg)/constants::roots;
-  double xA = pg*exp(-yg)/constants::roots;
+  double xp = pg*exp(yg)/roots;
+  double xA = pg*exp(-yg)/roots;
 
   if (xp>1.){
     f = 0.;
@@ -3308,6 +3334,7 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -3346,8 +3373,8 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
     yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                  /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
-  double xp = pg*exp(yg)/constants::roots;
-  double xA = pg*exp(-yg)/constants::roots;
+  double xp = pg*exp(yg)/roots;
+  double xA = pg*exp(-yg)/roots;
 
   if (xp>1.){
     f = 0.;
@@ -3426,6 +3453,7 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -3462,8 +3490,8 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
     yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                  /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
-  double xp = pg*exp(yg)/constants::roots;
-  double xA = pg*exp(-yg)/constants::roots;
+  double xp = pg*exp(yg)/roots;
+  double xA = pg*exp(-yg)/roots;
 
   if (xp>1.){
     f = 0.;
@@ -3529,6 +3557,7 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -3567,8 +3596,8 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
     yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                  /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
-  double xp = pg*exp(yg)/constants::roots;
-  double xA = pg*exp(-yg)/constants::roots;
+  double xp = pg*exp(yg)/roots;
+  double xA = pg*exp(-yg)/roots;
   
   if (xp>1.){
     f = 0.;
@@ -3632,6 +3661,7 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
   double mIR = static_cast<params*>(userdata)->mIR;
 
   double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
   double sigma02 = static_cast<params*>(userdata)->sigma02;
   double rt2 = static_cast<params*>(userdata)->rt2;
   double bdep_p = static_cast<params*>(userdata)->bdep_p;
@@ -3670,8 +3700,8 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
     yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
                  /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
-  double xp = pg*exp(yg)/constants::roots;
-  double xA = pg*exp(-yg)/constants::roots;
+  double xp = pg*exp(yg)/roots;
+  double xA = pg*exp(-yg)/roots;
   
   if (xp>1.){
     f = 0.;
