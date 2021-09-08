@@ -113,6 +113,7 @@ struct params {
 
   //----
   
+  double roots;
   double mIR;
   double alphas;
   double Bp;
@@ -3732,6 +3733,7 @@ int main(int argc, char *argv[]) {
   double width = 0.5; // Qs fluctutation sigma
   const double oomph = 2.21; //for Pb
   double mIR=0.4;
+  double roots = 8160.;
 
   // initialize MPI
   MPI_Init(&argc, &argv);
@@ -3932,8 +3934,17 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--roots") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        roots = atof(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--roots is the center of mass energy in [GeV]; this option requires one argument, a double >0" << std::endl;
+        return 1;
+      }  
+    }
     else if (std::string(argv[i]) == "-?") {
-      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0.], --RA [>0.], --Bp [>0.], --Bq [>0.], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0.], --mIR [>0.])" << endl;
+      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0. mb], --RA [>0. fm], --Bp [>0. GeV^-2], --Bq [>0. GeV^-2], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0. fm], --mIR [>0. GeV] --roots [>0 GeV])" << endl;
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
         i++;
         exit(0);
@@ -3963,6 +3974,7 @@ int main(int argc, char *argv[]) {
   glauber->makeNuclei(random, data.Bp, data.Bq);
   double A = glauber->getA();
 
+  data.roots = roots;
   data.mIR=mIR;
   data.alphas=alphas;
   data.Bp=Bp;
@@ -4002,6 +4014,7 @@ int main(int argc, char *argv[]) {
          << endl;
     cout << " Target = " << Target << endl;
     cout << " A = " << A << endl;
+    cout << " roots = " << roots << " GeV" << endl;
     cout << " mIR = " << mIR << " GeV" << endl;
     cout << " bmax = " << bmax << " fm" << endl;
     cout << " alphas = " << alphas << endl;
@@ -4104,7 +4117,6 @@ int main(int argc, char *argv[]) {
 
   cubareal integral[NCOMP], error[NCOMP], prob[NCOMP];
 
-
   double gresult = 0.;
   double gerror = 0.;
 
@@ -4146,7 +4158,7 @@ int main(int argc, char *argv[]) {
   data.pe = 0.; // dummy for now
   data.k = 0.;  // dummy for now
   data.m = 0.;
-  data.lambda = 0.05; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
+  data.lambda = 0.0; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf) - use 0 when using mIR as cutoff
   data.mv = mv; // MV class
   data.TAclass = TAclass; // TA class
   data.glauberClass = glauber; // Glauber class
@@ -4225,7 +4237,7 @@ int main(int argc, char *argv[]) {
         hresult = (double)integral[0];
         herror = (double)error[0];
         
-        data.lambda = 0.15; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
+        data.lambda = 0.; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
         NDIM = 5;
         llVegas(NDIM, NCOMP, HadronsNoBAvPtNum, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
@@ -4244,7 +4256,7 @@ int main(int argc, char *argv[]) {
         hmeanPterror_den = (double)error[0];
         
         hmeanPt = hmeanPtresult_num/hmeanPtresult_den;
-        data.lambda = 0.05; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
+        data.lambda = 0.0; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
        
         if(NRQCD==1){
           //    cout << "Using NRQCD"  << endl;
