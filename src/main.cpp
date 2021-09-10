@@ -4542,6 +4542,12 @@ int main(int argc, char *argv[]) {
   double JPsi2result_den = 0.;
   double JPsi2error_den = 0.;
 
+  double JPsi2result_num_2 = 0.;
+  double JPsi2error_num_2 = 0.;
+
+  double JPsi2result_den_2 = 0.;
+  double JPsi2error_den_2 = 0.;
+
   double JPsi2result2 = 0.;
   double JPsi2error2 = 0.;
 
@@ -4552,6 +4558,7 @@ int main(int argc, char *argv[]) {
   double meanPterror_den = 0;
 
   double Jpsi2meanPtresult = 0;
+  double Jpsi2meanPtresult_2 = 0;
 
   data.useFluc = useFluc;
   data.bdep = bdep;
@@ -5010,28 +5017,29 @@ int main(int argc, char *argv[]) {
         
         data.Y = YJPsi1; //forward
          
-        NDIM = 10;
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
+        // NDIM = 10;
+        // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
+        //         EPSREL, EPSABS, VERBOSE, SEED,
+        //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+        //         GRIDNO, NULL, NULL,
+        //         &neval, &fail, integral, error, prob);
         
-        JPsi2result_cs = (double)integral[0];
-        JPsi2error_cs = (double)error[0];    
+        // JPsi2result_cs = (double)integral[0];
+        // JPsi2error_cs = (double)error[0];    
         
-        NDIM = 8;
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
-        JPsi2result_co= (double)integral[0];
-        JPsi2error_co = (double)error[0];
+        // NDIM = 8;
+        // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
+        //         EPSREL, EPSABS, VERBOSE, SEED,
+        //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+        //         GRIDNO, NULL, NULL,
+        //         &neval, &fail, integral, error, prob);
+        // JPsi2result_co= (double)integral[0];
+        // JPsi2error_co = (double)error[0];
         
-        JPsi2result = JPsi2result_co + JPsi2result_cs;
-        JPsi2error = JPsi2error_co + JPsi2error_cs;
+        // JPsi2result = JPsi2result_co + JPsi2result_cs;
+        // JPsi2error = JPsi2error_co + JPsi2error_cs;
 
+        //mean pT
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtNumFluc, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
@@ -5052,8 +5060,9 @@ int main(int argc, char *argv[]) {
         JPsi2error_den = (double)error[0];    
   
         Jpsi2meanPtresult = JPsi2result_num/JPsi2result_den;
-
-
+        JPsi2result = JPsi2result_den;
+        JPsi2error = JPsi2error_den;
+          
         // NDIM = 12;
         // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtNum, &data, NVEC,
         //          EPSREL, EPSABS, VERBOSE, SEED,
@@ -5079,32 +5088,54 @@ int main(int argc, char *argv[]) {
 
         data.Y = YJPsi2; //backward
          
+        // NDIM = 10;
+        // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
+        //         EPSREL, EPSABS, VERBOSE, SEED,
+        //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+        //         GRIDNO, NULL, NULL,
+        //         &neval, &fail, integral, error, prob);
+        
+        // JPsi2result_cs = (double)integral[0];
+        // JPsi2error_cs = (double)error[0];    
+        
+        // NDIM = 8;
+        // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
+        //         EPSREL, EPSABS, VERBOSE, SEED,
+        //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+        //         GRIDNO, NULL, NULL,
+        //         &neval, &fail, integral, error, prob);
+        // JPsi2result_co= (double)integral[0];
+        // JPsi2error_co = (double)error[0];
+     
+        //mean pT
         NDIM = 10;
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtNumFluc, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
         
-        JPsi2result_cs = (double)integral[0];
-        JPsi2error_cs = (double)error[0];    
+        JPsi2result_num_2 = (double)integral[0];
+        JPsi2error_num_2 = (double)error[0];   
         
-        NDIM = 8;
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
+        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtDenFluc, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
-        JPsi2result_co= (double)integral[0];
-        JPsi2error_co = (double)error[0];
         
-        JPsi2result2 = JPsi2result_co + JPsi2result_cs;
-        JPsi2error2 = JPsi2error_co + JPsi2error_cs;
+        JPsi2result_den_2 = (double)integral[0];
+        JPsi2error_den_2 = (double)error[0];    
+  
+        Jpsi2meanPtresult_2 = JPsi2result_num_2/JPsi2result_den_2;
+
+        JPsi2result2 = JPsi2result_den_2;
+        JPsi2error2 = JPsi2error_den_2;
 
         double TA = returnTA2D(-data.bx,-data.by,glauber);
         cout << setprecision(10) << hresult << " " << herror << " " << JPsi2result
              << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2
-             << " " << hmeanPt << " " << Jpsi2meanPtresult << endl;
+             << " " << hmeanPt << " " << Jpsi2meanPtresult << " " << Jpsi2meanPtresult_2 << endl;
                
       }
       
