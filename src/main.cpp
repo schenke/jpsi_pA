@@ -4432,6 +4432,7 @@ int main(int argc, char *argv[]) {
     cout << " Bp = " << data.Bp << " GeV^(-2)" << endl;
     cout << " Bq = " << data.Bq << " GeV^(-2)" << endl;
     cout << " Qswidth = " << width << endl;
+    cout << " Bqwidth = " << Bqwidth << endl;
     cout << " bdep_p = " << data.bdep_p << endl;
     cout << " bdep_A = " << data.bdep_A << endl;
     cout << " bindep_A = " << data.bindep_A << endl;
@@ -4908,7 +4909,7 @@ int main(int argc, char *argv[]) {
       
       // Run Vegas integration with fluctuations
       // Make a new target
-      glauber->makeNuclei(random, data.Bp, data.Bq);
+      glauber->makeNuclei(random, data.Bp, data.Bq*BqGauss);
       
       // Sample b
       double bmin = 0.;
