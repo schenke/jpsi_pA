@@ -4131,7 +4131,8 @@ int main(int argc, char *argv[]) {
   const double oomph = 2.21; //for Pb
   double mIR=0.4;
   double roots = 8160.;
-
+  double Bqwidth = 0.;
+   
   // initialize MPI
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank); // get current process id
@@ -4340,8 +4341,17 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--Bqwidth") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        Bqwidth = atof(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--Bqwidth is the width of the log-normal fluctuations of Bq; this option requires one argument, a double >0" << std::endl;
+        return 1;
+      }  
+    }
     else if (std::string(argv[i]) == "-?") {
-      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0. mb], --RA [>0. fm], --Bp [>0. GeV^-2], --Bq [>0. GeV^-2], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0. fm], --mIR [>0. GeV] --roots [>0 GeV])" << endl;
+      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0. mb], --RA [>0. fm], --Bp [>0. GeV^-2], --Bq [>0. GeV^-2], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0. fm], --mIR [>0. GeV], --roots [>0 GeV], --Bqwidth [>0.])" << endl;
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
         i++;
         exit(0);
@@ -4882,7 +4892,20 @@ int main(int argc, char *argv[]) {
     if (rank==0)
       cout << "Fluctuating results"  << endl; 
     int ni=0;
+    double BqGauss;
+    //double BqGaussSum =0.;
+    //double BqGaussSumSq =0.;
     while (ni<Nevents){
+      // fluctuation of the hot-spot size
+      BqGauss = (exp(random->Gauss(0., Bqwidth))) /
+        std::exp(Bqwidth * Bqwidth / 2.0);
+      
+      // for (int i=0;i<10000;i++){
+      //   BqGaussSum += BqGauss;
+      //   BqGaussSumSq += BqGauss*BqGauss;
+      // }
+      // cout << "E[Gauss]=" << BqGaussSum/10000. << "sigma[Gauss]=" << sqrt(BqGaussSumSq/10000.-BqGaussSum*BqGaussSum/10000./10000.) << endl;
+      
       // Run Vegas integration with fluctuations
       // Make a new target
       glauber->makeNuclei(random, data.Bp, data.Bq);
@@ -5195,7 +5218,8 @@ int main(int argc, char *argv[]) {
       
       fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << JPsi2result
             << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " " <<  hmeanPt << " " 
-            << Jpsi2meanPtresult << endl;
+            << Jpsi2meanPtresult << " " 
+            << Jpsi2meanPtresult_2 << endl;
       fouth.close();
      
       ni++;
