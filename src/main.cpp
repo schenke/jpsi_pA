@@ -4378,7 +4378,7 @@ int main(int argc, char *argv[]) {
   Glauber *glauber;
   glauber = new Glauber(Glauber_param, width);
   glauber->init(random);
-  glauber->makeNuclei(random, data.Bp, data.Bq);
+  glauber->makeNuclei(random, data.Bp, data.Bq, Bqwidth);
   double A = glauber->getA();
 
   data.roots = roots;
@@ -4893,14 +4893,12 @@ int main(int argc, char *argv[]) {
     if (rank==0)
       cout << "Fluctuating results"  << endl; 
     int ni=0;
-    double BqGauss;
+    //double BqGauss;
     //double BqGaussSum =0.;
     //double BqGaussSumSq =0.;
     while (ni<Nevents){
-      // fluctuation of the hot-spot size
-      BqGauss = (exp(random->Gauss(0., Bqwidth))) /
-        std::exp(Bqwidth * Bqwidth / 2.0);
       
+      // fluctuation of the hot-spot size (moved to Glauber.cpp to fluctuate each hot spot differently
       // for (int i=0;i<10000;i++){
       //   BqGaussSum += BqGauss;
       //   BqGaussSumSq += BqGauss*BqGauss;
@@ -4909,7 +4907,8 @@ int main(int argc, char *argv[]) {
       
       // Run Vegas integration with fluctuations
       // Make a new target
-      glauber->makeNuclei(random, data.Bp, data.Bq*BqGauss);
+
+      glauber->makeNuclei(random, data.Bp, data.Bq, Bqwidth);
       
       // Sample b
       double bmin = 0.;
