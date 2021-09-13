@@ -299,6 +299,10 @@ void Glauber::generateProtonTp(Nucleus *nuc, Random *random, double Bp, double B
       std::exp(width * width / 2.0);
   }
 
+  // placed here makes one size fluctuation for all hot spots simultaneously
+  BqGauss= (exp(random->Gauss(0., Bqwidth))) /
+    std::exp(Bqwidth * Bqwidth / 2.0);
+
   double avgxq = 0.;
   double avgyq = 0.;
   for (int iq = 0; iq < Nq; iq++) {
@@ -320,8 +324,6 @@ void Glauber::generateProtonTp(Nucleus *nuc, Random *random, double Bp, double B
       double y = (double(iy)/40.*4.-2.);
       Tpgrid2D[ix][iy] = 0.;
       for(int i=0; i<Nq; i++){
-        BqGauss= (exp(random->Gauss(0., Bqwidth))) /
-          std::exp(Bqwidth * Bqwidth / 2.0);
         Tpgrid2D[ix][iy] += exp(-((x-xq[i])*(x-xq[i])+(y-yq[i])*(y-yq[i]))/hbarc/hbarc/2./(Bq*BqGauss))*gauss[i]/(Bq*BqGauss)/double(Nq)*((Bq*BqGauss)+Bp); // normalize to 1 at zero on average
       }
     }
@@ -351,6 +353,10 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp, double 
         std::exp(width * width / 2.0);
     }
   }
+
+  // placed here makes one size fluctuation for all hot spots simultaneously
+  BqGauss= (exp(random->Gauss(0., Bqwidth))) /
+    std::exp(Bqwidth * Bqwidth / 2.0);
   
   if (useQuarks == 1){
     for (unsigned int i = 0; i < nuc->nucleonList.size(); i++) {
@@ -388,8 +394,6 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp, double 
       for(unsigned int i=0; i<nuc->nucleonList.size(); i++){
         if(useQuarks == 1){
           for (int iq = 0; iq < Nq; iq++) {
-            BqGauss= (exp(random->Gauss(0., Bqwidth))) /
-              std::exp(Bqwidth * Bqwidth / 2.0);
             double xpos = nuc->nucleonList.at(i).x+xq[i][iq]; 
             double ypos = nuc->nucleonList.at(i).y+yq[i][iq]; 
             TAgrid2D[ix][iy] += exp(-((x-xpos)*(x-xpos)+(y-ypos)*(y-ypos))
