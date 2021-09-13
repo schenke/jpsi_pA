@@ -4132,7 +4132,8 @@ int main(int argc, char *argv[]) {
   double mIR=0.4;
   double roots = 8160.;
   double Bqwidth = 0.;
-   
+  int Nq = 3;
+
   // initialize MPI
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank); // get current process id
@@ -4350,8 +4351,17 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--Nq") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        Nq = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--Nq is the number of hot spots per nucleon; this option requires one argument, an integer >0" << std::endl;
+        return 1;
+      }  
+    }
     else if (std::string(argv[i]) == "-?") {
-      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0. mb], --RA [>0. fm], --Bp [>0. GeV^-2], --Bq [>0. GeV^-2], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0. fm], --mIR [>0. GeV], --roots [>0 GeV], --Bqwidth [>0.])" << endl;
+      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0. mb], --RA [>0. fm], --Bp [>0. GeV^-2], --Bq [>0. GeV^-2], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0. fm], --mIR [>0. GeV], --roots [>0 GeV], --Bqwidth [>0.], --Nq [>0])" << endl;
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
         i++;
         exit(0);
@@ -4378,7 +4388,7 @@ int main(int argc, char *argv[]) {
   Glauber *glauber;
   glauber = new Glauber(Glauber_param, width);
   glauber->init(random);
-  glauber->makeNuclei(random, data.Bp, data.Bq, Bqwidth);
+  glauber->makeNuclei(random, data.Bp, data.Bq, Bqwidth, Nq);
   double A = glauber->getA();
 
   data.roots = roots;
@@ -4429,6 +4439,7 @@ int main(int argc, char *argv[]) {
     cout << " sigma02 = " << data.sigma02 << " GeV^(-2)" << endl;
     cout << " RA = " << RA << " fm" << endl;
     cout << " rt2 (from RA) = " << data.rt2 << " GeV^(-2)" << endl;
+    cout << " Nq = " << Nq << endl;
     cout << " Bp = " << data.Bp << " GeV^(-2)" << endl;
     cout << " Bq = " << data.Bq << " GeV^(-2)" << endl;
     cout << " Qswidth = " << width << endl;
@@ -4908,7 +4919,7 @@ int main(int argc, char *argv[]) {
       // Run Vegas integration with fluctuations
       // Make a new target
 
-      glauber->makeNuclei(random, data.Bp, data.Bq, Bqwidth);
+      glauber->makeNuclei(random, data.Bp, data.Bq, Bqwidth, Nq);
       
       // Sample b
       double bmin = 0.;
