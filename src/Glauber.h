@@ -68,11 +68,11 @@ class Glauber{
   Nucleon sampleRho(Nucleus *nucleus, Random *random); 
   Quark sampleQuark(Random *random);
   double ExponentialDistribution(double a, double r);
-  void makeNuclei(Random *random, double Bp, double Bq, double Bqwidth, int Nq);
-  void generateProtonTp(Nucleus *nuc, Random *random, double Bp, double Bq, double Bqwidth, int Nq);
-  void generateNucleusTA(Nucleus *nuc, Random *random, double Bp, double Bq, double Bqwidth, int Nq);
-  double returnNucleusTA(double x, double y);
-  double returnProtonTp(double x, double y);
+  void makeNuclei(Random *random, double Bp, double Bq, double Bqwidth, int Nq, double Yg, double YJPsi1, double YJPsi2, int Ydep);
+  void generateProtonTp(Nucleus *nuc, Random *random, double Bp, double Bq, double Bqwidth, int Nq, double Yg, double YJPsi1, double YJPsi2, int Ydep);
+  void generateNucleusTA(Nucleus *nuc, Random *random, double Bp, double Bq, double Bqwidth, int Nq, double Yg, double YJPsi1, double YJPsi2, int Ydep);
+  double returnNucleusTA(double x, double y, int Ybin);
+  double returnProtonTp(double x, double y, int Ybin);
 
   int getA();
   Nucleus getTarget(){return Target;}
@@ -92,8 +92,8 @@ class Glauber{
 
   int numberOfQuarks;
   double width;
-  double TAgrid2D[200][200]; 
-  double Tpgrid2D[40][40]; 
+  double TAgrid2D[3][200][200]; 
+  double Tpgrid2D[3][40][40]; 
   
  };
 #endif

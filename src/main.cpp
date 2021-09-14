@@ -110,6 +110,7 @@ struct params {
   int BK;
   int useFluc;
   int bdep;
+  int Ybin;
 
   //----
   
@@ -190,12 +191,12 @@ kinqq convert(kinPair input) {
   
 // Transverse profiles with fluctuations
 
-double returnTA2D(double x, double y, Glauber *glauberClass){
-  return glauberClass->returnNucleusTA(x, y);
+double returnTA2D(double x, double y, Glauber *glauberClass, int Ybin){
+  return glauberClass->returnNucleusTA(x, y, Ybin);
 }
 
-double returnTp2D(double x, double y, Glauber *glauberClass){
-  return glauberClass->returnProtonTp(x, y);
+double returnTp2D(double x, double y, Glauber *glauberClass, int Ybin){
+  return glauberClass->returnProtonTp(x, y, Ybin);
 }
 
 double returnTA(double R, TAInt *TAclass){
@@ -1688,7 +1689,8 @@ static int JPsiIntegrandNRQCDAvPtNumFluc(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
-
+  int Ybin = static_cast<params*>(userdata)->Ybin;
+  
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
   Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
@@ -1748,8 +1750,8 @@ static int JPsiIntegrandNRQCDAvPtNumFluc(const int *ndim, const cubareal xx[],
                 +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
     
-    double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-    double Tp = returnTp2D(Rx,Ry,glauberClass);
+    double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+    double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
     
 
   if(pminuskminusk1>30. || pminuskminusk1minuskprime > 30.){
@@ -1821,6 +1823,7 @@ static int JPsiIntegrandNRQCDAvPtDenFluc(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  int Ybin = static_cast<params*>(userdata)->Ybin;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -1880,8 +1883,8 @@ static int JPsiIntegrandNRQCDAvPtDenFluc(const int *ndim, const cubareal xx[],
                 +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
 
-    double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-    double Tp = returnTp2D(Rx,Ry,glauberClass);
+    double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+    double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
     
   if(pminuskminusk1>30. || pminuskminusk1minuskprime > 30.){
     f=0.;
@@ -1950,6 +1953,7 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  int Ybin = static_cast<params*>(userdata)->Ybin;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -2000,8 +2004,8 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
     
     double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
     
-    double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-    double Tp = returnTp2D(Rx,Ry,glauberClass);
+    double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+    double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
     
     if(pminuskminusk1minuskprime>30.){
       f=0.;
@@ -2061,6 +2065,7 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  int Ybin = static_cast<params*>(userdata)->Ybin;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -2109,8 +2114,8 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
                 +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
  
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-  double Tp = returnTp2D(Rx,Ry,glauberClass);
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+  double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
  
   if(pminuskminusk1>30.){
     f=0.;
@@ -2175,6 +2180,7 @@ static int JPsiIntegrandNRQCDCsFlucNoPT(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  int Ybin = static_cast<params*>(userdata)->Ybin;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -2225,8 +2231,8 @@ static int JPsiIntegrandNRQCDCsFlucNoPT(const int *ndim, const cubareal xx[],
     
     double H_cs = constants::ldme_singlet*nrqcd::singlet(p, phip, k1, phik1,kprime, phikprime, k, phik,m);
     
-    double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-    double Tp = returnTp2D(Rx,Ry,glauberClass);
+    double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+    double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
     
     if(pminuskminusk1minuskprime>30.){
       f=0.;
@@ -2286,6 +2292,7 @@ static int JPsiIntegrandNRQCDCoFlucNoPT(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  int Ybin = static_cast<params*>(userdata)->Ybin;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -2334,8 +2341,8 @@ static int JPsiIntegrandNRQCDCoFlucNoPT(const int *ndim, const cubareal xx[],
                 +constants::ldme_octet_s13*nrqcd::octets13(p, phip, k1, phik1, k, phik,m)
                 +constants::ldme_octet_p3j*nrqcd::octetp3j(p, phip, k1, phik1, k, phik,m);
  
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-  double Tp = returnTp2D(Rx,Ry,glauberClass);
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+  double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
  
   if(pminuskminusk1>30.){
     f=0.;
@@ -2691,6 +2698,7 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  int Ybin = static_cast<params*>(userdata)->Ybin;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   MV *mv = static_cast<params*>(userdata)->mv;
@@ -2775,8 +2783,8 @@ static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
   
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
 
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-  double Tp = returnTp2D(Rx,Ry,glauberClass);
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+  double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
 
   // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
   f = alphas*double(constants::Nc)*double(constants::Nc)
@@ -3138,6 +3146,7 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
   double bdep_A = static_cast<params*>(userdata)->bdep_A;
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  int Ybin = static_cast<params*>(userdata)->Ybin;
 
   TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
   Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
@@ -3145,8 +3154,8 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
 
   double R = sqrt(Rx*Rx+Ry*Ry);
   double b = sqrt(bx*bx+by*by);
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-  double Tp = returnTp2D(Rx,Ry,glauberClass);
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+  double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
 
   double p = fgp*pscale+lambda;
   double xp = p*exp(Y)/roots;
@@ -3833,6 +3842,7 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
   double A = static_cast<params*>(userdata)->A;
+  int Ybin = static_cast<params*>(userdata)->Ybin;
 
   int BK = static_cast<params*>(userdata)->BK;
   int bdep = static_cast<params*>(userdata)->bdep;
@@ -3844,8 +3854,8 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
 
   double R = sqrt(Rx*Rx+Ry*Ry);
   double b = sqrt(bx*bx+by*by);
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-  double Tp = returnTp2D(Rx,Ry,glauberClass);
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+  double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
   
   double p = (fgp*pscale+lambda);
   
@@ -3933,6 +3943,7 @@ static int HadronsFlucAvPtNum(const int *ndim, const cubareal xx[],
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
   double A = static_cast<params*>(userdata)->A;
+  int Ybin = static_cast<params*>(userdata)->Ybin;
 
   int BK = static_cast<params*>(userdata)->BK;
   int bdep = static_cast<params*>(userdata)->bdep;
@@ -3944,8 +3955,8 @@ static int HadronsFlucAvPtNum(const int *ndim, const cubareal xx[],
 
   double R = sqrt(Rx*Rx+Ry*Ry);
   double b = sqrt(bx*bx+by*by);
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-  double Tp = returnTp2D(Rx,Ry,glauberClass);
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+  double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
   
   double p = (fgp*pscale+lambda);
   
@@ -4037,6 +4048,7 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
   double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
   double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
   double A = static_cast<params*>(userdata)->A;
+  int Ybin = static_cast<params*>(userdata)->Ybin;
 
   int BK = static_cast<params*>(userdata)->BK;
   int bdep = static_cast<params*>(userdata)->bdep;
@@ -4048,8 +4060,8 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
 
   double R = sqrt(Rx*Rx+Ry*Ry);
   double b = sqrt(bx*bx+by*by);
-  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass);
-  double Tp = returnTp2D(Rx,Ry,glauberClass);
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+  double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
   
   double p = static_cast<params*>(userdata)->PT;
   
@@ -4133,6 +4145,7 @@ int main(int argc, char *argv[]) {
   double roots = 8160.;
   double Bqwidth = 0.;
   int Nq = 3;
+  int BqYdep = 0;
 
   // initialize MPI
   MPI_Init(&argc, &argv);
@@ -4360,6 +4373,15 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--BqYdep") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        BqYdep = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--BqYdep decides if Bq should depend on rapidity; this option requires one argument, 0 or 1" << std::endl;
+        return 1;
+      }  
+    }
     else if (std::string(argv[i]) == "-?") {
       cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0. mb], --RA [>0. fm], --Bp [>0. GeV^-2], --Bq [>0. GeV^-2], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0. fm], --mIR [>0. GeV], --roots [>0 GeV], --Bqwidth [>0.], --Nq [>0])" << endl;
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
@@ -4388,7 +4410,6 @@ int main(int argc, char *argv[]) {
   Glauber *glauber;
   glauber = new Glauber(Glauber_param, width);
   glauber->init(random);
-  glauber->makeNuclei(random, data.Bp, data.Bq, Bqwidth, Nq);
   double A = glauber->getA();
 
   data.roots = roots;
@@ -4405,7 +4426,7 @@ int main(int argc, char *argv[]) {
     data.bdep_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq);
   }
 
-  data.bdep_A = oomph*data.bdep_p;// this is for Pb 
+  data.bdep_A = oomph*data.bdep_p;// this is for Pb
   //  const double bindep_A = 1./(oomph*(1.69/constants::hbarc/constants::hbarc)/pow(A,1./3.)/2./Bp)*bdep_A; // assuming R_A = R_0 A^(1/3), with R_0=1.3 fm (R_0^2 = 1.69 fm^2)
   data.bindep_A = A*data.sigma02/constants::PI/data.rt2; 
   data.bdep_fluc_p = data.bdep_p;
@@ -4444,6 +4465,7 @@ int main(int argc, char *argv[]) {
     cout << " Bq = " << data.Bq << " GeV^(-2)" << endl;
     cout << " Qswidth = " << width << endl;
     cout << " Bqwidth = " << Bqwidth << endl;
+    cout << " BqYdep = "  << BqYdep << endl;
     cout << " bdep_p = " << data.bdep_p << endl;
     cout << " bdep_A = " << data.bdep_A << endl;
     cout << " bindep_A = " << data.bindep_A << endl;
@@ -4919,7 +4941,7 @@ int main(int argc, char *argv[]) {
       // Run Vegas integration with fluctuations
       // Make a new target
 
-      glauber->makeNuclei(random, data.Bp, data.Bq, Bqwidth, Nq);
+      glauber->makeNuclei(random, data.Bp, data.Bq, Bqwidth, Nq, Yg, YJPsi1, YJPsi2, BqYdep);
       
       // Sample b
       double bmin = 0.;
@@ -4932,8 +4954,11 @@ int main(int argc, char *argv[]) {
       data.bx = b*cos(phib);
       data.by = b*sin(phib);
       data.Y = Yg;
-
-      //      cout << "Using impact parmater b=" << b << " [fm], phib=" << phib << endl;
+      data.Ybin = 0;
+      if(BqYdep){
+        data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+        data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      }
       
       // do hadrons
       NDIM = 7;
@@ -5050,7 +5075,12 @@ int main(int argc, char *argv[]) {
         //        cout << "Using NRQCD"  << endl;
         
         data.Y = YJPsi1; //forward
-         
+        data.Ybin = 1;
+        if(BqYdep){
+          data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+          data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+        }
+
         // NDIM = 10;
         // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
         //         EPSREL, EPSABS, VERBOSE, SEED,
@@ -5121,7 +5151,12 @@ int main(int argc, char *argv[]) {
 
 
         data.Y = YJPsi2; //backward
-         
+        data.Ybin = 2;
+        if(BqYdep){
+          data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+          data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+        }
+
         // NDIM = 10;
         // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
         //         EPSREL, EPSABS, VERBOSE, SEED,
@@ -5166,7 +5201,6 @@ int main(int argc, char *argv[]) {
         JPsi2result2 = JPsi2result_den_2;
         JPsi2error2 = JPsi2error_den_2;
 
-        double TA = returnTA2D(-data.bx,-data.by,glauber);
         cout << setprecision(10) << hresult << " " << herror << " " << JPsi2result
              << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2
              << " " << hmeanPt << " " << Jpsi2meanPtresult << " " << Jpsi2meanPtresult_2 << endl;
@@ -5177,7 +5211,8 @@ int main(int argc, char *argv[]) {
         //cout << "Using ICEM"  << endl;    
  
         data.Y = YJPsi1; //forward
-         
+        data.Ybin = 1;
+
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
@@ -5188,6 +5223,7 @@ int main(int argc, char *argv[]) {
         JPsi2error = (double)error[0];  
         
         data.Y = YJPsi2; //backward
+        data.Ybin = 2;
          
         NDIM = 10;
         llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
@@ -5198,12 +5234,11 @@ int main(int argc, char *argv[]) {
         JPsi2result2 = (double)integral[0];
         JPsi2error2 = (double)error[0];  
         
-        double TA = returnTA2D(-data.bx,-data.by,glauber);
         cout << setprecision(10) << gresult << " " << gerror 
              << " " << JPsi2result << " " << JPsi2error 
              << " " << JPsi2result2 << " " << JPsi2error2
              << " " << sqrt(data.bx*data.bx+data.by*data.by)
-             << " " << TA << endl;
+             << endl;
       }
       
       stringstream strfilename;
@@ -5212,12 +5247,11 @@ int main(int argc, char *argv[]) {
       string filename;
       filename = strfilename.str();
       fstream fout(filename.c_str(), ios::app);
-      double TA = returnTA2D(-data.bx,-data.by,glauber);
       
       fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result
            << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " "
            << sqrt(data.bx*data.bx+data.by*data.by)
-           << " " << TA << endl;
+           << endl;
       fout.close();
 
       stringstream strfilenameh;
