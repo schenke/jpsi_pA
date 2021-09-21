@@ -4383,7 +4383,7 @@ int main(int argc, char *argv[]) {
       }  
     }
     else if (std::string(argv[i]) == "-?") {
-      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0. mb], --RA [>0. fm], --Bp [>0. GeV^-2], --Bq [>0. GeV^-2], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0. fm], --mIR [>0. GeV], --roots [>0 GeV], --Bqwidth [>0.], --Nq [>0])" << endl;
+      cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0. mb], --RA [>0. fm], --Bp [>0. GeV^-2], --Bq [>0. GeV^-2], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0. fm], --mIR [>0. GeV], --roots [>0 GeV], --Bqwidth [>0.], --Nq [>0], --BqYdep [0 or 1])" << endl;
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
         i++;
         exit(0);
@@ -5012,6 +5012,8 @@ int main(int argc, char *argv[]) {
         for (int nip=0; nip<npoints; nip++){ 
           //       data.PT= pow(10,ptmin + nip*step);   
           data.PT= 0.1 + (nip*0.5);
+          data.Y = Yg;
+          data.Ybin = 0;
           NDIM = 6;
           llVegas(NDIM, NCOMP, HadronsFlucNoPT, &data, NVEC,
                   EPSREL, EPSABS, VERBOSE, SEED,
@@ -5019,6 +5021,8 @@ int main(int argc, char *argv[]) {
                   GRIDNO, NULL, NULL,
                   &neval, &fail, integral, error, prob);
           hresultpt = (double)integral[0];
+          data.Y = YJPsi1; //forward
+          data.Ybin = 1;
           NDIM = 9;
           llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFlucNoPT, &data, NVEC,
                   EPSREL, EPSABS, VERBOSE, SEED,
@@ -5039,7 +5043,8 @@ int main(int argc, char *argv[]) {
         }
         fouthpt.close();
       }
-      
+      data.Y = Yg;
+      data.Ybin = 0;
       NDIM = 6;
       llVegas(NDIM, NCOMP, GluonsFluc, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
