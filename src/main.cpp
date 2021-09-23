@@ -3234,18 +3234,20 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
   double eta = Y;
   double pg = p/z;
   
-  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  //  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double J = p*cosh(eta)/sqrt(p*p*cosh(eta)*cosh(eta)+mh*mh);
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg;
   if (A==208)
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta)))) + 0.465;
   else
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta))));
 
+  //assuming yg=yh
 
   double xp = pg*exp(yg)/roots;
   double xA = pg*exp(-yg)/roots;
@@ -3329,17 +3331,31 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
   double eta = Y;
   double pg = p/z;
   
-  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+
+  //  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double J = p*cosh(eta)/sqrt(p*p*cosh(eta)*cosh(eta)+mh*mh);
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg;
   if (A==208)
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta)))) + 0.465;
   else
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta))));
+
+  // double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  // //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  // double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
+  
+  // double yg;
+  // if (A==208)
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  // else
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/roots;
   double xA = pg*exp(-yg)/roots;
@@ -3426,17 +3442,30 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
   double eta = Y;
   double pg = p/z;
   
-  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  //  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double J = p*cosh(eta)/sqrt(p*p*cosh(eta)*cosh(eta)+mh*mh);
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg;
   if (A==208)
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta)))) + 0.465;
   else
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta))));
+
+  // double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  // //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  // double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
+  
+  // double yg;
+  // if (A==208)
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  // else
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/roots;
   double xA = pg*exp(-yg)/roots;
@@ -3531,17 +3560,30 @@ static int Hadrons(const int *ndim, const cubareal xx[],
   double eta = Y;
   double pg = p/z;
   
-  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  //  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double J = p*cosh(eta)/sqrt(p*p*cosh(eta)*cosh(eta)+mh*mh);
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg;
   if (A==208)
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta)))) + 0.465;
   else
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta))));
+
+  // double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  // //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  // double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
+  
+  // double yg;
+  // if (A==208)
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  // else
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/roots;
   double xA = pg*exp(-yg)/roots;
@@ -3635,19 +3677,32 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
   double eta = Y;
   double pg = p/z;
   
-  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
-
-  //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO   
-  //  double Dh = kkp::KKPFragmentation(7, 1, z, pg, gluon);
+  //  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double J = p*cosh(eta)/sqrt(p*p*cosh(eta)*cosh(eta)+mh*mh);
+  //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
-
+  
   double yg;
   if (A==208)
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta)))) + 0.465;
   else
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta))));
+
+  // double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+
+  // //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO   
+  // //  double Dh = kkp::KKPFragmentation(7, 1, z, pg, gluon);
+  // double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
+
+  // double yg;
+  // if (A==208)
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  // else
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/roots;
   double xA = pg*exp(-yg)/roots;
@@ -3754,17 +3809,30 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
   double eta = Y;
   double pg = p/z;
   
-  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
-  //double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  //  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double J = p*cosh(eta)/sqrt(p*p*cosh(eta)*cosh(eta)+mh*mh);
+  //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg;
   if (A==208)
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta)))) + 0.465;
   else
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta))));
+
+  // double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  // //double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  // double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
+  
+  // double yg;
+  // if (A==208)
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  // else
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/roots;
   double xA = pg*exp(-yg)/roots;
@@ -3861,17 +3929,30 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
   
   double pg = p/z;
   
-  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  //  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double J = p*cosh(eta)/sqrt(p*p*cosh(eta)*cosh(eta)+mh*mh);
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg;
   if (A==208)
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta)))) + 0.465;
   else
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta))));
+
+  // double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  // //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  // double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
+  
+  // double yg;
+  // if (A==208)
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  // else
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/roots;
   double xA = pg*exp(-yg)/roots;
@@ -3962,17 +4043,30 @@ static int HadronsFlucAvPtNum(const int *ndim, const cubareal xx[],
   
   double pg = p/z;
   
-  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  //  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double J = p*cosh(eta)/sqrt(p*p*cosh(eta)*cosh(eta)+mh*mh);
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
   double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg;
   if (A==208)
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta)))) + 0.465;
   else
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta))));
+
+  // double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  // //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  // double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
+  
+  // double yg;
+  // if (A==208)
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  // else
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/roots;
   double xA = pg*exp(-yg)/roots;
@@ -4067,17 +4161,30 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
   
   double pg = p/zfnpt;
   
-  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
-  //  double Dh = 6.05*pow(zfnpt,-0.714)*pow(1.-zfnpt,2.92); //KKP NLO 
-  double Dh = kkp::KKPFragmentation(7, 1, zfnpt, p, gluon);
+  //  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  double J = p*cosh(eta)/sqrt(p*p*cosh(eta)*cosh(eta)+mh*mh);
+  //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
+  double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
   
   double yg;
   if (A==208)
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta)))) + 0.465;
   else
-    yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
-                 /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
+    yg = 0.5*log((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))+p*sinh(eta))
+                 /((sqrt(mh*mh+p*p*cosh(eta)*cosh(eta))-p*sinh(eta))));
+
+  // double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
+  // //  double Dh = 6.05*pow(zfnpt,-0.714)*pow(1.-zfnpt,2.92); //KKP NLO 
+  // double Dh = kkp::KKPFragmentation(7, 1, zfnpt, p, gluon);
+  
+  // double yg;
+  // if (A==208)
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta)))) + 0.465;
+  // else
+  //   yg = 0.5*log((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))+pg*sinh(eta))
+  //                /((sqrt(mh*mh+pg*pg*cosh(eta)*cosh(eta))-pg*sinh(eta))));
   
   double xp = pg*exp(yg)/roots;
   double xA = pg*exp(-yg)/roots;
