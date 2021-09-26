@@ -4172,7 +4172,7 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
   //  double J = pg*cosh(eta)/sqrt(pg*pg*cosh(eta)*cosh(eta)+mh*mh);
   double J = p*cosh(eta)/sqrt(p*p*cosh(eta)*cosh(eta)+mh*mh);
   //  double Dh = 6.05*pow(z,-0.714)*pow(1.-z,2.92); //KKP NLO 
-  double Dh = kkp::KKPFragmentation(7, 1, z, p, gluon);
+  double Dh = kkp::KKPFragmentation(7, 1, zfnpt, p, gluon);
   
   double yg;
   if (A==208)
