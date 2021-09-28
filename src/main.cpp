@@ -2245,7 +2245,6 @@ static int JPsiIntegrandNRQCDFlucNoPT(const int *ndim, const cubareal xx[],
           *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp/(k1*k1)*H_cs
           *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(kprime,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1minuskprime,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
           *Rscale*Rscale
-          *p*2.*constants::PI
           *k*kscale*2.*constants::PI
           *k1*kscale*2.*constants::PI
           *kprime*kscale*2.*constants::PI;
@@ -2270,7 +2269,6 @@ static int JPsiIntegrandNRQCDFlucNoPT(const int *ndim, const cubareal xx[],
           *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp/(k1*k1)*H_co
           *(StF(k,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(pminuskminusk1,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA)
           *Rscale*Rscale
-          *p*2.*constants::PI
           *k*kscale*2.*constants::PI
           *k1*kscale*2.*constants::PI;
       }
