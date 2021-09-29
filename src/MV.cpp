@@ -561,7 +561,7 @@ int MV::readTable(){
   std::ifstream InStream;
   InStream.precision(10);
   InStream.open(MVTableName, std::ios::in | std::ios::binary);
-  cout << "Reading MV table from file " << MVTableName << endl;
+  //  cout << "Reading MV table from file " << MVTableName << endl;
   
   if(InStream.is_open())
     {
@@ -572,7 +572,7 @@ int MV::readTable(){
       InStream.read(reinterpret_cast<char*>(&deltaA), sizeof(double));
       InStream.read(reinterpret_cast<char*>(&deltak), sizeof(double));
       
-      cout << "sizeA = " << sizeA << " sizek = " << sizek << " deltaA = " << deltaA << " deltak = " << deltak << endl;                               
+      //cout << "sizeA = " << sizeA << " sizek = " << sizek << " deltaA = " << deltaA << " deltak = " << deltak << endl;                               
                 
       // read data
       double ValueBuffer;
@@ -615,7 +615,7 @@ int MV::readTableBK(int BKMVe){
   std::ifstream InStream;
   InStream.precision(10);
   InStream.open(BKTableName, std::ios::in | std::ios::binary);
-  cout << "Reading BK table from file " << BKTableName << endl;
+  //cout << "Reading BK table from file " << BKTableName << endl;
   
   if(InStream.is_open())
     {
@@ -628,9 +628,9 @@ int MV::readTableBK(int BKMVe){
       InStream.read(reinterpret_cast<char*>(&deltak), sizeof(double));
       InStream.read(reinterpret_cast<char*>(&deltay), sizeof(double));
       
-      cout << "sizeA = " << sizeA << " sizek = " << sizek 
-           << " sizey = " << sizey << " deltaA = " << deltaA 
-           << " deltak = " << deltak << " deltay = " << deltay << endl;                               
+      //      cout << "sizeA = " << sizeA << " sizek = " << sizek 
+      //     << " sizey = " << sizey << " deltaA = " << deltaA 
+      //     << " deltak = " << deltak << " deltay = " << deltay << endl;                               
                 
       // read data
       double ValueBuffer;
