@@ -4472,7 +4472,7 @@ int main(int argc, char *argv[]) {
     else if (std::string(argv[i]) == "--Yg") {
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
         i++;
-        Yg = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+        Yg = atof(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
       } else { // Uh-oh, there was no argument to the destination option.
         std::cerr << "--Yg option requires one argument, gluon rapidity" << std::endl;
         return 1;
