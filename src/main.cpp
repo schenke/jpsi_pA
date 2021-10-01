@@ -3331,7 +3331,7 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
 #define hnobphi xx[3]
 
   double z = xx[4];
-  double mh = 0.3; //GeV
+  double mh = 0.2; //GeV
 
   double kscale = 30.;
   double pscale = 30.;
@@ -3430,7 +3430,7 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
 #define hnobnoptphi xx[2]
 
   double z = xx[3];
-  double mh = 0.3; //GeV
+  double mh = 0.2; //GeV
 
   double kscale = 30.;
   double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
@@ -3542,7 +3542,7 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
 #define hnobavptnumphi xx[3]
 
   double z = xx[4];
-  double mh = 0.3; //GeV
+  double mh = 0.2; //GeV
 
   double kscale = 30.;
   double pscale = 30.;
@@ -3656,7 +3656,7 @@ static int Hadrons(const int *ndim, const cubareal xx[],
 #define hp xx[7]
 
   double z = xx[8];
-  double mh = 0.3; //GeV
+  double mh = 0.2; //GeV
 
   double kscale = 30.;
   double pscale = 30.;
@@ -3774,7 +3774,7 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
 
   double z = xx[7];
   
-  double mh = 0.3; //GeV
+  double mh = 0.2; //GeV
 
   double kscale = 30.;
   double Rscale = 2./constants::hbarc;
@@ -3907,7 +3907,7 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
 #define havptnump xx[7]
 
   double z = xx[8];
-  double mh = 0.3; //GeV
+  double mh = 0.2; //GeV
 
   double kscale = 30.;
   double pscale = 30.;
@@ -4018,7 +4018,7 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
 
  #define z xx[6] 
 
-  double mh = 0.3; //GeV
+  double mh = 0.2; //GeV
 
   double kscale = 30.;
   double pscale = 30.;
@@ -4133,7 +4133,7 @@ static int HadronsFlucAvPtNum(const int *ndim, const cubareal xx[],
 
  #define z xx[6] 
 
-  double mh = 0.3; //GeV
+  double mh = 0.2; //GeV
 
   double kscale = 30.;
   double pscale = 30.;
@@ -4252,7 +4252,7 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
 #define fgphi xx[4]
 #define zfnpt xx[5] 
 
-  double mh = 0.3; //GeV
+  double mh = 0.2; //GeV
 
   double kscale = 30.;
   double pscale = 30.;
