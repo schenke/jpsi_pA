@@ -5187,6 +5187,8 @@ int main(int argc, char *argv[]) {
     if (rank==0)
       cout << "Fluctuating results"  << endl; 
     int ni=0;
+    default_random_engine generator;    
+    generator.seed(seed);    
     //double BqGauss;
     //double BqGaussSum =0.;
     //double BqGaussSumSq =0.;
@@ -5203,10 +5205,11 @@ int main(int argc, char *argv[]) {
       // Make a new target
       
       if( flucNq == 1 ){
-        default_random_engine generator;    
-        generator.seed(seed);    
-        poisson_distribution<int> d(3);
+        poisson_distribution<int> d(2.8214393721220787); // this mean makes a mean of 3 for the zero truncated Poisson distribution
         Nq = d(generator);
+        while(Nq<1){
+          Nq = d(generator);
+        }
         cout << "Nq = " << Nq << endl;
       }
 
