@@ -12,6 +12,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string>
+#include <random>
 #include <unistd.h>
 //#include <vector>
 //#include <ctype.h>
@@ -4395,6 +4396,7 @@ int main(int argc, char *argv[]) {
   double Bqwidth = 0.;
   int Nq = 3;
   int BqYdep = 0;
+  int flucNq = 0;
 
   // initialize MPI
   MPI_Init(&argc, &argv);
@@ -4631,6 +4633,15 @@ int main(int argc, char *argv[]) {
         return 1;
       }  
     }
+    else if (std::string(argv[i]) == "--flucNq") {
+      if (i + 1 < argc) { // Make sure we aren't at the end of argv!
+        i++;
+        flucNq = atoi(argv[i]); // Increment 'i' so we don't get the argument as the next argv[i].
+      } else { // Uh-oh, there was no argument to the destination option.
+        std::cerr << "--flucNq decides if Nq should fluctuate event to event (it is the same for all nucleons); this option requires one argument, 0 or 1" << std::endl;
+        return 1;
+      }  
+    }
     else if (std::string(argv[i]) == "-?") {
       cout << "Options are:\n" << "--readTable [0 or 1], --fluctuations [0 or 1], --Nevents [# of events], --NRQCD [0 or 1], --BK [0 or 1], --BKMVe [0 or 1], --bdep [0 or 1], --Yg [value of gluon rapidity], --YJPsi1 [value of first JPsi rapidity], --YJPsi2 [value of second JPsi rapidity], --xsec [0 or 1] (computes inelastic cross section when set to 1, --sigma02 [>0. mb], --RA [>0. fm], --Bp [>0. GeV^-2], --Bq [>0. GeV^-2], --alphas [>0.], --Qswidth [>0.], --dopt [0 or 1], -- Target [Pb, p, ...], --bmax [>=0. fm], --mIR [>0. GeV], --roots [>0 GeV], --Bqwidth [>0.], --Nq [>0], --BqYdep [0 or 1])" << endl;
       if (i + 1 < argc) { // Make sure we aren't at the end of argv!
@@ -4715,6 +4726,7 @@ int main(int argc, char *argv[]) {
     cout << " Qswidth = " << width << endl;
     cout << " Bqwidth = " << Bqwidth << endl;
     cout << " BqYdep = "  << BqYdep << endl;
+    cout << " flucNq = "  << flucNq << endl;
     cout << " bdep_p = " << data.bdep_p << endl;
     cout << " bdep_A = " << data.bdep_A << endl;
     cout << " bindep_A = " << data.bindep_A << endl;
@@ -5189,6 +5201,15 @@ int main(int argc, char *argv[]) {
       
       // Run Vegas integration with fluctuations
       // Make a new target
+      
+      if( flucNq == 1 ){
+        default_random_engine generator;    
+        generator.seed(seed);    
+        poisson_distribution<int> d(3);
+        Nq = d(generator);
+        cout << "Nq = " << Nq << endl;
+      }
+
 
       glauber->makeNuclei(random, data.Bp, data.Bq, Bqwidth, Nq, Yg, YJPsi1, YJPsi2, BqYdep);
       
