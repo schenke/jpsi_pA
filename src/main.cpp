@@ -2798,7 +2798,156 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
 ///// Fluctuating b J/Psi cross section //////////
 /////////////////////////////////////////////////
 
-static int JPsiIntegrandAllFluc(const int *ndim, const cubareal xx[],
+static int JPsiIntegrandICEMNumFluc(const int *ndim, const cubareal xx[],
+  const int *ncomp, cubareal ff[], void *userdata) {
+
+#define fqqRx xx[0]
+#define fqqRy xx[1]
+#define fqqqtilde xx[2]
+#define fqqphi xx[3]
+#define fqqM xx[4]
+#define fqqPT xx[5]
+#define fqq4k xx[6]
+#define fqq4phik xx[7]
+#define fqq4k1 xx[8]
+#define fqq4phik1 xx[9]
+
+  double kscale = 30.;
+  double pscale = 30.;
+  double Rscale = 4./constants::hbarc; //choose a small scale (proton Phip will cut off at large R)
+  int BK = static_cast<params*>(userdata)->BK;
+  int bdep = static_cast<params*>(userdata)->bdep;
+  int useFluc = static_cast<params*>(userdata)->useFluc;
+  double Y = static_cast<params*>(userdata)->Y;
+  double bx=static_cast<params*>(userdata)->bx/constants::hbarc;
+  double by=static_cast<params*>(userdata)->by/constants::hbarc;
+  double sizeFactor = static_cast<params*>(userdata)->protonSizeFactor;
+ 
+  double alphas = static_cast<params*>(userdata)->alphas;
+  double roots = static_cast<params*>(userdata)->roots;
+  double sigma02 = static_cast<params*>(userdata)->sigma02;
+  double rt2 = static_cast<params*>(userdata)->rt2;
+  double bdep_p = static_cast<params*>(userdata)->bdep_p;
+  double bindep_A = static_cast<params*>(userdata)->bindep_A;
+  double bdep_A = static_cast<params*>(userdata)->bdep_A;
+  double bdep_fluc_p = static_cast<params*>(userdata)->bdep_fluc_p;
+  double bdep_fluc_A = static_cast<params*>(userdata)->bdep_fluc_A;
+  int Ybin = static_cast<params*>(userdata)->Ybin;
+
+  TAInt *TAclass = static_cast<params*>(userdata)->TAclass;
+  MV *mv = static_cast<params*>(userdata)->mv;
+  Glauber *glauberClass = static_cast<params*>(userdata)->glauberClass;
+ 
+  double m = constants::mc;//static_cast<params*>(userdata)->m;
+
+  // scale the integration variables 
+  double M = constants::mJPsi + fqqM*(2.*constants::mD-constants::mJPsi); 
+  double qtildescale = sqrt(M*M/4.-constants::mc*constants::mc);
+  double qtilde = fqqqtilde*qtildescale;
+  double PT = fqqPT*pscale; 
+
+  double Rx = fqqRx*Rscale-Rscale/2.;
+  double Ry = fqqRy*Rscale-Rscale/2.;
+  double k = fqq4k*kscale;
+  double phik = fqq4phik*2.*constants::PI;
+  double k1 = fqq4k1*kscale;
+  double phik1 = fqq4phik1*2.*constants::PI;
+
+  kinPair in;
+  in.M = M;
+  in.PT  = PT;
+  in.phi = fqqphi*2.*constants::PI; // not the PT phi
+  in.qtilde = qtilde;
+  in.Y = Y;
+  in.m = m;
+
+  kinqq out = convert(in);
+  
+  double p = out.p;
+  double phip = out.phip;
+  double q = out.q;
+  double phiq = out.phiq;
+  double yp = out.yp;
+  double yq = out.yq;
+
+  double xp = (sqrt(p*p+m*m)*exp(yp)+sqrt(q*q+m*m)*exp(yq))/roots;
+  double xA = (sqrt(p*p+m*m)*exp(-yp)+sqrt(q*q+m*m)*exp(-yq))/roots;
+
+
+  if (xp>1.){
+        f = 0.;
+  }
+  else if (xA>1.){
+       f = 0.;
+  }
+  
+  else{
+  double factorxp = pow(1.-xp,4.);
+  double factorxA = pow(1.-xA,4.);
+
+  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+
+  // get sums of vectors
+  double px = p*cos(phip); 
+  double py = p*sin(phip);
+  double qx = q*cos(phiq); 
+  double qy = q*sin(phiq);
+  double kx = k*cos(phik);
+  double ky = k*sin(phik);
+  double k1x = k1*cos(phik1);
+  double k1y = k1*sin(phik1);
+  double pplusqminusk1minuskx = px+qx-kx-k1x;
+  double pplusqminusk1minusky = py+qy-ky-k1y;
+  double pplusqminusk1minusk = sqrt(pplusqminusk1minuskx*pplusqminusk1minuskx
+                                    +pplusqminusk1minusky*pplusqminusk1minusky);
+  double phi_pplusqminusk1minusk = atan2(pplusqminusk1minusky,pplusqminusk1minuskx);
+
+  double pplusqminusk1x = px+qx-k1x;
+  double pplusqminusk1y = py+qy-k1y;
+  double pplusqminusk1 = sqrt(pplusqminusk1x*pplusqminusk1x+pplusqminusk1y*pplusqminusk1y);
+  double phi_pplusqminusk1 = atan2(pplusqminusk1y,pplusqminusk1x);
+
+  
+  double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
+
+  // get Jacobian
+  double betax = PT/sqrt(M*M+PT*PT);
+  double gammax = 1./sqrt(1.-betax*betax);
+  
+  double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
+
+  double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
+  double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
+
+  // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
+  f = alphas*double(constants::Nc)*double(constants::Nc)
+    /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
+    *PhipFluc(k1, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp/(k1*k1)*H*J
+    *(StF(pplusqminusk1minusk,TA,QsA,mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A)*factorxA*StF(k,TA,QsA,mv,BK,xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A))*factorxA
+    *Rscale*Rscale
+    *PT*PT*pscale*2.*constants::PI
+    *(2.*constants::mD-constants::mJPsi)*2.*M*(M/constants::mJPsi)*(M/constants::mJPsi)
+    *qtildescale
+    *2.*constants::PI
+    *k*kscale*2.*constants::PI
+    *k1*kscale*2.*constants::PI
+    *2.; // for p and q direction
+  // scaled momenta above (in PT)
+  // last rows are scaling of integration measures:
+  // dRxdRy
+  //// dbxdby
+  // d2PT
+  // dM
+  // dqtilde
+  // dphi
+  // d2k
+  // d2k1
+  } 
+  return 0;
+}  
+
+static int JPsiIntegrandICEMDenFluc(const int *ndim, const cubareal xx[],
   const int *ncomp, cubareal ff[], void *userdata) {
 
 #define fqqRx xx[0]
@@ -5191,7 +5340,7 @@ int main(int argc, char *argv[]) {
     generator.seed(seed);    
     //double BqGauss;
     //double BqGaussSum =0.;
-    //double BqGaussSumSq =0.;
+    //double BqGaussSumSq = 0.;
     while (ni<Nevents){
       
       // fluctuation of the hot-spot size (moved to Glauber.cpp to fluctuate each hot spot differently
@@ -5210,7 +5359,7 @@ int main(int argc, char *argv[]) {
         while(Nq<1){
           Nq = d(generator);
         }
-        cout << "Nq = " << Nq << endl;
+        //cout << "Nq = " << Nq << endl;
       }
 
 
@@ -5322,6 +5471,8 @@ int main(int argc, char *argv[]) {
         }
         fouthpt.close();
       }
+      // done pT spectra
+
       data.Y = Yg;
       data.Ybin = 0;
       NDIM = 6;
@@ -5489,43 +5640,87 @@ int main(int argc, char *argv[]) {
           
           JPsi2result2 = JPsi2result_den_2;
           JPsi2error2 = JPsi2error_den_2;
-        }  
+        }
         cout << setprecision(10) << hresult << " " << herror << " " << JPsi2result
              << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2
              << " " << hmeanPt << " " << Jpsi2meanPtresult << " " << Jpsi2meanPtresult_2 << endl;
       }
       else{
         //cout << "Using ICEM"  << endl;    
-        
+
         data.Y = YJPsi1; //forward
         data.Ybin = 1;
         
+        if(BqYdep){
+          data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+          data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+        }
+
+        //mean pT
         NDIM = 10;
-        llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
+        llVegas(NDIM, NCOMP, JPsiIntegrandICEMNumFluc, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
-        JPsi2result = (double)integral[0];
-        JPsi2error = (double)error[0];  
-        
-        data.Y = YJPsi2; //backward
-        data.Ybin = 2;
-         
-        NDIM = 10;
-        llVegas(NDIM, NCOMP, JPsiIntegrandAllFluc, &data, NVEC,
+        JPsi2result_num = (double)integral[0];
+        JPsi2error_num = (double)error[0];  
+
+        llVegas(NDIM, NCOMP, JPsiIntegrandICEMDenFluc, &data, NVEC,
                 EPSREL, EPSABS, VERBOSE, SEED,
                 MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
                 GRIDNO, NULL, NULL,
                 &neval, &fail, integral, error, prob);
-        JPsi2result2 = (double)integral[0];
-        JPsi2error2 = (double)error[0];  
-        
-        cout << setprecision(10) << gresult << " " << gerror 
-             << " " << JPsi2result << " " << JPsi2error 
-             << " " << JPsi2result2 << " " << JPsi2error2
-             << " " << sqrt(data.bx*data.bx+data.by*data.by)
-             << endl;
+        JPsi2result_den = (double)integral[0];
+        JPsi2error_den = (double)error[0];  
+  
+        Jpsi2meanPtresult = JPsi2result_num/JPsi2result_den;
+        JPsi2result = JPsi2result_den;
+        JPsi2error = JPsi2error_den;
+          
+        if ( YJPsi1 == YJPsi2 ){
+          JPsi2result2 = JPsi2result;
+          JPsi2error2 = JPsi2error;
+          Jpsi2meanPtresult_2 = Jpsi2meanPtresult;
+        }
+        else{
+          data.Y = YJPsi2; //backward
+          data.Ybin = 2;
+
+          if(BqYdep){
+            data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+            data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+          }
+                    
+          NDIM = 10;
+          llVegas(NDIM, NCOMP, JPsiIntegrandICEMNumFluc, &data, NVEC,
+                  EPSREL, EPSABS, VERBOSE, SEED,
+                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                  GRIDNO, NULL, NULL,
+                  &neval, &fail, integral, error, prob);
+          
+          JPsi2result_num_2 = (double)integral[0];
+          JPsi2error_num_2 = (double)error[0];   
+          
+          llVegas(NDIM, NCOMP, JPsiIntegrandICEMDenFluc, &data, NVEC,
+                  EPSREL, EPSABS, VERBOSE, SEED,
+                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+                  GRIDNO, NULL, NULL,
+                  &neval, &fail, integral, error, prob);
+
+          JPsi2result_den_2 = (double)integral[0];
+          JPsi2error_den_2 = (double)error[0];              
+          
+          Jpsi2meanPtresult_2 = JPsi2result_num_2/JPsi2result_den_2;
+          
+          JPsi2result2 = JPsi2result_den_2;
+          JPsi2error2 = JPsi2error_den_2;
+        }  
+
+        cout << setprecision(10) << hresult << " " << herror << " " << JPsi2result
+             << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2
+             << " " << hmeanPt << " " << Jpsi2meanPtresult << " " << Jpsi2meanPtresult_2 << endl;
+
       }
       
       stringstream strfilename;
