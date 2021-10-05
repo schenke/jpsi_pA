@@ -2855,7 +2855,8 @@ static int JPsiIntegrandICEMNumFluc(const int *ndim, const cubareal xx[],
 
   kinPair in;
   in.M = M;
-  in.PT  = PT;
+  //  in.PT  = PT;
+  in.PT  = PT*(M/constants::mJPsi); // evaluate cross section at PT' =  PT*(M/constants::mJPsi) (see (6) in https://arxiv.org/pdf/1609.06042.pdf)
   in.phi = fqqphi*2.*constants::PI; // not the PT phi
   in.qtilde = qtilde;
   in.Y = Y;
@@ -2912,7 +2913,8 @@ static int JPsiIntegrandICEMNumFluc(const int *ndim, const cubareal xx[],
   double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
   // get Jacobian
-  double betax = PT/sqrt(M*M+PT*PT);
+  //  double betax = PT/sqrt(M*M+PT*PT);
+  double betax = (M/constants::mJPsi*PT)/sqrt(M*M+(M/constants::mJPsi*PT)*(M/constants::mJPsi*PT));
   double gammax = 1./sqrt(1.-betax*betax);
   
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
@@ -3004,7 +3006,7 @@ static int JPsiIntegrandICEMDenFluc(const int *ndim, const cubareal xx[],
 
   kinPair in;
   in.M = M;
-  in.PT  = PT;
+  in.PT  = PT*(M/constants::mJPsi); // evaluate cross section at PT' =  PT*(M/constants::mJPsi) (see (6) in https://arxiv.org/pdf/1609.06042.pdf)
   in.phi = fqqphi*2.*constants::PI; // not the PT phi
   in.qtilde = qtilde;
   in.Y = Y;
@@ -3061,7 +3063,8 @@ static int JPsiIntegrandICEMDenFluc(const int *ndim, const cubareal xx[],
   double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
   // get Jacobian
-  double betax = PT/sqrt(M*M+PT*PT);
+  //double betax = PT/sqrt(M*M+PT*PT);
+  double betax = (M/constants::mJPsi*PT)/sqrt(M*M+(M/constants::mJPsi*PT)*(M/constants::mJPsi*PT));
   double gammax = 1./sqrt(1.-betax*betax);
   
   double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
