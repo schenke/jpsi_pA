@@ -2553,7 +2553,7 @@ static int JPsiIntegrandAllNoB(const int *ndim, const cubareal xx[],
 
   kinPair in;
   in.M = M;
-  in.PT  = PT;
+  in.PT  = PT*M/constants::mJPsi;
   in.phi = nobqqphi*2.*constants::PI; // not the PT phi
   in.qtilde = qtilde;
   in.Y = Y;
@@ -2601,7 +2601,8 @@ static int JPsiIntegrandAllNoB(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else{
-    double betax = PT/sqrt(M*M+PT*PT);
+    double betax = (M/constants::mJPsi*PT)/sqrt(M*M+(M/constants::mJPsi*PT)*(M/constants::mJPsi*PT));
+    //double betax = PT/sqrt(M*M+PT*PT);
     double gammax = 1./sqrt(1.-betax*betax);
     // get Jacobian  
     double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
@@ -2706,7 +2707,7 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
 
   kinPair in;
   in.M = M;
-  in.PT  = PT;
+  in.PT  = PT*M/constants::mJPsi;
   in.phi = qqphi*2.*constants::PI; // not the PT phi
   in.qtilde = qtilde;
   in.Y = Y;
@@ -2756,7 +2757,9 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else{
-    double betax = PT/sqrt(M*M+PT*PT);
+    //    double betax = PT/sqrt(M*M+PT*PT);
+    double betax = (M/constants::mJPsi*PT)/sqrt(M*M+(M/constants::mJPsi*PT)*(M/constants::mJPsi*PT));
+
     double gammax = 1./sqrt(1.-betax*betax);
     // get Jacobian  
     double J = qtilde*gammax/(sqrt(p*p+m*m)*sqrt(q*q+m*m)*abs(sinh(yp-yq)));
