@@ -54,7 +54,7 @@ namespace constants {
 
   const double lambdaSpeedp = 0.277;
   const double lambdaSpeedA = 0.277;
-  const double prefactor = 0.515;
+  const double prefactor = 0.52;
 
   //const double lambdaSpeedp = 0.17;
   //const double lambdaSpeedA = 0.17;
