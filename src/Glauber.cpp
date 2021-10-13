@@ -281,7 +281,6 @@ void Glauber::makeNuclei(Random *random, double Bp, double Bq, double Bqwidth, i
   
   generateNucleusTA(&Target, random, Bp, Bq, Bqwidth,Nq, Yg, YJPsi1, YJPsi2, Ydep); 
   generateProtonTp(&Target, random, Bp, Bq, Bqwidth,Nq, Yg, YJPsi1, YJPsi2, Ydep); 
-
 }
 
 void Glauber::generateProtonTp(Nucleus *nuc, Random *random, double Bp, double Bq, double Bqwidth, int Nq, double Yg, double YJPsi1, double YJPsi2, int Ydep){

@@ -54,7 +54,8 @@ namespace constants {
 
   const double lambdaSpeedp = 0.277;
   const double lambdaSpeedA = 0.277;
-  const double prefactor = 0.52;
+  const double prefactorp = 0.52;
+  const double prefactorA = 0.52;
 
   //const double lambdaSpeedp = 0.17;
   //const double lambdaSpeedA = 0.17;
@@ -432,8 +433,8 @@ static int JPsiIntegrandNRQCDCsNoB(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   // get sums of vectors
     double px = p*cos(phip); 
     double py = p*sin(phip);
@@ -534,8 +535,8 @@ static int JPsiIntegrandNRQCDCoNoB(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   // get sums of vectors
     double px = p*cos(phip); 
     double py = p*sin(phip);
@@ -642,8 +643,8 @@ static int JPsiIntegrandNRQCDNoBNoPt(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   // get sums of vectors
   double px = p*cos(phip); 
   double py = p*sin(phip);
@@ -774,8 +775,8 @@ static int JPsiIntegrandNRQCDNoBAvPtNum(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   // get sums of vectors
   double px = p*cos(phip); 
   double py = p*sin(phip);
@@ -903,8 +904,8 @@ static int JPsiIntegrandNRQCDNoBAvPtDen(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   // get sums of vectors
   double px = p*cos(phip); 
   double py = p*sin(phip);
@@ -1046,8 +1047,8 @@ static int JPsiIntegrandNRQCDCs(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   // get sums of vectors
   double px = p*cos(phip); 
   double py = p*sin(phip);
@@ -1161,8 +1162,8 @@ static int JPsiIntegrandNRQCDCo(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else{
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     // get sums of vectors
     double px = p*cos(phip); 
     double py = p*sin(phip);
@@ -1283,8 +1284,8 @@ static int JPsiIntegrandNRQCDNoPT(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   // get sums of vectors
     double px = p*cos(phip); 
     double py = p*sin(phip);
@@ -1428,8 +1429,8 @@ static int JPsiIntegrandNRQCDAvPtNum(const int *ndim, const cubareal xx[],
     f = 0;
   }
   else {
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     // get sums of vectors
     double px = p*cos(phip); 
     double py = p*sin(phip);
@@ -1573,8 +1574,8 @@ static int JPsiIntegrandNRQCDAvPtDen(const int *ndim, const cubareal xx[],
     f = 0;
   }
   else{
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     // get sums of vectors
     double px = p*cos(phip); 
     double py = p*sin(phip);
@@ -1722,8 +1723,8 @@ static int JPsiIntegrandNRQCDAvPtNumFluc(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     // get sums of vectors
     double px = p*cos(phip); 
     double py = p*sin(phip);
@@ -1856,8 +1857,8 @@ static int JPsiIntegrandNRQCDAvPtDenFluc(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     // get sums of vectors
     double px = p*cos(phip); 
     double py = p*sin(phip);
@@ -1986,8 +1987,8 @@ static int JPsiIntegrandNRQCDCsFluc(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     // get sums of vectors
     double px = p*cos(phip); 
     double py = p*sin(phip);
@@ -2097,8 +2098,8 @@ static int JPsiIntegrandNRQCDCoFluc(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   // get sums of vectors
   double px = p*cos(phip); 
   double py = p*sin(phip);
@@ -2213,8 +2214,8 @@ static int JPsiIntegrandNRQCDFlucNoPT(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     // get sums of vectors
     double px = p*cos(phip); 
     double py = p*sin(phip);
@@ -2346,8 +2347,8 @@ static int JPsiIntegrandNRQCDCsFlucNoPT(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     // get sums of vectors
     double px = p*cos(phip); 
     double py = p*sin(phip);
@@ -2457,8 +2458,8 @@ static int JPsiIntegrandNRQCDCoFlucNoPT(const int *ndim, const cubareal xx[],
     f= 0;
   }
   else {
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
   // get sums of vectors
   double px = p*cos(phip); 
   double py = p*sin(phip);
@@ -2610,8 +2611,8 @@ static int JPsiIntegrandAllNoB(const int *ndim, const cubareal xx[],
     double myTA = 1.;
     double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
     f = alphas*double(constants::Nc)*double(constants::Nc)
       /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
@@ -2766,8 +2767,8 @@ static int JPsiIntegrandAll(const int *ndim, const cubareal xx[],
     double myTA = returnTA(Rminusb,TAclass); 
     double H = Hard::all(p, phip, q, phiq, k1, phik1, pplusqminusk1, phi_pplusqminusk1, k, phik, yp, yq, m);
 
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
     f = alphas*double(constants::Nc)*double(constants::Nc)
       /(2.*pow(2.*constants::PI,10.)*(double(constants::Nc)*double(constants::Nc)-1.))
@@ -2889,8 +2890,8 @@ static int JPsiIntegrandICEMNumFluc(const int *ndim, const cubareal xx[],
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
 
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
   // get sums of vectors
   double px = p*cos(phip); 
@@ -3039,8 +3040,8 @@ static int JPsiIntegrandICEMDenFluc(const int *ndim, const cubareal xx[],
   double factorxp = pow(1.-xp,4.);
   double factorxA = pow(1.-xA,4.);
 
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
   // get sums of vectors
   double px = p*cos(phip); 
@@ -3147,8 +3148,8 @@ static int GluonsNoB(const int *ndim, const cubareal xx[],
 
   double xp = (nobp*pscale+lambda)*exp(Y)/roots;
   double xA = (nobp*pscale+lambda)*exp(-Y)/roots;
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
   double TA = 1.; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
   double factorxp = pow(1.-xp,4.);
@@ -3212,8 +3213,8 @@ static int GluonsNoBNoPt(const int *ndim, const cubareal xx[],
 
   double xp = (p)*exp(Y)/roots;
   double xA = (p)*exp(-Y)/roots;
-  double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-  double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+  double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+  double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
   double TA = 1.; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
   double factorxp = pow(1.-xp,4.);
@@ -3299,8 +3300,8 @@ static int Gluons(const int *ndim, const cubareal xx[],
     f = 0.;
   }
   else{
-   double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-   double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+   double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+   double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
    double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
 
@@ -3374,8 +3375,8 @@ static int GluonsNoPt(const int *ndim, const cubareal xx[],
     f = 0.;
   }
   else{
-   double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-   double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+   double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+   double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
 
    double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
 
@@ -3460,8 +3461,8 @@ static int GluonsFluc(const int *ndim, const cubareal xx[],
   }
   else{
     
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = alphas/constants::CF/(p*p+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
@@ -3554,8 +3555,8 @@ static int HadronsNoB(const int *ndim, const cubareal xx[],
     double factorxA = pow(1.-xA,4.);
     double factorxp = pow(1.-xp,4.);
     
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
     
@@ -3663,8 +3664,8 @@ static int HadronsNoBNoPt(const int *ndim, const cubareal xx[],
     double factorxA = pow(1.-xA,4.);
     double factorxp = pow(1.-xp,4.);
     
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
     
@@ -3774,8 +3775,8 @@ static int HadronsNoBAvPtNum(const int *ndim, const cubareal xx[],
     double factorxA = pow(1.-xA,4.);
     double factorxp = pow(1.-xp,4.);
     
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     double TA = 1; // To avoid impact parameter dependence. We also set R=0 inside Phip for the same purpose
     
@@ -3893,8 +3894,8 @@ static int Hadrons(const int *ndim, const cubareal xx[],
     double factorxA = pow(1.-xA,4.);
     double factorxp = pow(1.-xp,4.);
     
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
     
@@ -4013,8 +4014,8 @@ static int HadronsNoPt(const int *ndim, const cubareal xx[],
     double factorxA = pow(1.-xA,4.);
     double factorxp = pow(1.-xp,4.);
     
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
   
@@ -4144,8 +4145,8 @@ static int HadronsAvPtNum(const int *ndim, const cubareal xx[],
     double factorxA = pow(1.-xA,4.);
     double factorxp = pow(1.-xp,4.);
     
-    double Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    double QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    double Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    double QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     double TA = returnTA(sqrt(max(R*R + b*b - 2.*R*b*cos((phiR - phib)),0.)),TAclass);
     
@@ -4217,6 +4218,7 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
 
   double R = sqrt(Rx*Rx+Ry*Ry);
   double b = sqrt(bx*bx+by*by);
+
   double TA = returnTA2D(Rx-bx,Ry-by,glauberClass, Ybin);
   double Tp = returnTp2D(Rx,Ry,glauberClass, Ybin);
   
@@ -4265,8 +4267,8 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
     double factorxA = pow(1.-xA,4.);
     double factorxp = pow(1.-xp,4.);
     
-    Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh*J*
@@ -4380,8 +4382,8 @@ static int HadronsFlucAvPtNum(const int *ndim, const cubareal xx[],
     double factorxA = pow(1.-xA,4.);
     double factorxp = pow(1.-xp,4.);
     
-    Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh*J*
@@ -4499,8 +4501,8 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
     double factorxA = pow(1.-xA,4.);
     double factorxp = pow(1.-xp,4.);
     
-    Qsp = constants::prefactor*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
-    QsA = constants::prefactor*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
+    Qsp = constants::prefactorp*pow(constants::x0/xp,constants::lambdaSpeedp/2.);
+    QsA = constants::prefactorA*pow(constants::x0/xA,constants::lambdaSpeedA/2.);
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh*J* 
