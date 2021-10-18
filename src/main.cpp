@@ -1,3 +1,4 @@
+
 // Jpsi and gluon cross section calculation in MV or GBW models 
 // including fluctuating geometries 
 // 2021 Bjoern Schenke
@@ -5386,8 +5387,8 @@ int main(int argc, char *argv[]) {
       data.Y = Yg;
       data.Ybin = 0;
       if(BqYdep){
-        data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-        data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+        data.bdep_fluc_p = data.sigma02/2./constants::PI/((data.Bp+data.Bq)*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+        data.bdep_fluc_A = data.sigma02/2./constants::PI/((data.Bp+data.Bq)*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
       }
       
       // do hadrons
@@ -5520,8 +5521,8 @@ int main(int argc, char *argv[]) {
         data.Y = YJPsi1; //forward
         data.Ybin = 1;
         if(BqYdep){
-          data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-          data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+          data.bdep_fluc_p = data.sigma02/2./constants::PI/((data.Bp+data.Bq)*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+          data.bdep_fluc_A = data.sigma02/2./constants::PI/((data.Bp+data.Bq)*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
         }
 
         // NDIM = 10;
@@ -5601,8 +5602,8 @@ int main(int argc, char *argv[]) {
           data.Y = YJPsi2; //backward
           data.Ybin = 2;
           if(BqYdep){
-            data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-            data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+            data.bdep_fluc_p = data.sigma02/2./constants::PI/((data.Bp+data.Bq)*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+            data.bdep_fluc_A = data.sigma02/2./constants::PI/((data.Bp+data.Bq)*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
           }
           
           // NDIM = 10;
@@ -5660,8 +5661,8 @@ int main(int argc, char *argv[]) {
         data.Ybin = 1;
         
         if(BqYdep){
-          data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-          data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+          data.bdep_fluc_p = data.sigma02/2./constants::PI/((data.Bp+data.Bq)*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+          data.bdep_fluc_A = data.sigma02/2./constants::PI/((data.Bp+data.Bq)*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
         }
 
         //mean pT
@@ -5696,8 +5697,8 @@ int main(int argc, char *argv[]) {
           data.Ybin = 2;
 
           if(BqYdep){
-            data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-            data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.1 + 0.09*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+            data.bdep_fluc_p = data.sigma02/2./constants::PI/((data.Bp+data.Bq)*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+            data.bdep_fluc_A = data.sigma02/2./constants::PI/((data.Bp+data.Bq)*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
           }
                     
           NDIM = 10;
