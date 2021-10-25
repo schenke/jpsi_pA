@@ -383,12 +383,7 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp, double 
   double hbarc = 0.1973269804;
   int useQuarks = 1;
   double BqGauss;
-  // stringstream strfilename;
-  // strfilename << "TA.dat";
-  // string filename;
-  // filename = strfilename.str();
-  // fstream fout(filename.c_str(), ios::out);
-  
+ 
   double gauss[nuc->nucleonList.size()][Nq];
   double xq[nuc->nucleonList.size()][Nq];
   double yq[nuc->nucleonList.size()][Nq];
@@ -544,6 +539,20 @@ void Glauber::generateNucleusTA(Nucleus *nuc, Random *random, double Bp, double 
       }
     }
   }
+  stringstream strfilename;
+  strfilename << "TA.dat";
+  string filename;
+  filename = strfilename.str();
+  fstream fout(filename.c_str(), ios::out);
+  
+  for(int ix=0; ix<200; ix++){
+    double x = (double(ix)/200.*20.-10.);
+    for(int iy=0; iy<200; iy++){
+      double y = (double(iy)/200.*20.-10.);
+      fout << x << " " << y << " " << TAgrid2D[0][ix][iy] << " " << TAgrid2D[1][ix][iy] << " " << TAgrid2D[2][ix][iy] << endl;
+    }
+  }
+  fout.close();
 }  
 
 //takes x and y in GeV^-1

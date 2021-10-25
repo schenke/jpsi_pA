@@ -5454,6 +5454,10 @@ int main(int argc, char *argv[]) {
           hresultpt = (double)integral[0];
           data.Y = YJPsi1; //forward
           data.Ybin = 1;
+          if(BqYdep){
+            data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+            data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+          }
           NDIM = 9;
           llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDFlucNoPT, &data, NVEC,
                   EPSREL, EPSABS, VERBOSE, SEED,
@@ -5484,6 +5488,10 @@ int main(int argc, char *argv[]) {
 
       data.Y = Yg;
       data.Ybin = 0;
+      if(BqYdep){
+        data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+        data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      }
       NDIM = 6;
       llVegas(NDIM, NCOMP, GluonsFluc, &data, NVEC,
               EPSREL, EPSABS, VERBOSE, SEED,
