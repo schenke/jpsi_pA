@@ -1,5 +1,4 @@
-
-// Jpsi and gluon cross section calculation in MV or GBW models 
+// Jpsi and gluon cross section calculation with BK or MV model and NRQCD or ICEM for the JPsi
 // including fluctuating geometries 
 // 2021 Bjoern Schenke
 
@@ -4658,7 +4657,7 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh*J* 
       //      alphas/constants::CF/(zfnpt*pg*zfnpt*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
-      alphas/constants::CF/(zfnpt*zfnpt)/(pg*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
+      alphas/constants::CF/(zfnpt*zfnpt*pg*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
       *PhipFluc(k, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
       *2.*constants::PI*k*kscale  //kdkdphik
@@ -4692,7 +4691,7 @@ int main(int argc, char *argv[]) {
   int xsec = 0;
   double alphas = 0.3;
   string Target="Pb";
-  double bmax = 10.;
+  double bmax = 10.; // [fm]
   double Bp = 4.; // GeV^-2
   double Bq = 0.3;
   double sigma02In = 9.; // mb
@@ -5112,7 +5111,8 @@ int main(int argc, char *argv[]) {
   
   /// put the large number back in !!! 
   //const long long int MAXEVAL = 5000000000;
-  const long long int MAXEVAL =   50000000;
+  //  const long long int MAXEVAL = 50000000;
+  const long long int MAXEVAL =     500000;
   int KEY = 0;
   
   //vegas
@@ -5673,259 +5673,293 @@ int main(int argc, char *argv[]) {
       }
       // done pT spectra
 
-      data.Y = Yg;
-      data.Ybin = 0;
-      if(BqYdep){
-        data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-        data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-      }
-      NDIM = 6;
-      llVegas(NDIM, NCOMP, GluonsFluc, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
-      gresult = (double)integral[0];
-      gerror = (double)error[0];
-      //      printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);        
+      //@@@@@@@
 
-      data.lambda = 0.15; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
-      NDIM = 7;
-      llVegas(NDIM, NCOMP, HadronsFluc, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
-      hmeanPtresult_den = (double)integral[0];
-      hmeanPterror_den = (double)error[0];
-      NDIM = 7;
-      llVegas(NDIM, NCOMP, HadronsFlucAvPtNum, &data, NVEC,
-              EPSREL, EPSABS, VERBOSE, SEED,
-              MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-              GRIDNO, NULL, NULL,
-              &neval, &fail, integral, error, prob);
-      hmeanPtresult_num = (double)integral[0];
-      hmeanPterror_num = (double)error[0];
+      // data.Y = Yg;
+      // data.Ybin = 0;
+      // if(BqYdep){
+      //   data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      //   data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      // }
+      // NDIM = 6;
+      // llVegas(NDIM, NCOMP, GluonsFluc, &data, NVEC,
+      //         EPSREL, EPSABS, VERBOSE, SEED,
+      //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //         GRIDNO, NULL, NULL,
+      //         &neval, &fail, integral, error, prob);
+      // gresult = (double)integral[0];
+      // gerror = (double)error[0];
+      // //      printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);        
+
+      // data.lambda = 0.15; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
+      // NDIM = 7;
+      // llVegas(NDIM, NCOMP, HadronsFluc, &data, NVEC,
+      //         EPSREL, EPSABS, VERBOSE, SEED,
+      //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //         GRIDNO, NULL, NULL,
+      //         &neval, &fail, integral, error, prob);
+      // hmeanPtresult_den = (double)integral[0];
+      // hmeanPterror_den = (double)error[0];
+      // NDIM = 7;
+      // llVegas(NDIM, NCOMP, HadronsFlucAvPtNum, &data, NVEC,
+      //         EPSREL, EPSABS, VERBOSE, SEED,
+      //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //         GRIDNO, NULL, NULL,
+      //         &neval, &fail, integral, error, prob);
+      // hmeanPtresult_num = (double)integral[0];
+      // hmeanPterror_num = (double)error[0];
       
-      hmeanPt = hmeanPtresult_num/hmeanPtresult_den;
-      data.lambda = 0.05; 
+      // hmeanPt = hmeanPtresult_num/hmeanPtresult_den;
+      // data.lambda = 0.05; 
       
-      if(NRQCD==1){
-        //        cout << "Using NRQCD"  << endl;
+      // if(NRQCD==1){
+      //   //        cout << "Using NRQCD"  << endl;
         
-        data.Y = YJPsi1; //forward
-        data.Ybin = 1;
-        if(BqYdep){
-          data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-          data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-        }
+      //   data.Y = YJPsi1; //forward
+      //   data.Ybin = 1;
+      //   if(BqYdep){
+      //     data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      //     data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      //   }
 
-        // NDIM = 10;
-        // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
-        //         EPSREL, EPSABS, VERBOSE, SEED,
-        //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        //         GRIDNO, NULL, NULL,
-        //         &neval, &fail, integral, error, prob);
+      //   // NDIM = 10;
+      //   // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
+      //   //         EPSREL, EPSABS, VERBOSE, SEED,
+      //   //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //   //         GRIDNO, NULL, NULL,
+      //   //         &neval, &fail, integral, error, prob);
         
-        // JPsi2result_cs = (double)integral[0];
-        // JPsi2error_cs = (double)error[0];    
+      //   // JPsi2result_cs = (double)integral[0];
+      //   // JPsi2error_cs = (double)error[0];    
         
-        // NDIM = 8;
-        // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
-        //         EPSREL, EPSABS, VERBOSE, SEED,
-        //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        //         GRIDNO, NULL, NULL,
-        //         &neval, &fail, integral, error, prob);
-        // JPsi2result_co= (double)integral[0];
-        // JPsi2error_co = (double)error[0];
+      //   // NDIM = 8;
+      //   // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
+      //   //         EPSREL, EPSABS, VERBOSE, SEED,
+      //   //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //   //         GRIDNO, NULL, NULL,
+      //   //         &neval, &fail, integral, error, prob);
+      //   // JPsi2result_co= (double)integral[0];
+      //   // JPsi2error_co = (double)error[0];
         
-        // JPsi2result = JPsi2result_co + JPsi2result_cs;
-        // JPsi2error = JPsi2error_co + JPsi2error_cs;
+      //   // JPsi2result = JPsi2result_co + JPsi2result_cs;
+      //   // JPsi2error = JPsi2error_co + JPsi2error_cs;
 
-        //mean pT
-        NDIM = 10;
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtNumFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
+      //   //mean pT
+      //   NDIM = 10;
+      //   llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtNumFluc, &data, NVEC,
+      //           EPSREL, EPSABS, VERBOSE, SEED,
+      //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //           GRIDNO, NULL, NULL,
+      //           &neval, &fail, integral, error, prob);
         
-        JPsi2result_num = (double)integral[0];
-        JPsi2error_num = (double)error[0];    
+      //   JPsi2result_num = (double)integral[0];
+      //   JPsi2error_num = (double)error[0];    
         
-        llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtDenFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
+      //   llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtDenFluc, &data, NVEC,
+      //           EPSREL, EPSABS, VERBOSE, SEED,
+      //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //           GRIDNO, NULL, NULL,
+      //           &neval, &fail, integral, error, prob);
         
-        JPsi2result_den = (double)integral[0];
-        JPsi2error_den = (double)error[0];    
+      //   JPsi2result_den = (double)integral[0];
+      //   JPsi2error_den = (double)error[0];    
   
-        Jpsi2meanPtresult = JPsi2result_num/JPsi2result_den;
-        JPsi2result = JPsi2result_den;
-        JPsi2error = JPsi2error_den;
+      //   Jpsi2meanPtresult = JPsi2result_num/JPsi2result_den;
+      //   JPsi2result = JPsi2result_den;
+      //   JPsi2error = JPsi2error_den;
           
-        // NDIM = 12;
-        // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtNum, &data, NVEC,
-        //          EPSREL, EPSABS, VERBOSE, SEED,
-        //          MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        //          GRIDNO, NULL, NULL,
-        //          &neval, &fail, integral, error, prob);
+      //   // NDIM = 12;
+      //   // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtNum, &data, NVEC,
+      //   //          EPSREL, EPSABS, VERBOSE, SEED,
+      //   //          MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //   //          GRIDNO, NULL, NULL,
+      //   //          &neval, &fail, integral, error, prob);
 
-        //  meanPtresult_num= (double)integral[0];
-        //  meanPterror_num = (double)error[0];
+      //   //  meanPtresult_num= (double)integral[0];
+      //   //  meanPterror_num = (double)error[0];
 
-        //   NDIM = 12;
-        //   llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtDen, &data, NVEC,
-        //          EPSREL, EPSABS, VERBOSE, SEED,
-        //          MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-        //          GRIDNO, NULL, NULL,
-        //          &neval, &fail, integral, error, prob);
+      //   //   NDIM = 12;
+      //   //   llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtDen, &data, NVEC,
+      //   //          EPSREL, EPSABS, VERBOSE, SEED,
+      //   //          MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //   //          GRIDNO, NULL, NULL,
+      //   //          &neval, &fail, integral, error, prob);
 
-        //  meanPtresult_den = (double)integral[0];
-        //  meanPterror_den = (double)error[0];
+      //   //  meanPtresult_den = (double)integral[0];
+      //   //  meanPterror_den = (double)error[0];
 
-        //  Jpsi2meanPtresult = meanPtresult_num/meanPtresult_den;
+      //   //  Jpsi2meanPtresult = meanPtresult_num/meanPtresult_den;
 
-        if ( YJPsi1 == YJPsi2 ){
-          JPsi2result2 = JPsi2result;
-          JPsi2error2 = JPsi2error;
-          Jpsi2meanPtresult_2 = Jpsi2meanPtresult;
-        }
-        else{
-          data.Y = YJPsi2; //backward
-          data.Ybin = 2;
-          if(BqYdep){
-            data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-            data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-          }
+      //   if ( YJPsi1 == YJPsi2 ){
+      //     JPsi2result2 = JPsi2result;
+      //     JPsi2error2 = JPsi2error;
+      //     Jpsi2meanPtresult_2 = Jpsi2meanPtresult;
+      //   }
+      //   else{
+      //     data.Y = YJPsi2; //backward
+      //     data.Ybin = 2;
+      //     if(BqYdep){
+      //       data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      //       data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      //     }
           
-          // NDIM = 10;
-          // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
-          //         EPSREL, EPSABS, VERBOSE, SEED,
-          //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-          //         GRIDNO, NULL, NULL,
-          //         &neval, &fail, integral, error, prob);
+      //     // NDIM = 10;
+      //     // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCsFluc, &data, NVEC,
+      //     //         EPSREL, EPSABS, VERBOSE, SEED,
+      //     //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //     //         GRIDNO, NULL, NULL,
+      //     //         &neval, &fail, integral, error, prob);
           
-          // JPsi2result_cs = (double)integral[0];
-          // JPsi2error_cs = (double)error[0];    
+      //     // JPsi2result_cs = (double)integral[0];
+      //     // JPsi2error_cs = (double)error[0];    
           
-          // NDIM = 8;
-          // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
-          //         EPSREL, EPSABS, VERBOSE, SEED,
-          //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-          //         GRIDNO, NULL, NULL,
-          //         &neval, &fail, integral, error, prob);
-          // JPsi2result_co= (double)integral[0];
-          // JPsi2error_co = (double)error[0];
+      //     // NDIM = 8;
+      //     // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
+      //     //         EPSREL, EPSABS, VERBOSE, SEED,
+      //     //         MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //     //         GRIDNO, NULL, NULL,
+      //     //         &neval, &fail, integral, error, prob);
+      //     // JPsi2result_co= (double)integral[0];
+      //     // JPsi2error_co = (double)error[0];
           
-          //mean pT
-          NDIM = 10;
-          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtNumFluc, &data, NVEC,
-                  EPSREL, EPSABS, VERBOSE, SEED,
-                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                  GRIDNO, NULL, NULL,
-                  &neval, &fail, integral, error, prob);
+      //     //mean pT
+      //     NDIM = 10;
+      //     llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtNumFluc, &data, NVEC,
+      //             EPSREL, EPSABS, VERBOSE, SEED,
+      //             MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //             GRIDNO, NULL, NULL,
+      //             &neval, &fail, integral, error, prob);
           
-          JPsi2result_num_2 = (double)integral[0];
-          JPsi2error_num_2 = (double)error[0];   
+      //     JPsi2result_num_2 = (double)integral[0];
+      //     JPsi2error_num_2 = (double)error[0];   
           
-          llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtDenFluc, &data, NVEC,
-                  EPSREL, EPSABS, VERBOSE, SEED,
-                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                  GRIDNO, NULL, NULL,
-                  &neval, &fail, integral, error, prob);
+      //     llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDAvPtDenFluc, &data, NVEC,
+      //             EPSREL, EPSABS, VERBOSE, SEED,
+      //             MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //             GRIDNO, NULL, NULL,
+      //             &neval, &fail, integral, error, prob);
           
-          JPsi2result_den_2 = (double)integral[0];
-          JPsi2error_den_2 = (double)error[0];    
+      //     JPsi2result_den_2 = (double)integral[0];
+      //     JPsi2error_den_2 = (double)error[0];    
           
-          Jpsi2meanPtresult_2 = JPsi2result_num_2/JPsi2result_den_2;
+      //     Jpsi2meanPtresult_2 = JPsi2result_num_2/JPsi2result_den_2;
           
-          JPsi2result2 = JPsi2result_den_2;
-          JPsi2error2 = JPsi2error_den_2;
-        }
-        cout << setprecision(10) << hresult << " " << herror << " " << JPsi2result
-             << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2
-             << " " << hmeanPt << " " << Jpsi2meanPtresult << " " << Jpsi2meanPtresult_2 << endl;
-      }
-      else{
-        //cout << "Using ICEM"  << endl;    
+      //     JPsi2result2 = JPsi2result_den_2;
+      //     JPsi2error2 = JPsi2error_den_2;
+      //   }
+      //   // cout << setprecision(10) << hresult << " " << herror << " " << JPsi2result
+      //   //      << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2
+      //   //      << " " << hmeanPt << " " << Jpsi2meanPtresult << " " << Jpsi2meanPtresult_2 << endl;
+      // }
+      // else{
+      //   //cout << "Using ICEM"  << endl;    
 
-        data.Y = YJPsi1; //forward
-        data.Ybin = 1;
+      //   data.Y = YJPsi1; //forward
+      //   data.Ybin = 1;
         
-        if(BqYdep){
-          data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-          data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-        }
+      //   if(BqYdep){
+      //     data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      //     data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      //   }
 
-        //mean pT
-        NDIM = 10;
-        llVegas(NDIM, NCOMP, JPsiIntegrandICEMNumFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
-        JPsi2result_num = (double)integral[0];
-        JPsi2error_num = (double)error[0];  
+      //   //mean pT
+      //   NDIM = 10;
+      //   llVegas(NDIM, NCOMP, JPsiIntegrandICEMNumFluc, &data, NVEC,
+      //           EPSREL, EPSABS, VERBOSE, SEED,
+      //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //           GRIDNO, NULL, NULL,
+      //           &neval, &fail, integral, error, prob);
+      //   JPsi2result_num = (double)integral[0];
+      //   JPsi2error_num = (double)error[0];  
 
-        llVegas(NDIM, NCOMP, JPsiIntegrandICEMDenFluc, &data, NVEC,
-                EPSREL, EPSABS, VERBOSE, SEED,
-                MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                GRIDNO, NULL, NULL,
-                &neval, &fail, integral, error, prob);
-        JPsi2result_den = (double)integral[0];
-        JPsi2error_den = (double)error[0];  
+      //   llVegas(NDIM, NCOMP, JPsiIntegrandICEMDenFluc, &data, NVEC,
+      //           EPSREL, EPSABS, VERBOSE, SEED,
+      //           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //           GRIDNO, NULL, NULL,
+      //           &neval, &fail, integral, error, prob);
+      //   JPsi2result_den = (double)integral[0];
+      //   JPsi2error_den = (double)error[0];  
   
-        Jpsi2meanPtresult = JPsi2result_num/JPsi2result_den;
-        JPsi2result = JPsi2result_den;
-        JPsi2error = JPsi2error_den;
+      //   Jpsi2meanPtresult = JPsi2result_num/JPsi2result_den;
+      //   JPsi2result = JPsi2result_den;
+      //   JPsi2error = JPsi2error_den;
           
-        if ( YJPsi1 == YJPsi2 ){
-          JPsi2result2 = JPsi2result;
-          JPsi2error2 = JPsi2error;
-          Jpsi2meanPtresult_2 = Jpsi2meanPtresult;
-        }
-        else{
-          data.Y = YJPsi2; //backward
-          data.Ybin = 2;
+      //   if ( YJPsi1 == YJPsi2 ){
+      //     JPsi2result2 = JPsi2result;
+      //     JPsi2error2 = JPsi2error;
+      //     Jpsi2meanPtresult_2 = Jpsi2meanPtresult;
+      //   }
+      //   else{
+      //     data.Y = YJPsi2; //backward
+      //     data.Ybin = 2;
 
-          if(BqYdep){
-            data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-            data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
-          }
+      //     if(BqYdep){
+      //       data.bdep_fluc_p = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      //       data.bdep_fluc_A = data.sigma02/2./constants::PI/(data.Bp+data.Bq*(0.15 + 0.042*pow((-data.Y - 4.6),2.))); //make sure to use the same parametrization as in Glauber.cpp
+      //     }
                     
-          NDIM = 10;
-          llVegas(NDIM, NCOMP, JPsiIntegrandICEMNumFluc, &data, NVEC,
-                  EPSREL, EPSABS, VERBOSE, SEED,
-                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                  GRIDNO, NULL, NULL,
-                  &neval, &fail, integral, error, prob);
+      //     NDIM = 10;
+      //     llVegas(NDIM, NCOMP, JPsiIntegrandICEMNumFluc, &data, NVEC,
+      //             EPSREL, EPSABS, VERBOSE, SEED,
+      //             MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //             GRIDNO, NULL, NULL,
+      //             &neval, &fail, integral, error, prob);
           
-          JPsi2result_num_2 = (double)integral[0];
-          JPsi2error_num_2 = (double)error[0];   
+      //     JPsi2result_num_2 = (double)integral[0];
+      //     JPsi2error_num_2 = (double)error[0];   
           
-          llVegas(NDIM, NCOMP, JPsiIntegrandICEMDenFluc, &data, NVEC,
-                  EPSREL, EPSABS, VERBOSE, SEED,
-                  MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
-                  GRIDNO, NULL, NULL,
-                  &neval, &fail, integral, error, prob);
+      //     llVegas(NDIM, NCOMP, JPsiIntegrandICEMDenFluc, &data, NVEC,
+      //             EPSREL, EPSABS, VERBOSE, SEED,
+      //             MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
+      //             GRIDNO, NULL, NULL,
+      //             &neval, &fail, integral, error, prob);
 
-          JPsi2result_den_2 = (double)integral[0];
-          JPsi2error_den_2 = (double)error[0];              
+      //     JPsi2result_den_2 = (double)integral[0];
+      //     JPsi2error_den_2 = (double)error[0];              
           
-          Jpsi2meanPtresult_2 = JPsi2result_num_2/JPsi2result_den_2;
+      //     Jpsi2meanPtresult_2 = JPsi2result_num_2/JPsi2result_den_2;
           
-          JPsi2result2 = JPsi2result_den_2;
-          JPsi2error2 = JPsi2error_den_2;
-        }  
+      //     JPsi2result2 = JPsi2result_den_2;
+      //     JPsi2error2 = JPsi2error_den_2;
+      //   }  
 
-        cout << setprecision(10) << hresult << " " << herror << " " << JPsi2result
-             << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2
-             << " " << hmeanPt << " " << Jpsi2meanPtresult << " " << Jpsi2meanPtresult_2 << endl;
+      // }
 
+      // @@@@@@@
+      
+      double TA =  0.;
+      double Tp =  0.;
+      double denA = 0.;
+      double denp = 0.;
+
+      // TA = returnTA2D(0-data.bx/constants::hbarc,0-data.by/constants::hbarc,glauber,0);
+      // Tp = returnTp2D(0,0,glauber,0);
+ 
+
+      for(int ix=0;ix<100;ix++){
+        for(int iy=0;iy<100;iy++){
+          double x = ix*1./10.-5.;
+          double y = iy*1./10.-5.;
+          double tempA = returnTA2D(x-data.bx/constants::hbarc,y-data.by/constants::hbarc,glauber,0);
+          double tempp = returnTp2D(x,y,glauber,0);
+          TA += tempA*tempA;
+          Tp += tempp*tempp;
+          denA += tempA;
+          denp += tempp;
+        }
       }
+
+      TA = TA/denA;
+      Tp = Tp/denp;
+
+      
+      double QsAout = sqrt(TA*data.sigma02*0.67*0.67/2./constants::PI/(data.Bp+data.Bq)); // Qs0 at midrapidity is ~0.67 GeV for 8.16 TeV
+      double Qspout = sqrt(Tp*data.sigma02*0.67*0.67/2./constants::PI/(data.Bp+data.Bq));
+
+      cout << setprecision(10) << hresult << " " << herror << " " << JPsi2result
+           << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2
+           << " " << hmeanPt << " " << Jpsi2meanPtresult << " " << Jpsi2meanPtresult_2 << " " << Qspout << " " << QsAout << endl;
+      
       
       stringstream strfilename;
       strfilename << "output_g_Yg" << Yg << "_" << rank << ".dat";
@@ -5936,7 +5970,7 @@ int main(int argc, char *argv[]) {
       
       fout << std::scientific << setprecision(5) << gresult << " " << gerror << " " << JPsi2result
            << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " "
-           << sqrt(data.bx*data.bx+data.by*data.by)
+           << sqrt(data.bx*data.bx+data.by*data.by)  << " " << Qspout << " " << QsAout
            << endl;
       fout.close();
 
@@ -5950,7 +5984,7 @@ int main(int argc, char *argv[]) {
       fouth << std::scientific << setprecision(5) << hresult << " " << herror << " " << JPsi2result
             << " " << JPsi2error << " " << JPsi2result2 << " " << JPsi2error2 << " " <<  hmeanPt << " " 
             << Jpsi2meanPtresult << " " 
-            << Jpsi2meanPtresult_2 << endl;
+            << Jpsi2meanPtresult_2 << " " << Qspout << " " << QsAout << endl;
       fouth.close();
      
       ni++;

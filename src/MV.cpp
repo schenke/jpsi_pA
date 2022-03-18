@@ -7,7 +7,6 @@ namespace constants {
   const double hbarc = 0.1973269804;
   const double CA = double(Nc);
   const double CF = (double(Nc)*double(Nc) - 1.)/(2.*double(Nc));
-  const double alphas = 0.3;
 }
 
 
