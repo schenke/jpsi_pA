@@ -4422,8 +4422,8 @@ static int HadronsFluc(const int *ndim, const cubareal xx[],
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh*J*
-      //alphas/constants::CF/(z*pg*z*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
-      alphas/constants::CF/(z*z)/(pg*pg+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.) //!!
+      alphas/constants::CF/(z*pg*z*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
+      //alphas/constants::CF/(z*z)/(pg*pg+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.) //!!
       *PhipFluc(k, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
       *2.*constants::PI*k*kscale  //kdkdphik
@@ -4537,8 +4537,8 @@ static int HadronsFlucAvPtNum(const int *ndim, const cubareal xx[],
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh*J*
-      //alphas/constants::CF/(z*pg*z*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
-      alphas/constants::CF/(z*z)/(pg*pg+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.) //!!
+      alphas/constants::CF/(z*pg*z*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
+      //alphas/constants::CF/(z*z)/(pg*pg+mIR*mIR)/pow((2.*constants::PI*constants::PI),3.) //!!
       *PhipFluc(k, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
       *2.*constants::PI*k*kscale  //kdkdphik
@@ -4656,8 +4656,8 @@ static int HadronsFlucNoPT(const int *ndim, const cubareal xx[],
     
     // Below use Phip(..,Tp,..) when using quarks in the proton, otherwise use Phip(..,R,..) 
     f = Dh*J* 
-      // alphas/constants::CF/(zfnpt*pg*zfnpt*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
-      alphas/constants::CF/(zfnpt*zfnpt)/(pg*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.) //!!
+      alphas/constants::CF/(zfnpt*pg*zfnpt*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.)
+      //alphas/constants::CF/(zfnpt*zfnpt)/(pg*pg+mIR*mIR)/pow((2*constants::PI*constants::PI),3.) //!!
       *PhipFluc(k, Tp, Qsp, sizeFactor, mv, BK, xp, bdep_fluc_p, alphas)*factorxp
       *Phit(sqrt(pg*pg + k*k - 2.*pg*k*cos((fgphi - fgphik)*2.*constants::PI)), TA, QsA, mv, BK, xA,bdep,useFluc, bindep_A, bdep_A, bdep_fluc_A, alphas)*factorxA
       *2.*constants::PI*k*kscale  //kdkdphik
