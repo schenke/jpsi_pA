@@ -75,6 +75,7 @@ class Glauber{
   double returnProtonTp(double x, double y, int Ybin);
 
   int getA();
+  int getZ();
   Nucleus getTarget(){return Target;}
   Nucleus getProjectile(){return Projectile;}
   //  double returnTA2D(double x, double y);

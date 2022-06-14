@@ -172,6 +172,11 @@ int Glauber::getA()
   return Target.A;
 }
 
+int Glauber::getZ()
+{
+  return Target.Z;
+}
+
 void Glauber::makeNuclei(Random *random, double Bp, double Bq, double Bqwidth, int Nq, double Yg, double YJPsi1, double YJPsi2, int Ydep)
 {
   int Nx = param->getOutputNumberOfTransverseCells();
