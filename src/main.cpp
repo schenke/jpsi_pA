@@ -4958,7 +4958,14 @@ int main(int argc, char *argv[]) {
   glauber = new Glauber(Glauber_param, width);
   glauber->init(random);
   double A = glauber->getA();
-  double Z = glauber->getZ();
+
+  // the Z is used for the rapidity shift at LHC. At RHIC there is no such shift because energy per nucleon is 200 GeV no matter the system. So here we only shift for Pb, which is typically LHC:
+  double Z;
+  if (A==208)
+    Z = glauber->getZ();
+  else
+    Z = A; 
+  // if Z=A the shift will be zero.
 
   data.roots = roots;
   data.mIR=mIR;
