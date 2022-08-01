@@ -1276,7 +1276,7 @@ static int JPsiIntegrandNRQCDNoPT(const int *ndim, const cubareal xx[],
   double xA = sqrt(4.*m*m+p*p)*exp(-Y)/roots;
   
   double factorxp = pow(1.-xp,4.);
-  double factorxA = pow(1.-xA,4.);
+  double factorxA = pow(1.-xA,4.); //ok
   if (xp>1.){
     f = 0;
   }

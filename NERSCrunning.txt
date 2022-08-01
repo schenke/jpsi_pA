@@ -1,0 +1,6 @@
+Go to /global/cscratch1/sd/schenke/jpsi_pA/run
+Do ./run_jpsi_NERSC.sh
+(mult is the number of nodes to use per rapidity, you can change that)
+When done do ./postprocess_jpsi_NERSC.sh
+Then copy all yhJPsi-YXX.dat files to ~/projects/pAJPsi/JPsi
+Do python rapdep.py 
