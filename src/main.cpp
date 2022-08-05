@@ -62,20 +62,29 @@ namespace constants {
   //const double prefactor = 0.48;
   //const double prefactor = 0.7;
 
-  //const double roots = 8160.;
+  // set 1 (in PLB):
   const double ldme_singlet = 1.16/2./Nc; // GeV^3
   //const double ldme_singlet = 1.32; // GeV^3 arXiv:1009.5662
   const double ldme_octet_s10 = 0.089; // +- 0.0098 GeV^3 //1201.2675
   const double ldme_octet_s13 = 0.0030; // +- 0.0012 GeV^3 //1201.2675.
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5] //1201.2675.
 
+  // set 2:
+  //const double ldme_singlet = 1.32; // GeV^3 arXiv:1009.5662
+  //const double ldme_octet_s10 = 0.0497; // arXiv:1105.0820
+  //const double ldme_octet_s13 = 0.0022; // arXiv:1105.0820 
+  //const double ldme_octet_p3j = -0.0161; // arXiv:1105.0820
+
+
   //const double ldme_octet_s10 = 0.0792; // lower limit
   //const double ldme_octet_s13 = 0.0018; // lower limit
   //const double ldme_octet_p3j = 0.0035*mc*mc; // lower limit
  
- //const double ldme_octet_s10 = 0.045; // +/- 0.0072 GeV^3 // arXiv:1009.5662
+  //const double ldme_octet_s10 = 0.045; // +/- 0.0072 GeV^3 // arXiv:1009.5662
   //const double ldme_octet_s13 = 0.00312; // +- 0.00093 GeV^3 // arXiv:1009.5662 
   //const double ldme_octet_p3j = -0.0121; // (+- 0.0035 GeV^5) [GeV^5] // arXiv:1009.5662
+
+
 
   // //  const double sigma02 = 1.881 /constants::hbarc /constants::hbarc; // 18mb - Raju uses 7.2mb
   // const double sigma02 = 0.9/constants::hbarc /constants::hbarc; 
@@ -1649,9 +1658,9 @@ static int JPsiIntegrandNRQCDAvPtDen(const int *ndim, const cubareal xx[],
   return 0;
 } 
 
-//////////////////////////////////////////////////
-///// Fluctuating b J/Psi cross section //////////
-/////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////
 ///// Fluctuating b J/Psi cross section //////////
@@ -4948,8 +4957,9 @@ int main(int argc, char *argv[]) {
   
   
   long int seed = time(NULL)+rank*100000;
-  //long int seed = 1;
-    
+  //long int seed = 1659535154;
+  //cout << seed << endl;
+
   Random *random;
   random = new Random();
   random->init_genrand64(seed);
@@ -5101,11 +5111,12 @@ int main(int argc, char *argv[]) {
   /// put the large number back in !!! 
   //const long long int MAXEVAL = 5000000000;
   //  const long long int MAXEVAL = 50000000;
-  const long long int MAXEVAL =     500000;
+  const long long int MAXEVAL =     5000000;
   int KEY = 0;
   
   //vegas
   int SEED = time(NULL)+rank*100000;
+  //int SEED = 1;
   const long long int NSTART = 10000000;
   const long long int NINCREASE = 1000000;
   const long long int NBATCH = 1000;
@@ -5538,11 +5549,8 @@ int main(int argc, char *argv[]) {
               MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
               GRIDNO, NULL, NULL,
               &neval, &fail, integral, error, prob);
-      
-      // Print the result
       hresult = (double)integral[0];
       herror = (double)error[0];
-      //printf("Hadrons (fluc): %.8f +- %.8f\t\n", hresult, herror);
       
       if(xsec == 1){
         if(hresult<0.5){
@@ -5679,7 +5687,6 @@ int main(int argc, char *argv[]) {
               &neval, &fail, integral, error, prob);
       gresult = (double)integral[0];
       gerror = (double)error[0];
-      //      printf("Midrapidity gluon (fluc): %.8f +- %.8f\t\n", gresult, gerror);        
 
       data.lambda = 0.15; // Infrared cutoff on p integral in GeV (50 MeV according to https://arxiv.org/pdf/1812.01312.pdf)
       NDIM = 7;
@@ -5719,8 +5726,9 @@ int main(int argc, char *argv[]) {
         //         GRIDNO, NULL, NULL,
         //         &neval, &fail, integral, error, prob);
         
-        // JPsi2result_cs = (double)integral[0];
-        // JPsi2error_cs = (double)error[0];    
+
+        // Jpsi2result_Cs = (Double)Integral[0];
+        // Jpsi2error_Cs = (double)error[0];    
         
         // NDIM = 8;
         // llVegas(NDIM, NCOMP, JPsiIntegrandNRQCDCoFluc, &data, NVEC,
@@ -5932,10 +5940,10 @@ int main(int argc, char *argv[]) {
           double y = iy*1./10.-5.;
           double tempA = returnTA2D(x-data.bx/constants::hbarc,y-data.by/constants::hbarc,glauber,0);
           double tempp = returnTp2D(x,y,glauber,0);
-          TA += tempA*tempA;
-          Tp += tempp*tempp;
-          denA += tempA;
-          denp += tempp;
+          TA += tempA;
+          Tp += tempp;
+          denA += 1;
+          denp += 1;
         }
       }
 

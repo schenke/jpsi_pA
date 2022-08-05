@@ -200,6 +200,7 @@ double MV::PhipBKFluc(double k, double Tp, double x, double alphas){
   
   if (iA>=sizeA){
     cerr << "MV::PhipBKFluc: A out of range." << endl;
+    cerr << "Tp = " << Tp << " A = " << A << endl; 
     return 0.;
   }
   if (ik>=sizek){
