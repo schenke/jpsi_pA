@@ -70,7 +70,7 @@ namespace constants {
   const double ldme_octet_p3j = 0.0056*mc*mc; // (+- 0.0021 GeV^3) [GeV^5] //1201.2675.
 
   // set 2:
-  //const double ldme_singlet = 1.32; // GeV^3 arXiv:1009.5662
+  //const double ldme_singlet = 1.32/2./Nc; // GeV^3 arXiv:1009.5662
   //const double ldme_octet_s10 = 0.0497; // arXiv:1105.0820
   //const double ldme_octet_s13 = 0.0022; // arXiv:1105.0820 
   //const double ldme_octet_p3j = -0.0161; // arXiv:1105.0820
@@ -5111,7 +5111,7 @@ int main(int argc, char *argv[]) {
   /// put the large number back in !!! 
   //const long long int MAXEVAL = 5000000000;
   //  const long long int MAXEVAL = 50000000;
-  const long long int MAXEVAL =     5000000;
+  const long long int MAXEVAL =     50000000;
   int KEY = 0;
   
   //vegas
